@@ -1,0 +1,73 @@
+{
+"name": "demoelectron",
+"version": "1.0.0",
+"description": "Step-by-step demo (Windows 10/11)",
+"main": "dist/main.js",
+"author": "",
+"license": "ISC",
+"scripts": {
+"test": "echo Error: no test specified && exit 1",
+"build": "tsc && vite build",
+"start": "npm run start:prod",
+"start:prod": "npm run build && cross-env USE_DEV_SERVER=false electron .",
+
+
+"tsc:watch": "tsc -w",  
+
+"renderer:dev": "vite --host 127.0.0.1 --port 5173 --strictPort",
+"renderer:build": "vite build",  
+"renderer:build:watch": "vite build --watch",  
+
+"electron:dev": "wait-on -v dist/main.js tcp:127.0.0.1:5173 && cross-env USE_DEV_SERVER=true nodemon --watch dist --ext js --exec electron .",
+"electron:prod:watch": "wait-on dist/main.js renderer-dist/index.html && cross-env USE_DEV_SERVER=false nodemon --watch dist --watch renderer-dist --ext js,html,css --exec electron .",  
+
+"dev": "concurrently -k \"npm:tsc:watch\" \"npm:renderer:build:watch\" \"npm:electron:prod:watch\"",  
+"dev:hmr": "concurrently -k -n tsc,renderer,electron npm:tsc:watch npm:renderer:dev npm:electron:dev",
+
+"pack": "npm run build && electron-builder --dir",  
+"dist": "npm run build && electron-builder --win nsis",  
+"clean": "node -e \"const fs=require('fs'); ['dist','renderer-dist','release'].forEach(p=>fs.existsSync(p)&&fs.rmSync(p,{recursive:true,force:true}));\""  
+},
+"keywords": [],
+"dependencies": {
+"execa": "^9.6.1",
+"react": "^18.3.1",
+"react-dom": "^18.3.1",
+"systeminformation": "^5.30.3"
+},
+"devDependencies": {
+"@tailwindcss/postcss": "^4.1.18",
+"@types/node": "^22.19.6",
+"@types/react": "^18.2.48",
+"@types/react-dom": "^18.2.18",
+"@vitejs/plugin-react": "^4.3.2",
+"autoprefixer": "^10.4.23",
+"concurrently": "^8.2.2",
+"cross-env": "^10.1.0",
+"electron": "^39.2.7",
+"electron-builder": "^26.4.0",
+"nodemon": "^3.1.11",
+"postcss": "^8.5.6",
+"tailwindcss": "^3.4.19",
+"typescript": "^5.9.3",
+"vite": "^5.4.8",
+"wait-on": "^7.2.0"
+},
+"build": {
+"appId": "jp.co.example.demoelectron",
+"productName": "DemoElectron",
+"asar": true,
+"directories": {
+"output": "release"
+},
+"files": [
+"dist//*",
+"renderer-dist//",
+"!dist/**/.map"
+],
+"win": {
+"target": ["nsis"],
+"icon": "build/icon.ico"
+}
+}
+}

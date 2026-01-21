@@ -1,196 +1,130 @@
-# Invest
-# 🔥 最強モメンタム銘柄トレードルール（完成版）
+
+### Next.js + React + TypeScript + Tailwind
+
+Next.js: Reactを土台にしたフルスタックWebフレームワーク（ルーティング、SSR/SSG、APIなど）。サーバー側はNode.js/Edgeで動く
+React: UIライブラリ。主にブラウザで動く（SSR等ではサーバーでも実行）
+TypeScript: 型付きJavaScript。開発時に型チェック、ビルドでJavaScriptへトランスパイル
+Tailwind CSS: ユーティリティファーストCSS。ビルド時に使ったクラスだけのCSSを生成、実行時はブラウザで適用
+Node.js: 実行環境（エンジン）。開発・ビルド・SSRやAPIの土台。スタック表記では省略されがち
+
+#### 備考
+なぜ「Next.js + React + TypeScript + Tailwind」にNode.jsが載らないことが多いのか
+実行環境（インフラ）だから: アプリの「中身（フレームワーク/ライブラリ）」ではなく「エンジン」
+
+実行モデルのまとめ（どこで何が動くか）
+中身（あなたが書くもの）: Next.js + React + TypeScript + Tailwind
+エンジン（それを動かすもの）: Node.js（＋場合によりEdgeランタイム）
+だから一覧にはNode.jsを書かないことが多いが、実運用では前提として必須になることが多い
 
 ---
+#### install
+Node.jsのインストール
 
-## 🔥 1) 最初に縦方向の強い上昇が必要（Vertical Move）
+https://nodejs.org にアクセス
+“Current”（最新版、22系）Windows Installer (.msi) をダウンロード
+インストーラで「Add to PATH」にチェックしたままインストール
+PowerShellを開き、以下で確認
+node -v → v22.x.x が表示されればOK
+npm -v → npmのバージョンが出ればOK
+```
+任意のフォルダ作成
+npm init -y
 
-- 数日〜数週間以内に **+50〜70%の強烈な上昇** があること  
-- ギャップアップでも、一直線の上昇でもOK  
-- とにかく「爆発感」が必要  
+$env:HTTP_PROXY = "http://in-proxy-o.denso.co.jp:8080"
+$env:HTTPS_PROXY = "http://in-proxy-o.denso.co.jp:8080"
+$env:ELECTRON_GET_USE_PROXY="true"
 
-👉 これは  
-**本物の需要 / 本物の資金流入 / 本物の緊急性**  
-がある証拠。
+npm config set proxy http://in-proxy-o.denso.co.jp:8080
+npm config set https-proxy http://in-proxy-o.denso.co.jp:8080
+```
 
+必要パッケージの導入
+```
+npm i electron systeminformation execa --verbose
+
+npm i -D electron-builder
+
+npx electron --version
+```
+npx tsc --init をルートで実行
+
+#### ico
+プロジェクト直下に build フォルダを作る
+正しい Windows 用アイコン build/icon.ico を用意
+（256/128/64/48/32/16px を内包したICO）
+```
+winget install ImageMagick.ImageMagick
+magick build\icon.png -define icon:auto-resize=256,128,64,48,32,16 -define icon:format=bmp build\icon.ico
+package.json の build.win.icon を "build/icon.ico" に
+```
+
+VSCode 設定に追加（settings.json）
+```
+"css.lint.unknownAtRules": "ignore"
+```
+インストール（Tailwind v4）
+```
+npm i -D tailwindcss @tailwindcss/postcss postcss autoprefixer
+```
 ---
 
-## 🔥 2) クラッシュではなく“一時停止”が必要（Pause, not crash）
-
-- 急上昇のあとに **即暴落はNG**
-- 必要なのは **綺麗な持ち合い（コンソリデーション）**
-
-**期間の目安**
-- 超強い銘柄 → 数日  
-- 普通の銘柄 → **3〜5週間**
-
-👉 **3〜5週間以上の持ち合いの方が、その後の上昇確率が高い**
-
----
-
-## 🔥 3) タイトで制御された値動き（Tight, Controlled Price Action）
-
-- 乱高下・カオスはNG  
-- 必要なのは **落ち着いた狭いレンジ**
-
-👉  
-これは  
-**基幹投資家（機関投資家）が静かに株を吸収している証拠**
-
-静かな時期のあとに、次の上昇が一気に来る。
-
----
-
-## 🔥 4) 明確な上昇理由（Clear Catalyst）
-
-以下のような **明確な材料** が必要：
-
-- EPS：**+100〜500%**
-- 売上：**+20〜40%**
-- 強烈なサプライズ
-- 強力なストーリー / ニュース
-
-👉 **理由のない上昇は長続きしない**
-
----
-
-## 🔥 5) 出来高の裏付け（Volume Confirmation）
-
-- 最初の **+50〜70% の急騰には巨大な出来高が必須**
-- 普通の出来高ではダメ
-- **資金のフットプリント（痕跡）が見えること**
-
----
-
-## 🔥 6) ブレイクアウトでのみ買う（Buy the Breakout）
-
-- コンソリデーションを **上に抜けた瞬間だけ** 買う
-- 早すぎても遅すぎてもダメ
-
-**ストップ**
-- 基本：**3〜5%**
-- ボラ高銘柄：**7〜10%**
-
----
-
-## 🔥 7) 早売りしない（Don’t sell too early）
-
-- **+10%は目的ではない**
-- 本物のモメンタムは **+50〜100%以上** 走る
-- **EMA8 / EMA21** を基準にトレンドを保有
-
----
-
-## 🔥 8) 本物はすぐ動く（They work fast — or they don’t）
-
-- 強い銘柄は「考える時間」が不要
-- ブレイクしたら **その日から動く**
-- ブレイク後に横ばい → **レッドフラグ（危険サイン）**
-
----
-
-## 🔥 9) 忍耐が必要（You Need Patience）
-
-- このセットアップは毎日は出ない
-- しかし現れたら **月間成績を変えるレベル**
-- **待つ価値がある**
-
----
-
-## 🔥 チャート画像が示す重要ポイント
-
-- Huge Volume（巨大な出来高）
-- Tight consolidation（超タイトな持ち合い）
-- Dry up（出来高の枯渇 → 機関が売らずに溜めている証拠）
-- ブレイクアウト後の大陽線
-- **3日で +77% 上昇** の典型的モメンタムセットアップ
-
----
-
-# ✅ 最強モメンタム銘柄のエントリールール（完全版）
-
----
-
-## Stage 1（底固め）
-
-- 200日線の下で長期持ち合い（**3〜5週間以上が理想**）
-- 出来高が減少（Dry up）
-- ボラティリティが低下
-- 下降トレンド停止の証拠（Wedge Break など）
-
----
-
-## Stage 2（上昇開始〜セットアップ形成）
-
-- **+50〜70%の強烈な上昇**（5日〜2週間）
-- その後、急落せず **タイトなコンソリデーション**
-- 出来高減少は良い兆候（機関が売っていない）
-- 価格が **EMA8 / EMA21 の上**
-
-⚠️  
-**ここは買ってはいけない準備フェーズ**  
-買うのは **ブレイクした瞬間だけ**
-
----
-
-## エントリー条件（超厳格）
-
-以下 **5つすべて** を満たしたら買う：
-
-### ① ブレイクアウト
-- 持ち合い高値を **出来高を伴って突破**
-
-### ② 出来高爆増
-- 通常の **2倍以上が理想**
-
-### ③ 明確な材料（カタリスト）
-- EPS +100〜500%
-- 売上 +20〜40%
-- 新製品 / 提携 / 規制緩和 / 特許 など
-
-### ④ EMA8 / EMA21 の上
-- 常に短期トレンドの上にいること
-
-### ⑤ チャートがタイト
-- 大陰線・乱高下がない
-
----
-
-## エグジット（売りルール）
-
-- **EMA8 割れ** → 一部利確
-- **EMA21 割れ** → 完全撤退
-- ストップ：**3〜5%（最大10%）**
-
----
-
-## NGルール（絶対にやらない）
-
-- コンソリデーション中に買わない
-- 出来高が普通の状態で買わない
-- 材料なしの上昇に乗らない
-- ブレイクして動かない銘柄は即撤退
-- 「なんとなく」で入らない
-
----
-
-## 🔑 要するに
-
-この手法は  
-**「本物の機関投資家が買っている銘柄を、最適な位置だけで買う」**  
-ための **プロ仕様モメンタム戦略**。
-
-ミネルヴィニ / オニール / ドクターK の考え方と完全一致。
-
----
-
-## 📌 最終確認
-
-このルールは以下の形式に落とし込み可能：
-
-- チェックリスト形式
-- 図入りテンプレート
-- 実チャート付き
-- エントリー / エグジットを色分け
-
-👉 必要なら **1ページ完結テンプレート** を作成する。
+#### Electron + Vite（React）開発
+
+目標フォルダ構成（ソースのみ）
+.
+├── build/
+│ ├── icon.ico
+│ └── icon.png
+├── renderer/
+│ ├── index.html
+│ ├── src/
+│ │ ├── App.tsx
+│ │ ├── main.tsx
+│ │ ├── components/
+│ │ ├── types/
+│ │ └── index.css
+│ └── tsconfig.json
+├── src/
+│ ├── main.ts
+│ └── preload.ts
+├── package.json
+├── vite.config.ts
+├── tailwind.config.js
+├── tsconfig.json
+└── README.md
+
+※ 生成物は .gitignore に含める: dist/, renderer-dist/, release/
+
+```
+tsc:watch（main/preloadを監視）
+renderer:dev（Vite dev server）
+electron:dev（dist を nodemon 監視し、Electron を再起動。USE_DEV_SERVER=true で dev server を表示）
+```
+```
+npm run tsc:watch
+npm run renderer:dev
+npm run electron:dev
+```
+
+まとめてやりたい場合は「npm run dev:hmr」（tsc:watch + renderer:dev + electron:dev を並列起動）でもOKです
+```
+npm run dev:hmr
+```
+
+
+製品版相当の確認（自動リロードはしません）
+```
+npm run start:prod
+```
+renderer-dist/ が生成される
+```
+npm run build
+```
+release削除
+```
+cmd /c rmdir /s /q release
+```
+release/ にインストーラー生成
+```
+npm run dist
+```
