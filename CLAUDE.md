@@ -2,19 +2,57 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Project Overview
+
+Electron + React + TypeScript desktop application for Windows, bundled with Vite.
+
+## Critical Rules
+
+### 1. Test-Driven Development (MANDATORY)
+
+**Always write tests FIRST:**
+1. Write failing test (RED)
+2. Write minimal code to pass (GREEN)
+3. Refactor (IMPROVE)
+4. Verify 80%+ coverage
+
+Use `/tdd` command to enforce this workflow.
+
+### 2. Code Organization
+
+- Many small files over few large files
+- 200-400 lines typical, 800 max per file
+- Organize by feature/domain
+- High cohesion, low coupling
+
+### 3. Security (Electron-Critical)
+
+- contextIsolation: true (ALWAYS)
+- nodeIntegration: false (ALWAYS)
+- No hardcoded secrets
+- Validate all IPC inputs
+- Use environment variables for sensitive data
+
+### 4. Code Style
+
+- Immutability always - never mutate objects or arrays
+- No console.log in production code
+- Proper error handling with try/catch
+- TypeScript strict mode
+
 ## Build and Development Commands
 
 ### Development (with hot reload)
 ```bash
 npm run dev:hmr
 ```
-Runs three processes concurrently: TypeScript watch (`tsc:watch`), Vite dev server (`renderer:dev`), and Electron with nodemon (`electron:dev`).
+Runs three processes concurrently: TypeScript watch, Vite dev server, Electron with nodemon.
 
 ### Production preview
 ```bash
 npm run start:prod
 ```
-Builds and runs the app in production mode (no hot reload).
+Builds and runs the app in production mode.
 
 ### Build only
 ```bash
@@ -34,18 +72,33 @@ npm run clean
 ```
 Removes `dist/`, `renderer-dist/`, and `release/` directories.
 
+### Testing (when configured)
+```bash
+npm test              # Run tests
+npm run test:coverage # Run with coverage
+```
+
 ## Architecture
 
-This is an Electron desktop application for Windows with a React frontend bundled by Vite.
-
 ### Directory Structure
-- `src/` - Electron main process code (TypeScript, compiled to `dist/`)
-  - `main.ts` - Main process entry, window management, IPC handlers
-  - `preload.ts` - Context bridge exposing `window.win` and `window.gitlab` APIs
-- `renderer/` - React frontend (TypeScript/TSX, bundled to `renderer-dist/`)
-  - `src/App.tsx` - Main app component with navigation and page rendering
-  - `src/components/` - Reusable UI components (Titlebar, Icons)
-  - `src/types/` - TypeScript declarations for preload APIs
+```
+src/                    # Electron main process
+  main.ts               # Entry, window management, IPC handlers
+  preload.ts            # Context bridge (window.win, window.gitlab)
+
+renderer/               # React frontend
+  src/
+    App.tsx             # Main component
+    components/         # UI components
+    hooks/              # Custom hooks
+    types/              # TypeScript declarations
+
+.claude/                # Claude Code configuration
+  agents/               # Specialized subagents
+  commands/             # Slash commands
+  rules/                # Always-follow guidelines
+  skills/               # Workflow definitions
+```
 
 ### IPC Communication
 - Main process handles: `win:minimize`, `win:close`, `gitlab:openProjectWeb`
@@ -59,3 +112,16 @@ This is an Electron desktop application for Windows with a React frontend bundle
 Controlled by `USE_DEV_SERVER` environment variable:
 - `true`: Loads from Vite dev server (http://127.0.0.1:5173), auto-opens DevTools
 - `false`: Loads built static files from `renderer-dist/`
+
+## Available Commands
+
+- `/tdd` - Test-driven development workflow
+- `/plan` - Create implementation plan
+- `/code-review` - Review code quality
+- `/build-fix` - Fix build errors
+
+## Git Workflow
+
+- Conventional commits: `feat:`, `fix:`, `refactor:`, `docs:`, `test:`
+- All tests must pass before commit
+- Use `/code-review` before PR

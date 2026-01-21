@@ -2,14 +2,25 @@
   "mcpServers": {
     "filesystem": {
       "command": "cmd",
-      "args": ["/c", "npx", "-y", "@modelcontextprotocol/server-filesystem", "C:/00_mycode/Invest"]
+      "args": ["/c", "npx", "-y", "@modelcontextprotocol/server-filesystem", "C:/00_mycode/Invest"],
+      "description": "Filesystem operations for project directory"
     },
     "github": {
       "command": "cmd",
       "args": ["/c", "npx", "-y", "@modelcontextprotocol/server-github"],
       "env": {
         "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
-      }
+      },
+      "description": "GitHub operations - PRs, issues, repos"
+    },
+    "memory": {
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "@modelcontextprotocol/server-memory"],
+      "description": "Persistent memory across sessions"
     }
+  },
+  "_comments": {
+    "env_vars": "GITHUB_TOKEN is loaded from .env file",
+    "context_warning": "Keep under 10 MCPs enabled to preserve context window"
   }
 }

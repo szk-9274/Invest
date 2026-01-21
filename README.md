@@ -1,3 +1,45 @@
+## Claude Code Configuration
+
+このプロジェクトには Claude Code の設定が含まれています。
+
+### 設定ファイル構成
+
+```
+.claude/
+├── agents/                    # サブエージェント
+│   ├── tdd-guide.md           # TDD専門（テストファースト）
+│   ├── code-reviewer.md       # コードレビュー
+│   └── planner.md             # 実装計画作成
+│
+├── commands/                  # スラッシュコマンド
+│   ├── tdd.md                 # /tdd - テスト駆動開発
+│   ├── plan.md                # /plan - 実装計画
+│   ├── code-review.md         # /code-review - コードレビュー
+│   └── build-fix.md           # /build-fix - ビルドエラー修正
+│
+├── rules/                     # 常に従うルール
+│   ├── security.md            # Electronセキュリティ
+│   ├── coding-style.md        # コーディングスタイル
+│   ├── testing.md             # テスト要件
+│   └── git-workflow.md        # Gitワークフロー
+│
+└── skills/                    # ワークフロー定義
+    ├── electron-patterns.md   # Electronパターン
+    └── tdd-workflow.md        # TDDワークフロー
+```
+
+### 使い方
+
+1. **テスト駆動開発**: `/tdd` コマンドでTDDワークフローを開始
+2. **実装計画**: `/plan` コマンドで計画を作成
+3. **コードレビュー**: `/code-review` でコード品質をチェック
+4. **ビルド修正**: `/build-fix` でビルドエラーを自動修正
+
+### 設定元
+
+設定は [everything-claude-code](https://github.com/affaan-m/everything-claude-code) をベースに、Electron + React + TypeScript プロジェクト用にカスタマイズしています。
+
+---
 
 ### Next.js + React + TypeScript + Tailwind
 
