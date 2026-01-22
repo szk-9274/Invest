@@ -170,3 +170,43 @@ release/ にインストーラー生成
 ```
 npm run dist
 ```
+
+---
+
+## 開発環境セットアップ履歴（2026-01-22）
+
+### インストール・修正内容
+
+#### 1. 依存関係のインストール
+```bash
+npm install
+```
+全ての依存パッケージがインストールされます。
+
+#### 2. Electronバージョンの変更
+`package.json` の Electron バージョンを `31.x` に変更しました。
+```json
+"electron": "^31.7.7"
+```
+※ 環境依存の問題を回避するため安定版を使用
+
+#### 3. electron-launcher.js の追加
+`ELECTRON_RUN_AS_NODE` 環境変数が設定されている環境（VSCode拡張、Claude Code等）でも
+Electronが正常に起動するためのラッパースクリプトを追加しました。
+
+```javascript
+// electron-launcher.js
+// ELECTRON_RUN_AS_NODE 環境変数をクリアしてからElectronを起動
+```
+
+#### 4. package.json スクリプトの修正
+`electron:dev` スクリプトを修正し、`electron-launcher.js` を使用するようにしました。
+
+```json
+"electron:dev": "wait-on -v dist/main.js tcp:127.0.0.1:5173 && cross-env USE_DEV_SERVER=true nodemon --watch dist --ext js --exec \"node electron-launcher.js .\""
+```
+
+### 注意事項
+- `ELECTRON_RUN_AS_NODE=1` が設定された環境では、Electronが Node.js モードで動作し、
+  Electron API (app, ipcMain, BrowserWindow等) が利用できなくなります。
+- `electron-launcher.js` はこの問題を回避するために環境変数を削除してからElectronを起動します。
