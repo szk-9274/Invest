@@ -9,28 +9,10 @@
       "Read",
       "Glob",
       "Grep",
-      "Bash(npm run *)",
-      "Bash(npm test*)",
-      "Bash(npx *)",
-      "Bash(git status*)",
-      "Bash(git diff*)",
-      "Bash(git log*)",
-      "Bash(git branch*)",
-      "Bash(git checkout*)",
-      "Bash(git add *)",
-      "Bash(git commit*)",
-      "Bash(git push*)",
-      "Bash(git fetch*)",
-      "Bash(git pull*)",
-      "Bash(ls *)",
-      "Bash(cd *)",
-      "Bash(cat *)",
-      "Bash(find *)",
-      "Bash(mkdir *)",
-      "Bash(tsc*)",
-      "Bash(gh *)",
       "Edit",
-      "Write"
+      "Write",
+
+      "Bash(*)"
     ],
     "deny": []
   }
