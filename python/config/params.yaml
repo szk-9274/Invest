@@ -1,0 +1,74 @@
+# Stock Screening System Configuration
+# Based on Minervini's Stage Theory and VCP Pattern
+
+# Data source settings
+data:
+  source: "yfinance"
+  min_market_cap: 2_000_000_000  # $2B minimum
+  min_price: 5.0
+  min_volume: 500_000
+  exclude_types: ["ETF", "REIT", "ADR"]
+  history_period: "2y"  # 2 years of data
+
+# Benchmark
+benchmark:
+  symbol: "SPY"  # S&P 500 ETF
+
+# Stage detection parameters
+stage:
+  sma_periods: [50, 150, 200]
+  min_price_above_52w_low: 1.30      # 30% above 52-week low
+  max_distance_from_52w_high: 0.75   # Within 25% of 52-week high
+  min_slope_200_days: 20              # 200 MA must be rising for 20 days
+  rs_min_rating: 70
+  rs_new_high_required: true
+  min_volume: 500_000
+
+# VCP detection parameters
+vcp:
+  base_period_min: 35
+  base_period_max: 65
+  contraction_sequence: [0.25, 0.15, 0.08, 0.05]
+  last_contraction_max: 0.10
+  dryup_vol_ratio: 0.6
+  breakout_vol_ratio: 1.5
+  pivot_min_high_52w_ratio: 0.95
+  pivot_buffer_atr: 0.5
+
+# Entry conditions
+entry:
+  buy_zone_pct: 0.03                 # Within 3% of pivot
+  breakout_vol_ratio: 1.5            # Volume 1.5x 50-day average
+
+# Risk management
+risk:
+  risk_per_trade: 0.0075             # 0.75% of capital per trade
+  max_loss_hard: 0.10                # 10% hard stop
+  initial_stop_max: 0.07             # 7% maximum initial stop
+
+# Exit conditions
+exit:
+  partial_sell_bb_ratio: 0.25        # Sell 25% at BB upper
+  sma_50_exit: true                  # Exit on 50 MA break
+  trail_stop_atr: 2.0
+
+# Backtest settings
+backtest:
+  start_date: "2020-01-01"
+  end_date: "2025-01-27"
+  initial_capital: 10_000            # $10,000 (approx 1M yen)
+  max_positions: 5                   # Max 5 concurrent positions
+  commission: 0.001                  # 0.1% commission
+
+# Output settings
+output:
+  csv_path: "output/screening_results.csv"
+  log_path: "output/screening.log"
+  log_level: "INFO"
+
+# Performance settings
+performance:
+  max_workers: 4          # Parallel processing workers
+  request_delay: 0.5      # Delay between yfinance requests (seconds)
+  retry_attempts: 3       # Number of retries
+  timeout: 30             # Request timeout (seconds)

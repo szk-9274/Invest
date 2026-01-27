@@ -1,0 +1,99 @@
+ticker,exchange,sector
+AAPL,NASDAQ,Technology
+MSFT,NASDAQ,Technology
+NVDA,NASDAQ,Technology
+GOOGL,NASDAQ,Technology
+AMZN,NASDAQ,Consumer Discretionary
+META,NASDAQ,Technology
+TSLA,NASDAQ,Consumer Discretionary
+BRK-B,NYSE,Financials
+UNH,NYSE,Healthcare
+JNJ,NYSE,Healthcare
+JPM,NYSE,Financials
+V,NYSE,Financials
+PG,NYSE,Consumer Staples
+MA,NYSE,Financials
+HD,NYSE,Consumer Discretionary
+CVX,NYSE,Energy
+MRK,NYSE,Healthcare
+ABBV,NYSE,Healthcare
+LLY,NYSE,Healthcare
+PEP,NASDAQ,Consumer Staples
+KO,NYSE,Consumer Staples
+COST,NASDAQ,Consumer Staples
+AVGO,NASDAQ,Technology
+WMT,NYSE,Consumer Staples
+MCD,NYSE,Consumer Discretionary
+CSCO,NASDAQ,Technology
+TMO,NYSE,Healthcare
+ACN,NYSE,Technology
+ABT,NYSE,Healthcare
+DHR,NYSE,Healthcare
+CRM,NYSE,Technology
+ADBE,NASDAQ,Technology
+NKE,NYSE,Consumer Discretionary
+ORCL,NYSE,Technology
+AMD,NASDAQ,Technology
+INTC,NASDAQ,Technology
+QCOM,NASDAQ,Technology
+TXN,NASDAQ,Technology
+NOW,NYSE,Technology
+INTU,NASDAQ,Technology
+AMAT,NASDAQ,Technology
+LRCX,NASDAQ,Technology
+KLAC,NASDAQ,Technology
+SNPS,NASDAQ,Technology
+CDNS,NASDAQ,Technology
+MRVL,NASDAQ,Technology
+PANW,NASDAQ,Technology
+CRWD,NASDAQ,Technology
+ZS,NASDAQ,Technology
+DDOG,NASDAQ,Technology
+NET,NYSE,Technology
+SNOW,NYSE,Technology
+MDB,NASDAQ,Technology
+TEAM,NASDAQ,Technology
+WDAY,NASDAQ,Technology
+SHOP,NYSE,Technology
+SQ,NYSE,Technology
+COIN,NASDAQ,Financials
+PLTR,NYSE,Technology
+UBER,NYSE,Technology
+ABNB,NASDAQ,Consumer Discretionary
+DASH,NASDAQ,Technology
+NFLX,NASDAQ,Communication Services
+DIS,NYSE,Communication Services
+CMCSA,NASDAQ,Communication Services
+T,NYSE,Communication Services
+VZ,NYSE,Communication Services
+TMUS,NASDAQ,Communication Services
+NEE,NYSE,Utilities
+DUK,NYSE,Utilities
+SO,NYSE,Utilities
+XOM,NYSE,Energy
+COP,NYSE,Energy
+SLB,NYSE,Energy
+EOG,NYSE,Energy
+OXY,NYSE,Energy
+GS,NYSE,Financials
+MS,NYSE,Financials
+BLK,NYSE,Financials
+SCHW,NYSE,Financials
+C,NYSE,Financials
+WFC,NYSE,Financials
+AXP,NYSE,Financials
+BAC,NYSE,Financials
+USB,NYSE,Financials
+PNC,NYSE,Financials
+TFC,NYSE,Financials
+CAT,NYSE,Industrials
+DE,NYSE,Industrials
+UNP,NYSE,Industrials
+HON,NYSE,Industrials
+RTX,NYSE,Industrials
+LMT,NYSE,Industrials
+GE,NYSE,Industrials
+BA,NYSE,Industrials
+MMM,NYSE,Industrials
+UPS,NYSE,Industrials
+FDX,NYSE,Industrials
