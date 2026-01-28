@@ -18,6 +18,7 @@ data:
 # Benchmark
 benchmark:
   symbol: "SPY"  # S&P 500 ETF
+  enabled: true  # Set to false to disable benchmark (RS condition auto-passed)
 
 # Stage detection parameters
 stage:

@@ -20,20 +20,47 @@ from analysis.fundamentals import FundamentalsAnalyzer
 class Screener:
     """Stock screening integration class"""
 
-    def __init__(self, config: Dict):
+    def __init__(self, config: Dict, use_benchmark: bool = True):
         """
         Initialize the screener.
 
         Args:
             config: Configuration dictionary (from params.yaml)
+            use_benchmark: Whether to use SPY benchmark for RS calculation.
+                           If True but fetch fails, auto-fallback to False.
         """
         self.config = config
+        self.use_benchmark = use_benchmark
         self.fetcher = YahooFinanceFetcher(
             request_delay=config['performance']['request_delay']
         )
         self.stage_detector = StageDetector(config['stage'])
         self.vcp_detector = VCPDetector(config['vcp'])
         self.fundamentals_analyzer = FundamentalsAnalyzer(config)
+
+    def _fetch_benchmark(self) -> Optional[pd.DataFrame]:
+        """
+        Fetch benchmark data. On failure, log warning and return None
+        (triggers automatic fallback to no-benchmark mode).
+        """
+        if not self.use_benchmark:
+            logger.info("Benchmark disabled by user (--no-benchmark)")
+            return None
+
+        benchmark_symbol = self.config['benchmark']['symbol']
+        benchmark_data = self.fetcher.fetch_benchmark(
+            benchmark_symbol,
+            period=self.config['data']['history_period'],
+        )
+
+        if benchmark_data is None:
+            logger.warning(
+                f"Failed to fetch benchmark data ({benchmark_symbol}). "
+                "Falling back to no-benchmark mode."
+            )
+            return None
+
+        return benchmark_data
 
     def screen(self, tickers: List[str]) -> pd.DataFrame:
         """
@@ -47,24 +74,19 @@ class Screener:
         """
         results = []
 
-        # Fetch benchmark data
-        logger.info("Fetching benchmark data (SPY)...")
-        benchmark_symbol = self.config['benchmark']['symbol']
-        benchmark_data = self.fetcher.fetch_data(
-            benchmark_symbol,
-            period=self.config['data']['history_period']
-        )
+        # Fetch benchmark data (with fallback)
+        benchmark_data = self._fetch_benchmark()
+        use_benchmark = benchmark_data is not None
 
-        if benchmark_data is None:
-            logger.error("Failed to fetch benchmark data")
-            return pd.DataFrame()
+        if not use_benchmark:
+            logger.info("Running in NO-BENCHMARK mode (RS condition auto-passed)")
 
         # Process each ticker
         logger.info(f"Screening {len(tickers)} tickers...")
 
         for ticker in tqdm(tickers, desc="Screening"):
             try:
-                result = self._process_ticker(ticker, benchmark_data)
+                result = self._process_ticker(ticker, benchmark_data, use_benchmark)
                 if result:
                     results.append(result)
 
@@ -93,23 +115,18 @@ class Screener:
         """
         results = []
 
-        # Fetch benchmark data
-        logger.info("Fetching benchmark data (SPY)...")
-        benchmark_symbol = self.config['benchmark']['symbol']
-        benchmark_data = self.fetcher.fetch_data(
-            benchmark_symbol,
-            period=self.config['data']['history_period']
-        )
+        # Fetch benchmark data (with fallback)
+        benchmark_data = self._fetch_benchmark()
+        use_benchmark = benchmark_data is not None
 
-        if benchmark_data is None:
-            logger.error("Failed to fetch benchmark data")
-            return pd.DataFrame()
+        if not use_benchmark:
+            logger.info("Running in NO-BENCHMARK mode (RS condition auto-passed)")
 
         logger.info(f"Screening {len(tickers)} tickers for Stage 2...")
 
         for ticker in tqdm(tickers, desc="Stage 2 Screening"):
             try:
-                result = self._process_ticker_stage2(ticker, benchmark_data)
+                result = self._process_ticker_stage2(ticker, benchmark_data, use_benchmark)
                 if result:
                     results.append(result)
 
@@ -137,23 +154,20 @@ class Screener:
         """
         results = []
 
-        # Fetch benchmark data
-        logger.info("Fetching benchmark data (SPY)...")
-        benchmark_symbol = self.config['benchmark']['symbol']
-        benchmark_data = self.fetcher.fetch_data(
-            benchmark_symbol,
-            period=self.config['data']['history_period']
-        )
+        # Fetch benchmark data (with fallback)
+        benchmark_data = self._fetch_benchmark()
+        use_benchmark = benchmark_data is not None
 
-        if benchmark_data is None:
-            logger.error("Failed to fetch benchmark data")
-            return pd.DataFrame()
+        if not use_benchmark:
+            logger.info("Running in NO-BENCHMARK mode (RS condition auto-passed)")
 
         logger.info(f"Screening {len(tickers)} tickers for Stage 2 + Fundamentals...")
 
         for ticker in tqdm(tickers, desc="Stage 2 + Fundamentals Screening"):
             try:
-                result = self._process_ticker_with_fundamentals(ticker, benchmark_data)
+                result = self._process_ticker_with_fundamentals(
+                    ticker, benchmark_data, use_benchmark
+                )
                 if result:
                     results.append(result)
 
@@ -172,7 +186,8 @@ class Screener:
     def _process_ticker_with_fundamentals(
         self,
         ticker: str,
-        benchmark_data: pd.DataFrame
+        benchmark_data: Optional[pd.DataFrame],
+        use_benchmark: bool = True,
     ) -> Optional[Dict]:
         """
         Process a single ticker for Stage 2 with fundamentals.
@@ -193,9 +208,9 @@ class Screener:
         data = calculate_all_indicators(data, benchmark_data)
 
         # Stage detection
+        rs_line = data['rs_line'] if use_benchmark else None
         stage_result = self.stage_detector.detect_stage(
-            data,
-            data['rs_line']
+            data, rs_line, use_benchmark=use_benchmark
         )
 
         if stage_result['stage'] != 2:
@@ -226,6 +241,7 @@ class Screener:
             'sma_150': round(data['sma_150'].iloc[-1], 2),
             'sma_200': round(data['sma_200'].iloc[-1], 2),
             'rs_new_high': stage_result['details']['rs_new_high'],
+            'benchmark_enabled': use_benchmark,
             'volume_50d_avg': int(data['volume_ma_50'].iloc[-1]),
             # Fundamentals data
             'eps_growth': round(fund_result.eps_growth * 100, 1) if fund_result.eps_growth else None,
@@ -240,7 +256,8 @@ class Screener:
     def _process_ticker(
         self,
         ticker: str,
-        benchmark_data: pd.DataFrame
+        benchmark_data: Optional[pd.DataFrame],
+        use_benchmark: bool = True,
     ) -> Optional[Dict]:
         """
         Process a single ticker.
@@ -261,9 +278,9 @@ class Screener:
         data = calculate_all_indicators(data, benchmark_data)
 
         # Stage detection
+        rs_line = data['rs_line'] if use_benchmark else None
         stage_result = self.stage_detector.detect_stage(
-            data,
-            data['rs_line']
+            data, rs_line, use_benchmark=use_benchmark
         )
 
         if stage_result['stage'] != 2:
@@ -300,6 +317,7 @@ class Screener:
             'ticker': ticker,
             'stage': 2,
             'rs_new_high': stage_result['details']['rs_new_high'],
+            'benchmark_enabled': use_benchmark,
             'has_vcp': True,
             'pivot': round(vcp_result['pivot'], 2),
             'entry_price': round(entry, 2),
@@ -317,7 +335,8 @@ class Screener:
     def _process_ticker_stage2(
         self,
         ticker: str,
-        benchmark_data: pd.DataFrame
+        benchmark_data: Optional[pd.DataFrame],
+        use_benchmark: bool = True,
     ) -> Optional[Dict]:
         """
         Process a single ticker for Stage 2 only.
@@ -338,9 +357,9 @@ class Screener:
         data = calculate_all_indicators(data, benchmark_data)
 
         # Stage detection
+        rs_line = data['rs_line'] if use_benchmark else None
         stage_result = self.stage_detector.detect_stage(
-            data,
-            data['rs_line']
+            data, rs_line, use_benchmark=use_benchmark
         )
 
         if stage_result['stage'] != 2:
@@ -364,6 +383,7 @@ class Screener:
             'sma_150': round(data['sma_150'].iloc[-1], 2),
             'sma_200': round(data['sma_200'].iloc[-1], 2),
             'rs_new_high': stage_result['details']['rs_new_high'],
+            'benchmark_enabled': use_benchmark,
             'volume_50d_avg': int(data['volume_ma_50'].iloc[-1]),
             'conditions_met': sum(stage_result['details'].values()),
             'total_conditions': len(stage_result['details']),

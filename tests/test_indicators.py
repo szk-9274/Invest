@@ -141,8 +141,23 @@ class TestRSLine:
 
     def test_calculate_rs_line(self):
         """Test RS Line calculation"""
-        stock_data = create_sample_data(100)
-        benchmark_data = create_sample_data(100)
+        # Use a shared date index so intersection works
+        dates = pd.date_range(end='2025-01-01', periods=100, freq='D')
+        np.random.seed(42)
+        prices1 = 100 * np.exp(np.cumsum(np.random.normal(0.0005, 0.02, 100)))
+        stock_data = pd.DataFrame({
+            'open': prices1 * 0.99, 'high': prices1 * 1.01,
+            'low': prices1 * 0.99, 'close': prices1,
+            'volume': np.random.randint(1000000, 10000000, 100)
+        }, index=dates)
+
+        np.random.seed(43)
+        prices2 = 450 * np.exp(np.cumsum(np.random.normal(0.0003, 0.015, 100)))
+        benchmark_data = pd.DataFrame({
+            'open': prices2 * 0.99, 'high': prices2 * 1.01,
+            'low': prices2 * 0.99, 'close': prices2,
+            'volume': np.random.randint(50000000, 100000000, 100)
+        }, index=dates)
 
         rs_line = calculate_rs_line(stock_data, benchmark_data)
 

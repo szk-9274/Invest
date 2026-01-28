@@ -21,14 +21,16 @@ class StageDetector:
     def detect_stage(
         self,
         data: pd.DataFrame,
-        rs_line: pd.Series
+        rs_line: pd.Series = None,
+        use_benchmark: bool = True,
     ) -> Dict:
         """
         Detect the current stage of the stock.
 
         Args:
             data: Stock data with all indicators
-            rs_line: RS Line Series
+            rs_line: RS Line Series (optional; None when benchmark disabled)
+            use_benchmark: Whether to require RS condition for Stage 2
 
         Returns:
             {
@@ -38,7 +40,7 @@ class StageDetector:
             }
         """
         # Check Stage 2 conditions
-        conditions = self.check_stage2_conditions(data, rs_line)
+        conditions = self.check_stage2_conditions(data, rs_line, use_benchmark)
 
         # Check if all conditions are met
         meets_all = all(conditions.values())
@@ -62,10 +64,14 @@ class StageDetector:
     def check_stage2_conditions(
         self,
         data: pd.DataFrame,
-        rs_line: pd.Series
+        rs_line: pd.Series = None,
+        use_benchmark: bool = True,
     ) -> Dict[str, bool]:
         """
-        Check the 7 Stage 2 conditions (Trend Template).
+        Check the Stage 2 conditions (Trend Template).
+
+        When use_benchmark is False, the RS new high condition is skipped
+        (always True), reducing the criteria to 8 non-benchmark conditions.
 
         Returns:
             Dictionary of condition results
@@ -84,6 +90,12 @@ class StageDetector:
 
         # 200-day MA slope
         ma200_slope = self._calculate_ma200_slope(data)
+
+        # RS condition: skip (always True) when benchmark is disabled
+        if use_benchmark and rs_line is not None:
+            rs_result = self._check_rs_strength(rs_line)
+        else:
+            rs_result = True
 
         conditions = {
             # 1. Close > SMA_50 > SMA_150 > SMA_200
@@ -106,8 +118,8 @@ class StageDetector:
                 latest['sma_50'] > latest['sma_200']
             ),
 
-            # 6. RS new high
-            'rs_new_high': self._check_rs_strength(rs_line),
+            # 6. RS new high (auto-True when benchmark disabled)
+            'rs_new_high': rs_result,
 
             # 7. Sufficient volume
             'sufficient_volume': latest['volume_ma_50'] >= self.params.get('min_volume', 500_000)
@@ -187,18 +199,26 @@ class StageDetector:
         return abs(ma200_slope) < (latest['sma_200'] * 0.01)
 
 
-def is_stage2(data: pd.DataFrame, rs_line: pd.Series, params: Dict) -> bool:
+def is_stage2(
+    data: pd.DataFrame,
+    rs_line: pd.Series = None,
+    params: Dict = None,
+    use_benchmark: bool = True,
+) -> bool:
     """
     Quick Stage 2 check function.
 
     Args:
         data: Stock data with indicators
-        rs_line: RS Line Series
+        rs_line: RS Line Series (optional)
         params: Stage detection parameters
+        use_benchmark: Whether to require RS condition
 
     Returns:
         True if stock is in Stage 2
     """
+    if params is None:
+        params = {}
     detector = StageDetector(params)
-    result = detector.detect_stage(data, rs_line)
+    result = detector.detect_stage(data, rs_line, use_benchmark=use_benchmark)
     return result['stage'] == 2 and result['meets_criteria']

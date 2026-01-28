@@ -52,6 +52,7 @@ class BacktestResult:
     max_drawdown: float
     max_drawdown_pct: float
     sharpe_ratio: float
+    benchmark_enabled: bool = True
     trades: List[Position] = field(default_factory=list)
     equity_curve: pd.Series = field(default_factory=pd.Series)
 
@@ -59,14 +60,16 @@ class BacktestResult:
 class BacktestEngine:
     """Backtesting engine for the screening strategy"""
 
-    def __init__(self, config: Dict):
+    def __init__(self, config: Dict, use_benchmark: bool = True):
         """
         Initialize the backtest engine.
 
         Args:
             config: Configuration dictionary
+            use_benchmark: Whether to use SPY benchmark for RS calculation
         """
         self.config = config
+        self.use_benchmark = use_benchmark
         self.fetcher = YahooFinanceFetcher(
             request_delay=config['performance']['request_delay']
         )
@@ -100,18 +103,30 @@ class BacktestEngine:
         logger.info(f"Initial capital: ${self.initial_capital:,.2f}")
         logger.info(f"Max positions: {self.max_positions}")
 
-        # Fetch benchmark data
-        benchmark_data = self.fetcher.fetch_data('SPY', period='5y')
-        if benchmark_data is None:
-            logger.error("Failed to fetch benchmark data")
-            return self._empty_result()
+        # Fetch benchmark data (with fallback)
+        benchmark_data = None
+        use_benchmark = self.use_benchmark
 
-        # Filter benchmark data to backtest period
-        start = pd.Timestamp(start_date)
-        end = pd.Timestamp(end_date)
-        benchmark_data = benchmark_data[
-            (benchmark_data.index >= start) & (benchmark_data.index <= end)
-        ]
+        if use_benchmark:
+            benchmark_data = self.fetcher.fetch_benchmark('SPY', period='5y')
+            if benchmark_data is None:
+                logger.warning(
+                    "Failed to fetch benchmark data (SPY). "
+                    "Falling back to no-benchmark mode for backtest."
+                )
+                use_benchmark = False
+            else:
+                # Filter benchmark data to backtest period
+                start = pd.Timestamp(start_date)
+                end = pd.Timestamp(end_date)
+                benchmark_data = benchmark_data[
+                    (benchmark_data.index >= start) & (benchmark_data.index <= end)
+                ]
+        else:
+            logger.info("Benchmark disabled by user (--no-benchmark)")
+
+        if not use_benchmark:
+            logger.info("Backtest: Running in NO-BENCHMARK mode (RS condition auto-passed)")
 
         # Fetch all ticker data
         logger.info("Fetching historical data...")
@@ -119,20 +134,36 @@ class BacktestEngine:
         for ticker in tickers:
             data = self.fetcher.fetch_data(ticker, period='5y')
             if data is not None and len(data) > 252:
-                # Calculate indicators
+                # Calculate indicators (benchmark may be None)
                 data = calculate_all_indicators(data, benchmark_data)
                 all_data[ticker] = data
 
         logger.info(f"Successfully fetched {len(all_data)} tickers")
+
+        # Determine trading days from data
+        if benchmark_data is not None and not benchmark_data.empty:
+            start = pd.Timestamp(start_date)
+            end = pd.Timestamp(end_date)
+            trading_days = benchmark_data.index
+        else:
+            # Without benchmark, derive trading days from available data
+            start = pd.Timestamp(start_date)
+            end = pd.Timestamp(end_date)
+            all_dates = set()
+            for data in all_data.values():
+                all_dates.update(data.index)
+            trading_days = pd.DatetimeIndex(sorted(all_dates))
+            trading_days = trading_days[(trading_days >= start) & (trading_days <= end)]
+
+        if len(trading_days) == 0:
+            logger.warning("No trading days found in the specified period")
+            return self._empty_result(use_benchmark)
 
         # Initialize portfolio
         capital = self.initial_capital
         positions: List[Position] = []
         closed_positions: List[Position] = []
         equity_curve = []
-
-        # Get trading days
-        trading_days = benchmark_data.index
 
         # Main backtest loop
         for i, date in enumerate(trading_days):
@@ -180,8 +211,9 @@ class BacktestEngine:
                         continue
 
                     # Check Stage 2
+                    rs_line = hist_data['rs_line'] if use_benchmark else None
                     stage_result = self.stage_detector.detect_stage(
-                        hist_data, hist_data['rs_line']
+                        hist_data, rs_line, use_benchmark=use_benchmark
                     )
                     if stage_result['stage'] != 2:
                         continue
@@ -263,7 +295,7 @@ class BacktestEngine:
                     closed_positions.append(pos)
 
         # Calculate results
-        return self._calculate_results(closed_positions, equity_curve)
+        return self._calculate_results(closed_positions, equity_curve, use_benchmark)
 
     def _check_exit(self, pos: Position, current_bar: pd.Series) -> tuple:
         """
@@ -291,11 +323,12 @@ class BacktestEngine:
     def _calculate_results(
         self,
         trades: List[Position],
-        equity_curve: List[Dict]
+        equity_curve: List[Dict],
+        benchmark_enabled: bool = True,
     ) -> BacktestResult:
         """Calculate backtest statistics"""
         if not trades:
-            return self._empty_result()
+            return self._empty_result(benchmark_enabled)
 
         # Convert equity curve to Series
         equity_df = pd.DataFrame(equity_curve)
@@ -347,11 +380,12 @@ class BacktestEngine:
             max_drawdown=max_drawdown,
             max_drawdown_pct=max_drawdown_pct,
             sharpe_ratio=sharpe_ratio,
+            benchmark_enabled=benchmark_enabled,
             trades=trades,
             equity_curve=equity_series
         )
 
-    def _empty_result(self) -> BacktestResult:
+    def _empty_result(self, benchmark_enabled: bool = True) -> BacktestResult:
         """Return empty result"""
         return BacktestResult(
             initial_capital=self.initial_capital,
@@ -368,23 +402,25 @@ class BacktestEngine:
             max_drawdown=0,
             max_drawdown_pct=0,
             sharpe_ratio=0,
+            benchmark_enabled=benchmark_enabled,
             trades=[],
             equity_curve=pd.Series()
         )
 
 
-def run_backtest(config: Dict, tickers: List[str]) -> BacktestResult:
+def run_backtest(config: Dict, tickers: List[str], use_benchmark: bool = True) -> BacktestResult:
     """
     Run backtest with given configuration.
 
     Args:
         config: Configuration dictionary
         tickers: List of ticker symbols
+        use_benchmark: Whether to use SPY benchmark
 
     Returns:
         BacktestResult object
     """
-    engine = BacktestEngine(config)
+    engine = BacktestEngine(config, use_benchmark=use_benchmark)
     return engine.run(
         tickers,
         config['backtest']['start_date'],
@@ -397,6 +433,8 @@ def print_backtest_report(result: BacktestResult):
     print("\n" + "=" * 60)
     print("BACKTEST RESULTS")
     print("=" * 60)
+    benchmark_status = "Enabled" if result.benchmark_enabled else "Disabled"
+    print(f"Benchmark:          {benchmark_status}")
     print(f"Initial Capital:    ${result.initial_capital:,.2f}")
     print(f"Final Capital:      ${result.final_capital:,.2f}")
     print(f"Total Return:       ${result.total_return:,.2f} ({result.total_return_pct:.1%})")

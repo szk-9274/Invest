@@ -15,8 +15,13 @@ sys.path.insert(0, str(Path(__file__).parent))
 from screening.screener import Screener
 from utils.logger import setup_logger
 from backtest.engine import BacktestEngine, print_backtest_report
-from backtest.visualization import visualize_backtest_results
 from backtest.performance import calculate_cagr
+
+try:
+    from backtest.visualization import visualize_backtest_results
+    VISUALIZATION_AVAILABLE = visualize_backtest_results is not None
+except (ImportError, AttributeError, Exception):
+    VISUALIZATION_AVAILABLE = False
 
 
 def load_config(config_path: str = "config/params.yaml") -> dict:
@@ -51,11 +56,14 @@ def run_backtest_mode(config: dict, tickers: list, args):
     start_date = args.start if args.start else config['backtest']['start_date']
     end_date = args.end if args.end else config['backtest']['end_date']
 
+    use_benchmark = not args.no_benchmark
+
     logger.info(f"Period: {start_date} to {end_date}")
     logger.info(f"Tickers: {len(tickers)}")
+    logger.info(f"Benchmark: {'Enabled' if use_benchmark else 'Disabled'}")
 
     # Initialize and run backtest engine
-    engine = BacktestEngine(config)
+    engine = BacktestEngine(config, use_benchmark=use_benchmark)
     result = engine.run(tickers, start_date, end_date)
 
     # Print report
@@ -75,11 +83,14 @@ def run_backtest_mode(config: dict, tickers: list, args):
     output_dir = Path(__file__).parent / "output" / "backtest"
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    try:
-        visualize_backtest_results(result, output_dir)
-        logger.info(f"Charts saved to: {output_dir}")
-    except Exception as e:
-        logger.warning(f"Could not generate charts: {e}")
+    if VISUALIZATION_AVAILABLE:
+        try:
+            visualize_backtest_results(result, output_dir)
+            logger.info(f"Charts saved to: {output_dir}")
+        except Exception as e:
+            logger.warning(f"Could not generate charts: {e}")
+    else:
+        logger.warning("matplotlib not available, skipping chart generation")
 
     # Save trade details
     if result.trades:
@@ -139,6 +150,23 @@ def main():
         type=str,
         help='Backtest end date (YYYY-MM-DD)'
     )
+
+    # Benchmark options (mutually exclusive)
+    benchmark_group = parser.add_mutually_exclusive_group()
+    benchmark_group.add_argument(
+        '--use-benchmark',
+        action='store_true',
+        default=True,
+        dest='use_benchmark',
+        help='Use SPY benchmark for relative strength calculation (default)'
+    )
+    benchmark_group.add_argument(
+        '--no-benchmark',
+        action='store_true',
+        default=False,
+        help='Disable SPY benchmark; use only technical conditions for Stage 2'
+    )
+
     args = parser.parse_args()
 
     # Load configuration
@@ -153,6 +181,7 @@ def main():
     logger.info("=" * 60)
     logger.info("Stock Screening System Started")
     logger.info(f"Mode: {args.mode}")
+    logger.info(f"Benchmark: {'Disabled' if args.no_benchmark else 'Enabled'}")
     logger.info("=" * 60)
 
     # Load tickers
@@ -171,8 +200,11 @@ def main():
         run_backtest_mode(config, tickers, args)
         return
 
+    # Determine benchmark usage
+    use_benchmark = not args.no_benchmark
+
     # Initialize screener
-    screener = Screener(config)
+    screener = Screener(config, use_benchmark=use_benchmark)
 
     # Run screening
     if args.mode == 'full' or args.mode == 'test':
@@ -207,6 +239,8 @@ def main():
     # Display summary
     print("\n" + "=" * 80)
     print(f"SCREENING RESULTS ({len(results)} candidates)")
+    if not use_benchmark:
+        print("Benchmark: Disabled (RS condition auto-passed)")
     print("=" * 80)
 
     # Show top 10 results

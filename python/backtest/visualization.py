@@ -12,9 +12,9 @@ try:
     import matplotlib.pyplot as plt
     import matplotlib.dates as mdates
     MATPLOTLIB_AVAILABLE = True
-except ImportError:
+except (ImportError, AttributeError, Exception) as e:
     MATPLOTLIB_AVAILABLE = False
-    logger.warning("matplotlib not available, visualization will be limited")
+    logger.warning(f"matplotlib not available, visualization will be limited: {e}")
 
 
 def visualize_backtest_results(
@@ -334,6 +334,7 @@ def generate_html_report(
     <body>
         <h1>Backtest Report</h1>
         <p>Period: {start_date} to {end_date}</p>
+        <p>Benchmark: {"Enabled" if getattr(result, 'benchmark_enabled', True) else "Disabled"}</p>
 
         <div class="summary">
             <h2>Performance Summary</h2>

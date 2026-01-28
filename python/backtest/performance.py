@@ -285,10 +285,13 @@ def generate_performance_summary(
     cagr = calculate_cagr(result.initial_capital, result.final_capital, years)
     win_loss = calculate_win_loss_stats(result.trades)
 
+    benchmark_status = "Enabled" if getattr(result, 'benchmark_enabled', True) else "Disabled"
+
     lines = [
         "=" * 80,
         f"BACKTEST RESULTS ({start_date} to {end_date})",
         "=" * 80,
+        f"Benchmark:            {benchmark_status}",
         f"Initial Capital:      ${result.initial_capital:,.2f}",
         f"Final Capital:        ${result.final_capital:,.2f}",
         f"Total Return:         {result.total_return_pct:+.1%}",
