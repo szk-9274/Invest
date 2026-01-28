@@ -210,3 +210,92 @@ Electronが正常に起動するためのラッパースクリプトを追加し
 - `ELECTRON_RUN_AS_NODE=1` が設定された環境では、Electronが Node.js モードで動作し、
   Electron API (app, ipcMain, BrowserWindow等) が利用できなくなります。
 - `electron-launcher.js` はこの問題を回避するために環境変数を削除してからElectronを起動します。
+
+---
+
+## Stock Screening System (Minervini Stage Theory)
+
+ミネルヴィニのステージ理論とVCPパターンに基づく株式スクリーニングシステム。
+
+### Python環境セットアップ
+
+```powershell
+cd C:\00_mycode\Invest\python
+
+# 仮想環境作成（初回のみ）
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+
+# 依存パッケージインストール
+pip install yfinance pandas numpy loguru tqdm pyyaml tenacity matplotlib
+```
+
+### コマンド一覧
+
+#### 1. 銘柄リストの更新（約3,500銘柄を取得）
+
+```powershell
+cd C:\00_mycode\Invest\python
+python scripts/update_tickers_extended.py
+
+# オプション指定
+python scripts/update_tickers_extended.py --min-market-cap 5000000000 --max-tickers 2000
+```
+
+#### 2. Stage 2 スクリーニング（基本）
+
+```powershell
+# Stage 2銘柄のみを抽出
+python main.py --mode stage2
+
+# クイックテスト（5銘柄）
+python main.py --mode test
+
+# Stage 2 + VCPパターン（フル分析）
+python main.py --mode full
+```
+
+#### 3. ファンダメンタルズ付きスクリーニング
+
+```powershell
+# Stage 2 + ファンダメンタルズフィルター（EPS成長率25%以上、売上成長率25%以上）
+python main.py --mode stage2 --with-fundamentals
+```
+
+#### 4. バックテスト実行
+
+```powershell
+# デフォルト期間（2020-01-01 ~ 2025-01-27）
+python main.py --mode backtest
+
+# 期間指定
+python main.py --mode backtest --start 2022-01-01 --end 2024-12-31
+
+# 特定銘柄のみ
+python main.py --mode backtest --tickers AAPL,MSFT,NVDA
+```
+
+### 出力ファイル
+
+| ファイル | 説明 |
+|---------|------|
+| `output/screening_results.csv` | スクリーニング結果 |
+| `output/screening.log` | 実行ログ |
+| `output/backtest/trades.csv` | トレード詳細 |
+| `output/backtest/equity_curve.png` | 資産曲線グラフ |
+| `output/backtest/drawdown.png` | ドローダウングラフ |
+| `output/backtest/monthly_returns.png` | 月次リターン表 |
+
+### 設定ファイル
+
+| ファイル | 説明 |
+|---------|------|
+| `config/params.yaml` | スクリーニング・バックテストパラメータ |
+| `config/tickers.csv` | スクリーニング対象銘柄リスト |
+
+### ファンダメンタルズフィルター条件（Minervini基準）
+
+- EPS成長率: 前年同期比 +25%以上
+- 売上高成長率: 前年同期比 +25%以上
+- 四半期加速: QoQ（四半期対前期）で成長加速
+- 営業利益率: 15%以上（オプション）

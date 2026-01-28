@@ -14,6 +14,9 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from screening.screener import Screener
 from utils.logger import setup_logger
+from backtest.engine import BacktestEngine, print_backtest_report
+from backtest.visualization import visualize_backtest_results
+from backtest.performance import calculate_cagr
 
 
 def load_config(config_path: str = "config/params.yaml") -> dict:
@@ -31,6 +34,74 @@ def load_tickers(tickers_path: str = "config/tickers.csv") -> list:
     return df['ticker'].tolist()
 
 
+def run_backtest_mode(config: dict, tickers: list, args):
+    """
+    Run backtest mode.
+
+    Args:
+        config: Configuration dictionary
+        tickers: List of ticker symbols
+        args: Command line arguments
+    """
+    logger.info("=" * 60)
+    logger.info("BACKTEST MODE")
+    logger.info("=" * 60)
+
+    # Override dates if provided
+    start_date = args.start if args.start else config['backtest']['start_date']
+    end_date = args.end if args.end else config['backtest']['end_date']
+
+    logger.info(f"Period: {start_date} to {end_date}")
+    logger.info(f"Tickers: {len(tickers)}")
+
+    # Initialize and run backtest engine
+    engine = BacktestEngine(config)
+    result = engine.run(tickers, start_date, end_date)
+
+    # Print report
+    print_backtest_report(result)
+
+    # Calculate and display CAGR
+    if result.total_trades > 0:
+        years = (pd.Timestamp(end_date) - pd.Timestamp(start_date)).days / 365.25
+        cagr = calculate_cagr(
+            result.initial_capital,
+            result.final_capital,
+            years
+        )
+        print(f"CAGR:                 {cagr:.1%}")
+
+    # Visualize results
+    output_dir = Path(__file__).parent / "output" / "backtest"
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    try:
+        visualize_backtest_results(result, output_dir)
+        logger.info(f"Charts saved to: {output_dir}")
+    except Exception as e:
+        logger.warning(f"Could not generate charts: {e}")
+
+    # Save trade details
+    if result.trades:
+        trades_df = pd.DataFrame([
+            {
+                'ticker': t.ticker,
+                'entry_date': t.entry_date.strftime('%Y-%m-%d') if t.entry_date else None,
+                'entry_price': round(t.entry_price, 2),
+                'exit_date': t.exit_date.strftime('%Y-%m-%d') if t.exit_date else None,
+                'exit_price': round(t.exit_price, 2) if t.exit_price else None,
+                'exit_reason': t.exit_reason,
+                'shares': t.shares,
+                'pnl': round(t.pnl, 2),
+                'pnl_pct': round(t.pnl_pct * 100, 2)
+            }
+            for t in result.trades
+        ])
+        trades_file = output_dir / "trades.csv"
+        trades_df.to_csv(trades_file, index=False)
+        logger.info(f"Trade details saved to: {trades_file}")
+
+
 def main():
     """Main function"""
     # Parse command line arguments
@@ -39,9 +110,9 @@ def main():
     )
     parser.add_argument(
         '--mode',
-        choices=['full', 'stage2', 'test'],
+        choices=['full', 'stage2', 'test', 'backtest'],
         default='full',
-        help='Screening mode: full (Stage2+VCP), stage2 (Stage2 only), test (quick test)'
+        help='Mode: full (Stage2+VCP), stage2 (Stage2 only), test (quick test), backtest (backtest engine)'
     )
     parser.add_argument(
         '--tickers',
@@ -52,6 +123,21 @@ def main():
         '--output',
         type=str,
         help='Output CSV path (overrides config)'
+    )
+    parser.add_argument(
+        '--with-fundamentals',
+        action='store_true',
+        help='Apply fundamentals filter (EPS/Revenue growth, QoQ acceleration)'
+    )
+    parser.add_argument(
+        '--start',
+        type=str,
+        help='Backtest start date (YYYY-MM-DD)'
+    )
+    parser.add_argument(
+        '--end',
+        type=str,
+        help='Backtest end date (YYYY-MM-DD)'
     )
     args = parser.parse_args()
 
@@ -80,12 +166,19 @@ def main():
 
     logger.info(f"Loaded {len(tickers)} tickers")
 
+    # Run backtest mode
+    if args.mode == 'backtest':
+        run_backtest_mode(config, tickers, args)
+        return
+
     # Initialize screener
     screener = Screener(config)
 
     # Run screening
     if args.mode == 'full' or args.mode == 'test':
         results = screener.screen(tickers)
+    elif args.with_fundamentals:
+        results = screener.screen_with_fundamentals(tickers)
     else:  # stage2
         results = screener.screen_stage2_only(tickers)
 

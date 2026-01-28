@@ -14,6 +14,7 @@ from data.fetcher import YahooFinanceFetcher
 from analysis.stage_detector import StageDetector
 from analysis.vcp_detector import VCPDetector
 from analysis.indicators import calculate_all_indicators
+from analysis.fundamentals import FundamentalsAnalyzer
 
 
 class Screener:
@@ -32,6 +33,7 @@ class Screener:
         )
         self.stage_detector = StageDetector(config['stage'])
         self.vcp_detector = VCPDetector(config['vcp'])
+        self.fundamentals_analyzer = FundamentalsAnalyzer(config)
 
     def screen(self, tickers: List[str]) -> pd.DataFrame:
         """
@@ -122,6 +124,118 @@ class Screener:
         else:
             logger.warning("No Stage 2 candidates found")
             return pd.DataFrame()
+
+    def screen_with_fundamentals(self, tickers: List[str]) -> pd.DataFrame:
+        """
+        Screen for Stage 2 stocks with fundamentals filter.
+
+        Args:
+            tickers: List of ticker symbols
+
+        Returns:
+            DataFrame with Stage 2 stocks that pass fundamentals filter
+        """
+        results = []
+
+        # Fetch benchmark data
+        logger.info("Fetching benchmark data (SPY)...")
+        benchmark_symbol = self.config['benchmark']['symbol']
+        benchmark_data = self.fetcher.fetch_data(
+            benchmark_symbol,
+            period=self.config['data']['history_period']
+        )
+
+        if benchmark_data is None:
+            logger.error("Failed to fetch benchmark data")
+            return pd.DataFrame()
+
+        logger.info(f"Screening {len(tickers)} tickers for Stage 2 + Fundamentals...")
+
+        for ticker in tqdm(tickers, desc="Stage 2 + Fundamentals Screening"):
+            try:
+                result = self._process_ticker_with_fundamentals(ticker, benchmark_data)
+                if result:
+                    results.append(result)
+
+            except Exception as e:
+                logger.error(f"{ticker}: Error - {e}")
+                continue
+
+        if results:
+            df = pd.DataFrame(results)
+            logger.info(f"Found {len(df)} Stage 2 + Fundamentals candidates")
+            return df
+        else:
+            logger.warning("No candidates found with fundamentals filter")
+            return pd.DataFrame()
+
+    def _process_ticker_with_fundamentals(
+        self,
+        ticker: str,
+        benchmark_data: pd.DataFrame
+    ) -> Optional[Dict]:
+        """
+        Process a single ticker for Stage 2 with fundamentals.
+
+        Returns:
+            Screening result or None
+        """
+        # Fetch data
+        data = self.fetcher.fetch_data(
+            ticker,
+            period=self.config['data']['history_period']
+        )
+
+        if data is None or len(data) < 252:
+            return None
+
+        # Calculate technical indicators
+        data = calculate_all_indicators(data, benchmark_data)
+
+        # Stage detection
+        stage_result = self.stage_detector.detect_stage(
+            data,
+            data['rs_line']
+        )
+
+        if stage_result['stage'] != 2:
+            return None
+
+        # Fundamentals analysis
+        fund_result = self.fundamentals_analyzer.analyze(ticker)
+
+        if not fund_result.passes_filter:
+            logger.debug(f"{ticker}: Failed fundamentals filter")
+            return None
+
+        # Get 52-week high/low
+        high_52w = data['high'].tail(252).max()
+        low_52w = data['low'].tail(252).min()
+
+        current_price = data['close'].iloc[-1]
+        distance_from_high = (high_52w - current_price) / high_52w * 100
+
+        return {
+            'ticker': ticker,
+            'stage': 2,
+            'current_price': round(current_price, 2),
+            'high_52w': round(high_52w, 2),
+            'low_52w': round(low_52w, 2),
+            'distance_from_high_pct': round(distance_from_high, 2),
+            'sma_50': round(data['sma_50'].iloc[-1], 2),
+            'sma_150': round(data['sma_150'].iloc[-1], 2),
+            'sma_200': round(data['sma_200'].iloc[-1], 2),
+            'rs_new_high': stage_result['details']['rs_new_high'],
+            'volume_50d_avg': int(data['volume_ma_50'].iloc[-1]),
+            # Fundamentals data
+            'eps_growth': round(fund_result.eps_growth * 100, 1) if fund_result.eps_growth else None,
+            'revenue_growth': round(fund_result.revenue_growth * 100, 1) if fund_result.revenue_growth else None,
+            'operating_margin': round(fund_result.operating_margin * 100, 1) if fund_result.operating_margin else None,
+            'qoq_accelerating': fund_result.qoq_eps_accelerating or fund_result.qoq_revenue_accelerating,
+            'conditions_met': sum(stage_result['details'].values()),
+            'total_conditions': len(stage_result['details']),
+            'last_updated': data.index[-1].strftime('%Y-%m-%d')
+        }
 
     def _process_ticker(
         self,
