@@ -116,6 +116,10 @@ class BacktestEngine:
                 )
                 use_benchmark = False
             else:
+                # Normalize timezone to tz-naive for consistent comparison
+                if benchmark_data.index.tz is not None:
+                    benchmark_data.index = benchmark_data.index.tz_localize(None)
+
                 # Filter benchmark data to backtest period
                 start = pd.Timestamp(start_date)
                 end = pd.Timestamp(end_date)
