@@ -1,9 +1,4 @@
 {
-  "enabledMcpjsonServers": [
-    "filesystem",
-    "github",
-    "memory"
-  ],
   "permissions": {
     "allow": [
       "Read",
@@ -11,9 +6,14 @@
       "Grep",
       "Edit",
       "Write",
-
-      "Bash"
+      "Bash",
+      "mcp__github__create_pull_request"
     ],
     "deny": []
-  }
+  },
+  "enabledMcpjsonServers": [
+    "filesystem",
+    "github",
+    "memory"
+  ]
 }
