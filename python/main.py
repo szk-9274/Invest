@@ -2,16 +2,12 @@
 Stock Screening System - Main Entry Point
 Based on Minervini's Stage Theory and VCP Pattern
 """
-import warnings
 import yaml
 import pandas as pd
 from pathlib import Path
 from loguru import logger
 import argparse
 import sys
-
-# Suppress yfinance DeprecationWarning to keep logs clean
-warnings.filterwarnings("ignore", category=DeprecationWarning, module="yfinance")
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent))

@@ -3,6 +3,11 @@ Extended Ticker List Update Script
 Fetches approximately 3,500 tickers from S&P 500, NASDAQ, and Russell 3000
 """
 import pandas as pd
+import warnings
+
+# Suppress yfinance DeprecationWarning before import
+warnings.filterwarnings("ignore", category=DeprecationWarning, message=".*Ticker.earnings.*")
+
 import yfinance as yf
 import requests
 from typing import List, Set, Dict, Optional

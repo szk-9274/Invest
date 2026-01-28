@@ -2,6 +2,11 @@
 Yahoo Finance data fetcher module using yfinance
 with local cache support and rate-limit handling
 """
+import warnings
+
+# Suppress yfinance DeprecationWarning before import
+warnings.filterwarnings("ignore", category=DeprecationWarning, message=".*Ticker.earnings.*")
+
 import yfinance as yf
 import pandas as pd
 import pickle
