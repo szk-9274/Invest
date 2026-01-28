@@ -211,14 +211,14 @@ def calculate_volatility(data: pd.DataFrame, period: int = 20) -> pd.Series:
 
 def calculate_all_indicators(
     data: pd.DataFrame,
-    benchmark_data: pd.DataFrame
+    benchmark_data: pd.DataFrame = None
 ) -> pd.DataFrame:
     """
     Calculate all technical indicators.
 
     Args:
         data: Stock price data
-        benchmark_data: Benchmark data
+        benchmark_data: Benchmark data (optional; if None, RS line is not calculated)
 
     Returns:
         DataFrame with all indicators
@@ -232,8 +232,11 @@ def calculate_all_indicators(
     # ATR
     result['atr_14'] = calculate_atr(result, 14)
 
-    # RS Line
-    result['rs_line'] = calculate_rs_line(result, benchmark_data)
+    # RS Line (only if benchmark data is provided)
+    if benchmark_data is not None:
+        result['rs_line'] = calculate_rs_line(result, benchmark_data)
+    else:
+        result['rs_line'] = pd.Series(dtype=float, index=result.index)
 
     # Bollinger Bands
     bb = calculate_bollinger_bands(result)

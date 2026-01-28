@@ -2,6 +2,11 @@
 Fundamentals Analyzer Module
 Implements Minervini's growth stock criteria for fundamental analysis
 """
+import warnings
+
+# Suppress yfinance DeprecationWarning before import
+warnings.filterwarnings("ignore", category=DeprecationWarning, message=".*Ticker.earnings.*")
+
 import yfinance as yf
 import pandas as pd
 from typing import Dict, Optional, List

@@ -7,14 +7,28 @@ import numpy as np
 from pathlib import Path
 from typing import Optional
 from loguru import logger
+import warnings
+import sys
+from io import StringIO
 
+# Suppress NumPy 2.x ABI warnings during matplotlib import
+MATPLOTLIB_AVAILABLE = False
 try:
-    import matplotlib.pyplot as plt
-    import matplotlib.dates as mdates
-    MATPLOTLIB_AVAILABLE = True
-except ImportError:
-    MATPLOTLIB_AVAILABLE = False
-    logger.warning("matplotlib not available, visualization will be limited")
+    # Capture stderr to suppress NumPy ABI error stacktrace
+    old_stderr = sys.stderr
+    sys.stderr = StringIO()
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=DeprecationWarning)
+        warnings.filterwarnings("ignore", category=RuntimeWarning)
+        import matplotlib.pyplot as plt
+        import matplotlib.dates as mdates
+        MATPLOTLIB_AVAILABLE = True
+finally:
+    sys.stderr = old_stderr
+
+if not MATPLOTLIB_AVAILABLE:
+    logger.warning("matplotlib not available - NumPy 2.x compatibility issue, visualization will be limited")
 
 
 def visualize_backtest_results(
@@ -334,6 +348,7 @@ def generate_html_report(
     <body>
         <h1>Backtest Report</h1>
         <p>Period: {start_date} to {end_date}</p>
+        <p>Benchmark: {"Enabled" if getattr(result, 'benchmark_enabled', True) else "Disabled"}</p>
 
         <div class="summary">
             <h2>Performance Summary</h2>

@@ -12,7 +12,12 @@ from backtest.performance import (
     calculate_win_loss_stats,
     generate_performance_summary
 )
-from backtest.visualization import visualize_backtest_results, generate_html_report
+
+try:
+    from backtest.visualization import visualize_backtest_results, generate_html_report
+except (ImportError, AttributeError, Exception):
+    visualize_backtest_results = None
+    generate_html_report = None
 
 __all__ = [
     'BacktestEngine',
