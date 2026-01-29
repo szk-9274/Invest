@@ -222,26 +222,67 @@ class BacktestEngine:
                     if stage_result['stage'] != 2:
                         continue
 
-                    # Check VCP
-                    vcp_result = self.vcp_detector.detect_vcp(hist_data)
-                    if vcp_result is None:
-                        continue
+                    # ===== VCP DETECTION DISABLED - USING SIMPLIFIED LOGIC =====
+                    # # Check VCP
+                    # vcp_result = self.vcp_detector.detect_vcp(hist_data)
+                    # if vcp_result is None:
+                    #     continue
+                    #
+                    # # Check breakout
+                    # current_bar = data.loc[date]
+                    # if current_bar['close'] < vcp_result['pivot']:
+                    #     continue
+                    #
+                    # # Check volume
+                    # vol_ratio = current_bar['volume'] / current_bar['volume_ma_50']
+                    # if vol_ratio < self.config['entry']['breakout_vol_ratio']:
+                    #     continue
+                    #
+                    # # Calculate position size
+                    # entry_price = current_bar['close']
+                    # stop_price = vcp_result['stop_price']
+                    # risk = entry_price - stop_price
+                    #
+                    # if risk <= 0:
+                    #     continue
+                    #
+                    # risk_amount = capital * self.risk_per_trade
+                    # shares = int(risk_amount / risk)
+                    #
+                    # if shares <= 0:
+                    #     continue
+                    #
+                    # cost = shares * entry_price * (1 + self.commission)
+                    # if cost > capital:
+                    #     continue
+                    #
+                    # # Open position
+                    # pos = Position(
+                    #     ticker=ticker,
+                    #     entry_date=date,
+                    #     entry_price=entry_price,
+                    #     shares=shares,
+                    #     stop_price=stop_price,
+                    #     target_price=entry_price * 1.25,
+                    #     pivot=vcp_result['pivot']
+                    # )
+                    # positions.append(pos)
+                    # capital -= cost
+                    #
+                    # logger.debug(
+                    #     f"{date.date()}: ENTRY {ticker} @ ${entry_price:.2f}, "
+                    #     f"{shares} shares, Stop: ${stop_price:.2f}"
+                    # )
 
-                    # Check breakout
+                    # Simplified entry logic (Stage 2 with basic risk management)
                     current_bar = data.loc[date]
-                    if current_bar['close'] < vcp_result['pivot']:
-                        continue
+                    entry_price = current_bar['close']
 
-                    # Check volume
-                    vol_ratio = current_bar['volume'] / current_bar['volume_ma_50']
-                    if vol_ratio < self.config['entry']['breakout_vol_ratio']:
-                        continue
+                    # Simple 3% stop loss
+                    stop_price = entry_price * 0.97
 
                     # Calculate position size
-                    entry_price = current_bar['close']
-                    stop_price = vcp_result['stop_price']
                     risk = entry_price - stop_price
-
                     if risk <= 0:
                         continue
 
@@ -263,7 +304,7 @@ class BacktestEngine:
                         shares=shares,
                         stop_price=stop_price,
                         target_price=entry_price * 1.25,
-                        pivot=vcp_result['pivot']
+                        pivot=entry_price  # Simplified: use current price as pivot
                     )
                     positions.append(pos)
                     capital -= cost

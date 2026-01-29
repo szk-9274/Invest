@@ -1,6 +1,7 @@
 """
 Stock Screening System - Main Entry Point
-Based on Minervini's Stage Theory and VCP Pattern
+Based on Minervini's Stage Theory
+(VCP Pattern detection temporarily disabled for validation)
 """
 import yaml
 import pandas as pd
@@ -123,7 +124,7 @@ def main():
         '--mode',
         choices=['full', 'stage2', 'test', 'backtest'],
         default='full',
-        help='Mode: full (Stage2+VCP), stage2 (Stage2 only), test (quick test), backtest (backtest engine)'
+        help='Mode: full (Stage2 only, VCP disabled), stage2 (Stage2 only), test (quick test), backtest (backtest engine)'
     )
     parser.add_argument(
         '--tickers',
