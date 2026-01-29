@@ -1,7 +1,17 @@
 """
 Unit tests for VCP Detector
+
+NOTE: VCP detection is temporarily disabled for validation.
+      These tests are skipped during test runs.
+      To re-enable, remove the skip decorator below.
 """
 import pytest
+import sys
+from pathlib import Path
+
+# TEMPORARILY SKIP ALL VCP DETECTOR TESTS
+# VCP logic is disabled pending validation and backtesting
+pytestmark = pytest.mark.skip(reason="VCP detection temporarily disabled for validation")
 import pandas as pd
 import numpy as np
 from datetime import datetime

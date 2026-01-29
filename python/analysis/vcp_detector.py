@@ -23,67 +23,77 @@ class VCPDetector:
         """
         Detect VCP pattern.
 
+        NOTE: VCP detection is temporarily disabled for validation.
+              This method always returns None.
+              To re-enable, uncomment the implementation below.
+
         Args:
             data: Stock data with all indicators
 
         Returns:
-            VCP information dictionary, or None if not found
+            None (VCP detection disabled)
         """
-        # Find base period
-        base = self.find_base(data)
-        if base is None:
-            logger.debug("No valid base found")
-            return None
+        # VCP DETECTION TEMPORARILY DISABLED - UNVALIDATED LOGIC
+        # TODO: Re-enable after proper validation and backtesting
+        logger.debug("VCP detection disabled - returning None")
+        return None
 
-        base_start, base_end = base
-
-        # Extract swing highs and lows
-        swings = self.extract_swings(data, base_start, base_end)
-        if len(swings) < 4:  # Need at least 2 up-down cycles
-            logger.debug("Insufficient swings for VCP")
-            return None
-
-        # Check contraction sequence
-        contractions = self.check_contraction_sequence(swings)
-        if contractions is None:
-            logger.debug("No valid contraction sequence")
-            return None
-
-        # Check for dryup (volume exhaustion)
-        dryup = self.check_dryup(data, base_end)
-
-        # Calculate pivot
-        pivot = self.calculate_pivot(data, base_start, base_end)
-
-        # 52-week high check
-        high_52w, _ = self._get_52w_high_low(data)
-        min_ratio = self.params.get('pivot_min_high_52w_ratio', 0.95)
-        if pivot < high_52w * min_ratio:
-            logger.debug(f"Pivot {pivot:.2f} too far from 52w high {high_52w:.2f}")
-            return None
-
-        # Calculate stop price
-        stop = self.calculate_stop_price(data, pivot, base_start, base_end)
-
-        # Entry price (pivot + 1%)
-        entry = pivot * 1.01
-
-        # Risk percentage
-        risk_pct = (entry - stop) / entry
-
-        return {
-            'has_vcp': True,
-            'pivot': pivot,
-            'base_start': data.index[base_start],
-            'base_end': data.index[base_end],
-            'base_length': base_end - base_start,
-            'contractions': contractions,
-            'contraction_count': len(contractions),
-            'dryup_confirmed': dryup,
-            'entry_price': entry,
-            'stop_price': stop,
-            'risk_pct': risk_pct
-        }
+        # ===== ORIGINAL VCP DETECTION LOGIC (DISABLED) =====
+        # # Find base period
+        # base = self.find_base(data)
+        # if base is None:
+        #     logger.debug("No valid base found")
+        #     return None
+        #
+        # base_start, base_end = base
+        #
+        # # Extract swing highs and lows
+        # swings = self.extract_swings(data, base_start, base_end)
+        # if len(swings) < 4:  # Need at least 2 up-down cycles
+        #     logger.debug("Insufficient swings for VCP")
+        #     return None
+        #
+        # # Check contraction sequence
+        # contractions = self.check_contraction_sequence(swings)
+        # if contractions is None:
+        #     logger.debug("No valid contraction sequence")
+        #     return None
+        #
+        # # Check for dryup (volume exhaustion)
+        # dryup = self.check_dryup(data, base_end)
+        #
+        # # Calculate pivot
+        # pivot = self.calculate_pivot(data, base_start, base_end)
+        #
+        # # 52-week high check
+        # high_52w, _ = self._get_52w_high_low(data)
+        # min_ratio = self.params.get('pivot_min_high_52w_ratio', 0.95)
+        # if pivot < high_52w * min_ratio:
+        #     logger.debug(f"Pivot {pivot:.2f} too far from 52w high {high_52w:.2f}")
+        #     return None
+        #
+        # # Calculate stop price
+        # stop = self.calculate_stop_price(data, pivot, base_start, base_end)
+        #
+        # # Entry price (pivot + 1%)
+        # entry = pivot * 1.01
+        #
+        # # Risk percentage
+        # risk_pct = (entry - stop) / entry
+        #
+        # return {
+        #     'has_vcp': True,
+        #     'pivot': pivot,
+        #     'base_start': data.index[base_start],
+        #     'base_end': data.index[base_end],
+        #     'base_length': base_end - base_start,
+        #     'contractions': contractions,
+        #     'contraction_count': len(contractions),
+        #     'dryup_confirmed': dryup,
+        #     'entry_price': entry,
+        #     'stop_price': stop,
+        #     'risk_pct': risk_pct
+        # }
 
     def find_base(self, data: pd.DataFrame) -> Optional[Tuple[int, int]]:
         """

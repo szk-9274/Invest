@@ -262,6 +262,9 @@ class Screener:
         """
         Process a single ticker.
 
+        NOTE: VCP detection is temporarily disabled for validation.
+              Falls back to Stage 2 with simplified entry/exit logic.
+
         Returns:
             Screening result or None
         """
@@ -286,49 +289,63 @@ class Screener:
         if stage_result['stage'] != 2:
             return None
 
-        # VCP detection
-        vcp_result = self.vcp_detector.detect_vcp(data)
+        # ===== VCP DETECTION DISABLED - USING SIMPLIFIED LOGIC =====
+        # # VCP detection
+        # vcp_result = self.vcp_detector.detect_vcp(data)
+        #
+        # if vcp_result is None:
+        #     return None
+        #
+        # # Risk validation
+        # risk_pct = vcp_result['risk_pct']
+        # max_risk = self.config['risk']['initial_stop_max']
+        # if risk_pct > max_risk:
+        #     logger.debug(f"{ticker}: Risk too high ({risk_pct:.2%} > {max_risk:.2%})")
+        #     return None
+        #
+        # # Risk/Reward calculation
+        # entry = vcp_result['entry_price']
+        # stop = vcp_result['stop_price']
+        # target = entry * 1.25  # +25% target
+        #
+        # risk = entry - stop
+        # reward = target - entry
+        # risk_reward = reward / risk if risk > 0 else 0
+        #
+        # if risk_reward < 3.0:
+        #     logger.debug(f"{ticker}: R/R too low ({risk_reward:.2f})")
+        #     return None
 
-        if vcp_result is None:
-            return None
+        # Simplified entry/exit logic (no VCP requirement)
+        current_price = data['close'].iloc[-1]
+        high_52w = data['high'].tail(252).max()
 
-        # Risk validation
-        risk_pct = vcp_result['risk_pct']
-        max_risk = self.config['risk']['initial_stop_max']
-        if risk_pct > max_risk:
-            logger.debug(f"{ticker}: Risk too high ({risk_pct:.2%} > {max_risk:.2%})")
-            return None
-
-        # Risk/Reward calculation
-        entry = vcp_result['entry_price']
-        stop = vcp_result['stop_price']
+        entry = current_price
+        stop = current_price * 0.97  # Simple 3% stop loss
         target = entry * 1.25  # +25% target
 
         risk = entry - stop
         reward = target - entry
         risk_reward = reward / risk if risk > 0 else 0
+        risk_pct = risk / entry if entry > 0 else 0
 
-        if risk_reward < 3.0:
-            logger.debug(f"{ticker}: R/R too low ({risk_reward:.2f})")
-            return None
-
-        # Return result
+        # Return result (Stage 2 with simplified risk management)
         return {
             'ticker': ticker,
             'stage': 2,
             'rs_new_high': stage_result['details']['rs_new_high'],
             'benchmark_enabled': use_benchmark,
-            'has_vcp': True,
-            'pivot': round(vcp_result['pivot'], 2),
+            'has_vcp': False,  # VCP detection disabled
+            'pivot': round(current_price, 2),
             'entry_price': round(entry, 2),
             'stop_price': round(stop, 2),
             'target_price': round(target, 2),
             'risk_pct': round(risk_pct * 100, 2),
             'risk_reward': round(risk_reward, 2),
-            'current_price': round(data['close'].iloc[-1], 2),
+            'current_price': round(current_price, 2),
             'volume_50d_avg': int(data['volume_ma_50'].iloc[-1]),
-            'contraction_count': vcp_result['contraction_count'],
-            'dryup_confirmed': vcp_result['dryup_confirmed'],
+            'contraction_count': 0,  # VCP disabled
+            'dryup_confirmed': False,  # VCP disabled
             'last_updated': data.index[-1].strftime('%Y-%m-%d')
         }
 
