@@ -8,14 +8,10 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from loguru import logger
 
-import sys
-from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
-from data.fetcher import YahooFinanceFetcher
-from analysis.indicators import calculate_all_indicators
-from analysis.stage_detector import StageDetector
-from analysis.vcp_detector import VCPDetector
+from ..data.fetcher import YahooFinanceFetcher
+from ..analysis.indicators import calculate_all_indicators
+from ..analysis.stage_detector import StageDetector
+from ..analysis.vcp_detector import VCPDetector
 
 
 @dataclass
