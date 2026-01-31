@@ -62,7 +62,7 @@ class TickerFetcher:
         logger.info("Fetching S&P 500 tickers from Wikipedia...")
         try:
             url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
-            tables = pd.read_html(url)
+            tables = pd.read_html(url, flavor='lxml')
             df = tables[0]
             tickers = df['Symbol'].str.replace('.', '-', regex=False).tolist()
             logger.info(f"[OK] S&P 500: Fetched {len(tickers)} tickers")
