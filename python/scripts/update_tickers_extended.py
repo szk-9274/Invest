@@ -23,6 +23,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from utils.logger import setup_logger
+from utils.ticker_normalizer import normalize_tickers
 
 
 class TickerFetcher:
@@ -346,6 +347,21 @@ class TickerFetcher:
 
         duplicates_removed = len(all_tickers) - len(cleaned)
 
+        # Apply ticker normalization to filter invalid formats
+        # This removes warrants (.W), units (.U), preferred (.P), class shares (.A, -A, etc.)
+        # BEFORE calling Yahoo Finance API, significantly reducing API failures
+        before_normalization = len(cleaned)
+        normalized = normalize_tickers(list(cleaned))
+        normalized_set = set(normalized)
+        excluded_by_normalization = before_normalization - len(normalized_set)
+
+        # Update stats
+        stats['normalized_total'] = len(normalized_set)
+        stats['excluded_by_normalization'] = excluded_by_normalization
+
+        # Update cleaned to use normalized tickers
+        cleaned = normalized_set
+
         logger.info("=" * 60)
         logger.info("SOURCE SUMMARY")
         logger.info("=" * 60)
@@ -356,9 +372,14 @@ class TickerFetcher:
         logger.info("-" * 60)
         logger.info(f"Raw Total:      {stats['raw_total']:>6,} tickers")
         logger.info(f"After dedup:    {stats['unique_total']:>6,} unique tickers")
-        logger.info(f"After cleanup:  {len(cleaned):>6,} valid tickers")
+        logger.info(f"After cleanup:  {before_normalization:>6,} valid tickers")
         if duplicates_removed > 0:
             logger.info(f"Removed:        {duplicates_removed:>6,} invalid/duplicate tickers")
+        logger.info("-" * 60)
+        logger.info("NORMALIZATION (warrants, units, preferred, class shares)")
+        logger.info(f"Before:         {before_normalization:>6,} tickers")
+        logger.info(f"Excluded:       {excluded_by_normalization:>6,} invalid formats")
+        logger.info(f"After:          {stats['normalized_total']:>6,} normalized tickers")
         logger.info("=" * 60)
 
         return {
