@@ -23,6 +23,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from utils.logger import setup_logger
+from utils.ticker_normalizer import normalize_tickers
 
 
 class TickerFetcher:
@@ -30,7 +31,7 @@ class TickerFetcher:
 
     def __init__(
         self,
-        min_market_cap: float = 2_000_000_000,
+        min_market_cap: float = 1_000_000_000,
         min_price: float = 5.0,
         min_volume: int = 500_000,
         max_tickers: int = 3500,
@@ -40,7 +41,7 @@ class TickerFetcher:
         Initialize the ticker fetcher.
 
         Args:
-            min_market_cap: Minimum market cap in USD (default: 2B)
+            min_market_cap: Minimum market cap in USD (default: 1B, relaxed from 2B)
             min_price: Minimum stock price (default: $5)
             min_volume: Minimum average daily volume (default: 500K)
             max_tickers: Maximum number of tickers to return (default: 3500)
@@ -154,13 +155,59 @@ class TickerFetcher:
         logger.warning("Using NASDAQ + NYSE as Russell 3000 proxy")
         return []
 
+    def get_ticker_info(self, ticker: str, max_retries: int = 3) -> Optional[Dict]:
+        """
+        Get info for a single ticker with retry logic and exponential backoff.
+
+        Args:
+            ticker: Ticker symbol
+            max_retries: Maximum number of retry attempts (default: 3)
+
+        Returns:
+            Dictionary with ticker info, or None if all retries fail
+        """
+        for attempt in range(max_retries):
+            try:
+                time.sleep(self.request_delay)
+                stock = yf.Ticker(ticker)
+                info = stock.info
+
+                # Return extracted data (using snake_case keys for consistency with filter_tickers)
+                return {
+                    'market_cap': info.get('marketCap', 0),
+                    'current_price': info.get('currentPrice', 0) or info.get('regularMarketPrice', 0),
+                    'average_volume': info.get('averageVolume', 0),
+                    'sector': info.get('sector', 'Unknown'),
+                    'industry': info.get('industry', 'Unknown'),
+                    'quote_type': info.get('quoteType', 'Unknown'),
+                    'exchange': info.get('exchange', 'Unknown'),
+                    'long_name': info.get('longName', ticker)
+                }
+
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    # Exponential backoff: 1s, 2s, 4s
+                    wait_time = 2 ** attempt
+                    logger.debug(
+                        f"{ticker}: Attempt {attempt + 1}/{max_retries} failed "
+                        f"({type(e).__name__}), retrying in {wait_time}s..."
+                    )
+                    time.sleep(wait_time)
+                else:
+                    logger.debug(
+                        f"{ticker}: All {max_retries} attempts failed - {type(e).__name__}: {e}"
+                    )
+                    return None
+
+        return None
+
     def get_ticker_info_batch(
         self,
         tickers: List[str],
         max_workers: int = 4
     ) -> dict:
         """
-        Get ticker info for multiple symbols in parallel.
+        Get ticker info for multiple symbols in parallel with cooldown on failures.
 
         Args:
             tickers: List of ticker symbols
@@ -176,24 +223,13 @@ class TickerFetcher:
             'total': len(tickers)
         }
 
+        consecutive_failures = 0
+        cooldown_threshold = 10  # Trigger cooldown after 10 consecutive failures
+
         def fetch_single(ticker: str) -> tuple:
-            try:
-                time.sleep(self.request_delay)
-                stock = yf.Ticker(ticker)
-                info = stock.info
-                return ticker, {
-                    'market_cap': info.get('marketCap', 0),
-                    'current_price': info.get('currentPrice', 0) or info.get('regularMarketPrice', 0),
-                    'average_volume': info.get('averageVolume', 0),
-                    'sector': info.get('sector', 'Unknown'),
-                    'industry': info.get('industry', 'Unknown'),
-                    'quote_type': info.get('quoteType', 'Unknown'),
-                    'exchange': info.get('exchange', 'Unknown'),
-                    'long_name': info.get('longName', ticker)
-                }
-            except Exception as e:
-                logger.debug(f"{ticker}: Error fetching info - {type(e).__name__}: {e}")
-                return ticker, None
+            # Use the new get_ticker_info method with retry logic
+            info = self.get_ticker_info(ticker)
+            return ticker, info
 
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = {executor.submit(fetch_single, t): t for t in tickers}
@@ -203,10 +239,25 @@ class TickerFetcher:
                 if info is not None:
                     results[ticker] = info
                     stats['success'] += 1
+                    consecutive_failures = 0  # Reset on success
                 else:
                     stats['failed'] += 1
+                    consecutive_failures += 1
 
-        logger.info(f"Info fetch: {stats['success']:,} succeeded, {stats['failed']:,} failed (total: {stats['total']:,})")
+                    # Add cooldown after consecutive failures to avoid rate limiting
+                    if consecutive_failures >= cooldown_threshold:
+                        logger.warning(
+                            f"[WARN] {consecutive_failures} consecutive failures detected. "
+                            f"Adding 5s cooldown to avoid rate limiting..."
+                        )
+                        time.sleep(5)
+                        consecutive_failures = 0  # Reset after cooldown
+
+        success_rate = (stats['success'] / stats['total'] * 100) if stats['total'] > 0 else 0
+        logger.info(
+            f"Info fetch: {stats['success']:,} succeeded, {stats['failed']:,} failed "
+            f"(total: {stats['total']:,}, success rate: {success_rate:.1f}%)"
+        )
 
         return {
             'info': results,
@@ -346,6 +397,21 @@ class TickerFetcher:
 
         duplicates_removed = len(all_tickers) - len(cleaned)
 
+        # Apply ticker normalization to filter invalid formats
+        # This removes warrants (.W), units (.U), preferred (.P), class shares (.A, -A, etc.)
+        # BEFORE calling Yahoo Finance API, significantly reducing API failures
+        before_normalization = len(cleaned)
+        normalized = normalize_tickers(list(cleaned))
+        normalized_set = set(normalized)
+        excluded_by_normalization = before_normalization - len(normalized_set)
+
+        # Update stats
+        stats['normalized_total'] = len(normalized_set)
+        stats['excluded_by_normalization'] = excluded_by_normalization
+
+        # Update cleaned to use normalized tickers
+        cleaned = normalized_set
+
         logger.info("=" * 60)
         logger.info("SOURCE SUMMARY")
         logger.info("=" * 60)
@@ -356,9 +422,14 @@ class TickerFetcher:
         logger.info("-" * 60)
         logger.info(f"Raw Total:      {stats['raw_total']:>6,} tickers")
         logger.info(f"After dedup:    {stats['unique_total']:>6,} unique tickers")
-        logger.info(f"After cleanup:  {len(cleaned):>6,} valid tickers")
+        logger.info(f"After cleanup:  {before_normalization:>6,} valid tickers")
         if duplicates_removed > 0:
             logger.info(f"Removed:        {duplicates_removed:>6,} invalid/duplicate tickers")
+        logger.info("-" * 60)
+        logger.info("NORMALIZATION (warrants, units, preferred, class shares)")
+        logger.info(f"Before:         {before_normalization:>6,} tickers")
+        logger.info(f"Excluded:       {excluded_by_normalization:>6,} invalid formats")
+        logger.info(f"After:          {stats['normalized_total']:>6,} normalized tickers")
         logger.info("=" * 60)
 
         return {
@@ -390,8 +461,9 @@ class TickerFetcher:
         logger.info("Fetching ticker information (this may take a while)...")
         ticker_list = list(all_tickers)
 
-        # Process in batches to avoid memory issues
-        batch_size = 500
+        # Process in batches to avoid memory issues and rate limits
+        # Reduced from 500 to 250 to reduce Yahoo Finance API rate limit issues
+        batch_size = 250
         all_info = {}
         info_success_total = 0
         info_failed_total = 0
@@ -405,6 +477,11 @@ class TickerFetcher:
             all_info.update(batch_result['info'])
             info_success_total += batch_result['stats']['success']
             info_failed_total += batch_result['stats']['failed']
+
+            # Add delay between batches to avoid rate limiting (except after last batch)
+            if i + batch_size < len(ticker_list):
+                logger.debug(f"Waiting 2 seconds before next batch to avoid rate limits...")
+                time.sleep(2)
 
         logger.info("")
         logger.info("=" * 60)
@@ -446,19 +523,29 @@ class TickerFetcher:
         output_path.parent.mkdir(parents=True, exist_ok=True)
         df_output.to_csv(output_path, index=False)
 
-        # Final Summary
+        # Final Summary with enhanced diagnostics
         logger.info("")
         logger.info("=" * 80)
         logger.info("FINAL SUMMARY")
         logger.info("=" * 80)
-        logger.info(f"Sources fetched → Unique → Info success → Passed filters → Saved")
-        logger.info(
-            f"{source_stats['raw_total']:>6,} → "
-            f"{source_stats['unique_total']:>6,} → "
-            f"{info_success_total:>6,} → "
-            f"{filter_stats['passed']:>6,} → "
-            f"{len(df_output):>6,}"
-        )
+        logger.info("Pipeline:")
+        logger.info(f"  Raw fetched:              {source_stats['raw_total']:>6,} tickers")
+        logger.info(f"  After dedup:              {source_stats['unique_total']:>6,} tickers")
+        logger.info(f"  After normalization:      {source_stats.get('normalized_total', source_stats['unique_total']):>6,} tickers")
+        logger.info(f"    (excluded invalid):     {source_stats.get('excluded_by_normalization', 0):>6,} tickers")
+        logger.info(f"  Info fetch success:       {info_success_total:>6,} tickers")
+        logger.info(f"    (failed):               {info_failed_total:>6,} tickers")
+
+        if info_success_total + info_failed_total > 0:
+            api_success_rate = (info_success_total / (info_success_total + info_failed_total)) * 100
+            logger.info(f"    (success rate):         {api_success_rate:>6.1f}%")
+
+        logger.info(f"  Passed filters:           {filter_stats['passed']:>6,} tickers")
+        logger.info(f"    (excluded market cap):  {filter_stats.get('excluded_market_cap', 0):>6,} tickers")
+        logger.info(f"    (excluded price):       {filter_stats.get('excluded_price', 0):>6,} tickers")
+        logger.info(f"    (excluded volume):      {filter_stats.get('excluded_volume', 0):>6,} tickers")
+        logger.info(f"    (excluded type):        {filter_stats.get('excluded_type', 0):>6,} tickers")
+        logger.info(f"  Final output:             {len(df_output):>6,} tickers")
         logger.info("=" * 80)
         logger.info(f"Output file: {output_path}")
         logger.info("=" * 80)
@@ -490,8 +577,8 @@ def main():
     parser.add_argument(
         '--min-market-cap',
         type=float,
-        default=2_000_000_000,
-        help='Minimum market cap in USD (default: 2B)'
+        default=1_000_000_000,
+        help='Minimum market cap in USD (default: 1B, relaxed from 2B for better coverage)'
     )
     parser.add_argument(
         '--min-price',
