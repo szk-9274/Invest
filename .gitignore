@@ -1,5 +1,5 @@
 _old/
-
+.venv/
 node_modules/  
 dist/  
 out/  
