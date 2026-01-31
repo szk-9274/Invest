@@ -180,6 +180,9 @@ cd C:\00_mycode\Invest\python
 python -m venv venv
 # 仮想環境起動
 .venv\Scripts\Activate.ps1
+
+pip install -r requirements.txt
+
 ```
 
 ### テスト実行
