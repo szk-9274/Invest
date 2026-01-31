@@ -62,13 +62,13 @@ class TickerFetcher:
         logger.info("Fetching S&P 500 tickers from Wikipedia...")
         try:
             url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
-            tables = pd.read_html(url, timeout=10)
+            tables = pd.read_html(url)
             df = tables[0]
             tickers = df['Symbol'].str.replace('.', '-', regex=False).tolist()
-            logger.info(f"✓ S&P 500: Fetched {len(tickers)} tickers")
+            logger.info(f"[OK] S&P 500: Fetched {len(tickers)} tickers")
             return tickers
         except Exception as e:
-            logger.error(f"✗ S&P 500 fetch failed: {type(e).__name__}: {e}")
+            logger.error(f"[FAIL] S&P 500 fetch failed: {type(e).__name__}: {e}")
             logger.warning("Attempting fallback sources for S&P 500...")
             # Fallback: Try alternative sources or use empty list
             return []
@@ -84,17 +84,17 @@ class TickerFetcher:
         try:
             # NASDAQ Trader FTP provides comprehensive lists
             url = "https://www.nasdaqtrader.com/dynamic/SymDir/nasdaqlisted.txt"
-            df = pd.read_csv(url, sep='|', timeout=10)
+            df = pd.read_csv(url, sep='|')
             # Filter out test issues and non-stock entries
             df = df[df['Test Issue'] == 'N']
             tickers = df['Symbol'].dropna().tolist()
             # Remove last row which is usually a file creation timestamp
             if tickers and 'File Creation Time' in str(tickers[-1]):
                 tickers = tickers[:-1]
-            logger.info(f"✓ NASDAQ: Fetched {len(tickers)} tickers")
+            logger.info(f"[OK] NASDAQ: Fetched {len(tickers)} tickers")
             return tickers
         except Exception as e:
-            logger.error(f"✗ NASDAQ fetch failed: {type(e).__name__}: {e}")
+            logger.error(f"[FAIL] NASDAQ fetch failed: {type(e).__name__}: {e}")
             return []
 
     def fetch_nyse_listed(self) -> List[str]:
@@ -107,17 +107,17 @@ class TickerFetcher:
         logger.info("Fetching NYSE tickers...")
         try:
             url = "https://www.nasdaqtrader.com/dynamic/SymDir/otherlisted.txt"
-            df = pd.read_csv(url, sep='|', timeout=10)
+            df = pd.read_csv(url, sep='|')
             # Filter for NYSE
             df = df[df['Exchange'] == 'N']
             df = df[df['Test Issue'] == 'N']
             tickers = df['ACT Symbol'].dropna().tolist()
             if tickers and 'File Creation Time' in str(tickers[-1]):
                 tickers = tickers[:-1]
-            logger.info(f"✓ NYSE: Fetched {len(tickers)} tickers")
+            logger.info(f"[OK] NYSE: Fetched {len(tickers)} tickers")
             return tickers
         except Exception as e:
-            logger.error(f"✗ NYSE fetch failed: {type(e).__name__}: {e}")
+            logger.error(f"[FAIL] NYSE fetch failed: {type(e).__name__}: {e}")
             return []
 
     def fetch_russell3000_proxy(self) -> List[str]:
@@ -132,15 +132,15 @@ class TickerFetcher:
         try:
             # Try to get IWV holdings from iShares
             url = "https://www.ishares.com/us/products/239714/ishares-russell-3000-etf/1467271812596.ajax?fileType=csv&fileName=IWV_holdings&dataType=fund"
-            df = pd.read_csv(url, skiprows=9, timeout=10)
+            df = pd.read_csv(url, skiprows=9)
             if 'Ticker' in df.columns:
                 tickers = df['Ticker'].dropna().tolist()
                 # Clean up tickers
                 tickers = [t.strip() for t in tickers if isinstance(t, str) and t.strip()]
-                logger.info(f"✓ Russell 3000 (IWV): Fetched {len(tickers)} tickers")
+                logger.info(f"[OK] Russell 3000 (IWV): Fetched {len(tickers)} tickers")
                 return tickers
         except Exception as e:
-            logger.warning(f"✗ Russell 3000 (IWV) fetch failed: {type(e).__name__}: {e}")
+            logger.warning(f"[WARN] Russell 3000 (IWV) fetch failed: {type(e).__name__}: {e}")
 
         # Fallback: return empty list, will rely on other sources
         logger.warning("Using NASDAQ + NYSE as Russell 3000 proxy")
