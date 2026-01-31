@@ -421,11 +421,13 @@ class TickerFetcher:
             logger.info(f"Reduced from {before_limit:,} to {len(filtered):,} tickers")
 
         # Create DataFrame
-        df = pd.DataFrame(filtered)
-
-        # Select and reorder columns for output
         output_columns = ['ticker', 'exchange', 'sector']
-        df_output = df[output_columns]
+        if filtered:
+            df = pd.DataFrame(filtered)
+            df_output = df[output_columns]
+        else:
+            # Handle empty result: create DataFrame with required columns only
+            df_output = pd.DataFrame(columns=output_columns)
 
         # Save to CSV
         if output_path is None:
