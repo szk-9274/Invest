@@ -7,6 +7,7 @@ from typing import Dict, List, Optional
 from dataclasses import dataclass, field
 from datetime import datetime
 from loguru import logger
+from tqdm import tqdm
 
 from ..data.fetcher import YahooFinanceFetcher
 from ..analysis.indicators import calculate_all_indicators
@@ -95,9 +96,17 @@ class BacktestEngine:
         Returns:
             BacktestResult object
         """
-        logger.info(f"Running backtest from {start_date} to {end_date}")
-        logger.info(f"Initial capital: ${self.initial_capital:,.2f}")
-        logger.info(f"Max positions: {self.max_positions}")
+        logger.info("=" * 60)
+        logger.info("BACKTEST CONFIGURATION")
+        logger.info("=" * 60)
+        logger.info(f"Period:           {start_date} to {end_date}")
+        logger.info(f"Tickers:          {len(tickers)}")
+        logger.info(f"Initial capital:  ${self.initial_capital:,.2f}")
+        logger.info(f"Max positions:    {self.max_positions}")
+        logger.info(f"Risk per trade:   {self.risk_per_trade:.1%}")
+        logger.info(f"Commission:       {self.commission:.2%}")
+        logger.info(f"Benchmark:        {'Enabled (SPY)' if self.use_benchmark else 'Disabled'}")
+        logger.info("=" * 60)
 
         # Fetch benchmark data (with fallback)
         benchmark_data = None
@@ -129,16 +138,16 @@ class BacktestEngine:
             logger.info("Backtest: Running in NO-BENCHMARK mode (RS condition auto-passed)")
 
         # Fetch all ticker data
-        logger.info("Fetching historical data...")
+        logger.info("\nFetching historical data...")
         all_data = {}
-        for ticker in tickers:
+        for ticker in tqdm(tickers, desc="Loading ticker data", unit="ticker"):
             data = self.fetcher.fetch_data(ticker, period='5y')
             if data is not None and len(data) > 252:
                 # Calculate indicators (benchmark may be None)
                 data = calculate_all_indicators(data, benchmark_data)
                 all_data[ticker] = data
 
-        logger.info(f"Successfully fetched {len(all_data)} tickers")
+        logger.info(f"Successfully fetched {len(all_data)}/{len(tickers)} tickers with sufficient data")
 
         # Determine trading days from data
         if benchmark_data is not None and not benchmark_data.empty:
@@ -165,10 +174,33 @@ class BacktestEngine:
         closed_positions: List[Position] = []
         equity_curve = []
 
-        # Main backtest loop
-        for i, date in enumerate(trading_days):
+        logger.info(f"\nRunning backtest simulation ({len(trading_days)} trading days)...")
+
+        # Main backtest loop with progress bar
+        pbar = tqdm(
+            enumerate(trading_days),
+            total=len(trading_days),
+            desc="Backtest progress",
+            unit="day"
+        )
+
+        for i, date in pbar:
             if i < 252:  # Need at least 252 days of history
                 continue
+
+            # Update progress bar with current status
+            current_equity = capital
+            for pos in positions:
+                if pos.ticker in all_data and date in all_data[pos.ticker].index:
+                    current_price = all_data[pos.ticker].loc[date, 'close']
+                    current_equity += pos.shares * current_price
+
+            pbar.set_postfix({
+                'date': date.strftime('%Y-%m-%d'),
+                'positions': len(positions),
+                'equity': f'${current_equity:,.0f}',
+                'trades': len(closed_positions)
+            })
 
             # Check exit conditions for existing positions
             for pos in positions[:]:
@@ -190,9 +222,9 @@ class BacktestEngine:
                             positions.remove(pos)
                             closed_positions.append(pos)
 
-                            logger.debug(
-                                f"{date.date()}: EXIT {pos.ticker} @ ${pos.exit_price:.2f} "
-                                f"({pos.exit_reason}) P&L: ${pos.pnl:.2f} ({pos.pnl_pct:.1%})"
+                            logger.info(
+                                f"EXIT: {pos.ticker} @ ${pos.exit_price:.2f} "
+                                f"({pos.exit_reason}) | P&L: ${pos.pnl:+.2f} ({pos.pnl_pct:+.1%})"
                             )
 
             # Check entry conditions for new positions
@@ -305,9 +337,9 @@ class BacktestEngine:
                     positions.append(pos)
                     capital -= cost
 
-                    logger.debug(
-                        f"{date.date()}: ENTRY {ticker} @ ${entry_price:.2f}, "
-                        f"{shares} shares, Stop: ${stop_price:.2f}"
+                    logger.info(
+                        f"ENTRY: {ticker} @ ${entry_price:.2f} | "
+                        f"{shares} shares | Stop: ${stop_price:.2f}"
                     )
 
                     if len(positions) >= self.max_positions:

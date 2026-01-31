@@ -147,6 +147,11 @@ def main():
         type=str,
         help='Backtest end date (YYYY-MM-DD)'
     )
+    parser.add_argument(
+        '--verbose',
+        action='store_true',
+        help='Enable verbose logging (DEBUG level)'
+    )
 
     # Benchmark options (mutually exclusive)
     benchmark_group = parser.add_mutually_exclusive_group()
@@ -170,9 +175,10 @@ def main():
     config = load_config()
 
     # Setup logger
+    log_level = 'DEBUG' if args.verbose else config['output']['log_level']
     setup_logger(
         log_path=config['output']['log_path'],
-        log_level=config['output']['log_level']
+        log_level=log_level
     )
 
     logger.info("=" * 60)
