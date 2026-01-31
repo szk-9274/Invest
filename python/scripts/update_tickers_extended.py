@@ -4,6 +4,7 @@ Fetches approximately 3,500 tickers from S&P 500, NASDAQ, and Russell 3000
 """
 import pandas as pd
 import warnings
+from io import StringIO
 
 # Suppress yfinance DeprecationWarning before import
 warnings.filterwarnings("ignore", category=DeprecationWarning, message=".*Ticker.earnings.*")
@@ -62,7 +63,14 @@ class TickerFetcher:
         logger.info("Fetching S&P 500 tickers from Wikipedia...")
         try:
             url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
-            tables = pd.read_html(url, flavor='lxml')
+            # Use requests with User-Agent header to avoid 403 Forbidden
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            }
+            response = requests.get(url, headers=headers, timeout=10)
+            response.raise_for_status()
+            # Parse HTML response with pandas (use StringIO to avoid FutureWarning)
+            tables = pd.read_html(StringIO(response.text), flavor='lxml')
             df = tables[0]
             tickers = df['Symbol'].str.replace('.', '-', regex=False).tolist()
             logger.info(f"[OK] S&P 500: Fetched {len(tickers)} tickers")
