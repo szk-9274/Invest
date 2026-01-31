@@ -230,6 +230,25 @@ python -m venv venv
 pip install yfinance pandas numpy loguru tqdm pyyaml tenacity matplotlib
 ```
 
+### テスト実行
+
+```powershell
+cd C:\00_mycode\Invest\python
+
+# 全テスト実行
+pytest
+
+# 特定のテストファイル実行
+pytest tests/test_ticker_fetcher_smoke.py -v
+
+# カバレッジ付きで実行
+pytest --cov=. --cov-report=html
+```
+
+**テストガイドライン**: 詳細は [docs/testing_guidelines.md](docs/testing_guidelines.md) を参照
+
+**重要**: `scripts/` ディレクトリのコードを修正する場合は、必ず対応する smoke test を追加・更新してください。
+
 ### コマンド一覧
 
 #### 1. 銘柄リストの更新（約3,500銘柄を取得）
