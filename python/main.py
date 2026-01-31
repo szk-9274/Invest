@@ -329,6 +329,11 @@ def main():
         help='Enable verbose logging (DEBUG level)'
     )
     parser.add_argument(
+        '--diagnose',
+        action='store_true',
+        help='Enable diagnostic mode (shows detailed backtest analysis)'
+    )
+    parser.add_argument(
         '--explain-stage2',
         type=str,
         metavar='TICKER',

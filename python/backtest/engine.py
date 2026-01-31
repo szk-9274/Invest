@@ -79,6 +79,17 @@ class BacktestEngine:
         self.commission = config['backtest']['commission']
         self.risk_per_trade = config['risk']['risk_per_trade']
 
+        # Diagnostics
+        self.diagnostics = {
+            'stage2_checks': 0,
+            'stage2_passed': 0,
+            'stage2_failed_conditions': {},
+            'insufficient_capital': 0,
+            'max_positions_reached': 0,
+            'insufficient_data': 0,
+            'total_entry_attempts': 0
+        }
+
     def run(
         self,
         tickers: List[str],
@@ -240,15 +251,26 @@ class BacktestEngine:
                     # Get data up to current date
                     hist_data = data[data.index <= date].tail(300)
                     if len(hist_data) < 252:
+                        self.diagnostics['insufficient_data'] += 1
                         continue
 
                     # Check Stage 2
+                    self.diagnostics['stage2_checks'] += 1
                     rs_line = hist_data['rs_line'] if use_benchmark else None
                     stage_result = self.stage_detector.detect_stage(
                         hist_data, rs_line, use_benchmark=use_benchmark
                     )
+
                     if stage_result['stage'] != 2:
+                        # Track which conditions failed
+                        for condition, passed in stage_result['details'].items():
+                            if not passed:
+                                self.diagnostics['stage2_failed_conditions'][condition] = \
+                                    self.diagnostics['stage2_failed_conditions'].get(condition, 0) + 1
                         continue
+
+                    self.diagnostics['stage2_passed'] += 1
+                    self.diagnostics['total_entry_attempts'] += 1
 
                     # ===== VCP DETECTION DISABLED - USING SIMPLIFIED LOGIC =====
                     # # Check VCP
@@ -322,6 +344,7 @@ class BacktestEngine:
 
                     cost = shares * entry_price * (1 + self.commission)
                     if cost > capital:
+                        self.diagnostics['insufficient_capital'] += 1
                         continue
 
                     # Open position
@@ -344,6 +367,11 @@ class BacktestEngine:
 
                     if len(positions) >= self.max_positions:
                         break
+            else:
+                # Count how often we couldn't enter due to max positions
+                if any(True for ticker, data in all_data.items()
+                       if date in data.index and len(data[data.index <= date]) >= 252):
+                    self.diagnostics['max_positions_reached'] += 1
 
             # Calculate current equity
             current_equity = capital
@@ -367,8 +395,63 @@ class BacktestEngine:
                     pos.pnl_pct = (pos.exit_price - pos.entry_price) / pos.entry_price
                     closed_positions.append(pos)
 
+        # Print diagnostics
+        self._print_diagnostics(len(closed_positions))
+
         # Calculate results
         return self._calculate_results(closed_positions, equity_curve, use_benchmark)
+
+    def _print_diagnostics(self, total_trades: int):
+        """Print diagnostic information about backtest execution."""
+        logger.info("")
+        logger.info("=" * 60)
+        logger.info("BACKTEST DIAGNOSTICS")
+        logger.info("=" * 60)
+        logger.info(f"Total trades executed:       {total_trades}")
+        logger.info("")
+        logger.info("Entry Analysis:")
+        logger.info(f"  Stage 2 checks performed:  {self.diagnostics['stage2_checks']:,}")
+        logger.info(f"  Stage 2 passed:            {self.diagnostics['stage2_passed']:,}")
+        logger.info(f"  Entry attempts (Stage 2+): {self.diagnostics['total_entry_attempts']:,}")
+        logger.info(f"  Insufficient capital:      {self.diagnostics['insufficient_capital']:,}")
+        logger.info(f"  Max positions reached:     {self.diagnostics['max_positions_reached']:,}")
+        logger.info(f"  Insufficient data (<252):  {self.diagnostics['insufficient_data']:,}")
+
+        if self.diagnostics['stage2_failed_conditions']:
+            logger.info("")
+            logger.info("Top Stage 2 failure reasons:")
+            sorted_failures = sorted(
+                self.diagnostics['stage2_failed_conditions'].items(),
+                key=lambda x: x[1],
+                reverse=True
+            )
+            for condition, count in sorted_failures[:5]:
+                logger.info(f"  {condition:25} {count:>6,} failures")
+
+        # Calculate pass rate
+        if self.diagnostics['stage2_checks'] > 0:
+            pass_rate = self.diagnostics['stage2_passed'] / self.diagnostics['stage2_checks'] * 100
+            logger.info("")
+            logger.info(f"Stage 2 pass rate:           {pass_rate:.1f}%")
+
+        # Warnings if no trades
+        if total_trades == 0:
+            logger.warning("")
+            logger.warning("NO TRADES EXECUTED - Possible issues:")
+            if self.diagnostics['stage2_passed'] == 0:
+                logger.warning("  • No stocks passed Stage 2 conditions")
+                if self.diagnostics['stage2_failed_conditions']:
+                    top_failure = max(
+                        self.diagnostics['stage2_failed_conditions'].items(),
+                        key=lambda x: x[1]
+                    )
+                    logger.warning(f"    Most common failure: {top_failure[0]} ({top_failure[1]:,} times)")
+            elif self.diagnostics['insufficient_capital'] > 0:
+                logger.warning("  • Insufficient capital to open positions")
+            elif self.diagnostics['total_entry_attempts'] > 0:
+                logger.warning("  • Stage 2 passed but entry conditions not met")
+
+        logger.info("=" * 60)
 
     def _check_exit(self, pos: Position, current_bar: pd.Series) -> tuple:
         """
