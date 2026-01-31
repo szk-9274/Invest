@@ -1,4 +1,8 @@
 # Testing Requirements
+This document defines detailed testing practices.
+
+If there is any conflict between this file and `.claude/rules.md`,
+the root rules.md MUST take precedence.
 
 ## Minimum Test Coverage: 80%
 
