@@ -68,7 +68,7 @@ class TestTickerFetcherSmokeTest:
 
     def test_filter_tickers_returns_required_columns(self, mock_ticker_fetcher, sample_ticker_info):
         """
-        CRITICAL TEST: Verify filter_tickers returns list with required columns
+        CRITICAL TEST: Verify filter_tickers returns dict with tickers list
 
         This test prevents KeyError on CSV output:
         - ticker (required for identification)
@@ -78,18 +78,23 @@ class TestTickerFetcherSmokeTest:
         # Execute filter
         result = mock_ticker_fetcher.filter_tickers(sample_ticker_info)
 
-        # Verify structure (current version returns list directly)
-        assert isinstance(result, list), "filter_tickers must return a list"
-        assert len(result) > 0, "Should have at least one ticker after filtering"
+        # Verify structure - returns dict with 'tickers' and 'filter_stats'
+        assert isinstance(result, dict), "filter_tickers must return a dict"
+        assert 'tickers' in result, "Result must have 'tickers' key"
+        assert 'filter_stats' in result, "Result must have 'filter_stats' key"
+
+        filtered_list = result['tickers']
+        assert isinstance(filtered_list, list), "tickers must be a list"
+        assert len(filtered_list) > 0, "Should have at least one ticker after filtering"
 
         # CRITICAL: Verify required columns exist in each ticker dict
         required_columns = ['ticker', 'exchange', 'sector']
-        for ticker_dict in result:
+        for ticker_dict in filtered_list:
             for col in required_columns:
                 assert col in ticker_dict, f"Missing required column '{col}' in ticker dict"
 
         # Verify all tickers passed filtering
-        assert len(result) == 3, "All sample tickers should pass filtering"
+        assert len(filtered_list) == 3, "All sample tickers should pass filtering"
 
     def test_filter_tickers_excludes_below_thresholds(self, mock_ticker_fetcher):
         """Verify filtering logic excludes stocks below thresholds"""
@@ -131,9 +136,14 @@ class TestTickerFetcherSmokeTest:
 
         result = mock_ticker_fetcher.filter_tickers(test_data)
 
-        # All should be filtered out (current version returns list)
-        assert isinstance(result, list), "filter_tickers must return a list"
-        assert len(result) == 0, "All test tickers should be filtered out"
+        # Verify dict structure with 'tickers' and 'filter_stats'
+        assert isinstance(result, dict), "filter_tickers must return a dict"
+        assert 'tickers' in result, "Result must have 'tickers' key"
+
+        # All should be filtered out
+        filtered_list = result['tickers']
+        assert isinstance(filtered_list, list), "tickers must be a list"
+        assert len(filtered_list) == 0, "All test tickers should be filtered out"
 
     def test_run_produces_valid_dataframe_structure(self, mock_ticker_fetcher, sample_ticker_info, tmp_path):
         """
@@ -146,11 +156,18 @@ class TestTickerFetcherSmokeTest:
         with patch.object(mock_ticker_fetcher, 'fetch_all_tickers') as mock_fetch_all, \
              patch.object(mock_ticker_fetcher, 'get_ticker_info_batch') as mock_get_info:
 
-            # Mock fetch_all_tickers to return sample tickers (current version returns Set[str])
-            mock_fetch_all.return_value = set(sample_ticker_info.keys())
+            # Mock fetch_all_tickers to return dict with 'tickers' (set) and 'stats'
+            mock_fetch_all.return_value = {
+                'tickers': set(sample_ticker_info.keys()),
+                'stats': {'sp500': 0, 'nasdaq': 2, 'nyse': 1, 'russell3000': 0,
+                          'raw_total': 3, 'unique_total': 3}
+            }
 
-            # Mock get_ticker_info_batch to return sample info (current version returns Dict)
-            mock_get_info.return_value = sample_ticker_info
+            # Mock get_ticker_info_batch to return dict with 'info' and 'stats'
+            mock_get_info.return_value = {
+                'info': sample_ticker_info,
+                'stats': {'success': 3, 'failed': 0, 'total': 3}
+            }
 
             # Run with temporary output path
             output_path = tmp_path / "test_tickers.csv"
