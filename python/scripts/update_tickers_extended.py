@@ -62,13 +62,15 @@ class TickerFetcher:
         logger.info("Fetching S&P 500 tickers from Wikipedia...")
         try:
             url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
-            tables = pd.read_html(url)
+            tables = pd.read_html(url, timeout=10)
             df = tables[0]
             tickers = df['Symbol'].str.replace('.', '-', regex=False).tolist()
-            logger.info(f"Fetched {len(tickers)} S&P 500 tickers")
+            logger.info(f"✓ S&P 500: Fetched {len(tickers)} tickers")
             return tickers
         except Exception as e:
-            logger.error(f"Failed to fetch S&P 500: {e}")
+            logger.error(f"✗ S&P 500 fetch failed: {type(e).__name__}: {e}")
+            logger.warning("Attempting fallback sources for S&P 500...")
+            # Fallback: Try alternative sources or use empty list
             return []
 
     def fetch_nasdaq_composite(self) -> List[str]:
@@ -82,17 +84,17 @@ class TickerFetcher:
         try:
             # NASDAQ Trader FTP provides comprehensive lists
             url = "https://www.nasdaqtrader.com/dynamic/SymDir/nasdaqlisted.txt"
-            df = pd.read_csv(url, sep='|')
+            df = pd.read_csv(url, sep='|', timeout=10)
             # Filter out test issues and non-stock entries
             df = df[df['Test Issue'] == 'N']
             tickers = df['Symbol'].dropna().tolist()
             # Remove last row which is usually a file creation timestamp
             if tickers and 'File Creation Time' in str(tickers[-1]):
                 tickers = tickers[:-1]
-            logger.info(f"Fetched {len(tickers)} NASDAQ tickers")
+            logger.info(f"✓ NASDAQ: Fetched {len(tickers)} tickers")
             return tickers
         except Exception as e:
-            logger.error(f"Failed to fetch NASDAQ composite: {e}")
+            logger.error(f"✗ NASDAQ fetch failed: {type(e).__name__}: {e}")
             return []
 
     def fetch_nyse_listed(self) -> List[str]:
@@ -105,17 +107,17 @@ class TickerFetcher:
         logger.info("Fetching NYSE tickers...")
         try:
             url = "https://www.nasdaqtrader.com/dynamic/SymDir/otherlisted.txt"
-            df = pd.read_csv(url, sep='|')
+            df = pd.read_csv(url, sep='|', timeout=10)
             # Filter for NYSE
             df = df[df['Exchange'] == 'N']
             df = df[df['Test Issue'] == 'N']
             tickers = df['ACT Symbol'].dropna().tolist()
             if tickers and 'File Creation Time' in str(tickers[-1]):
                 tickers = tickers[:-1]
-            logger.info(f"Fetched {len(tickers)} NYSE tickers")
+            logger.info(f"✓ NYSE: Fetched {len(tickers)} tickers")
             return tickers
         except Exception as e:
-            logger.error(f"Failed to fetch NYSE tickers: {e}")
+            logger.error(f"✗ NYSE fetch failed: {type(e).__name__}: {e}")
             return []
 
     def fetch_russell3000_proxy(self) -> List[str]:
@@ -130,15 +132,15 @@ class TickerFetcher:
         try:
             # Try to get IWV holdings from iShares
             url = "https://www.ishares.com/us/products/239714/ishares-russell-3000-etf/1467271812596.ajax?fileType=csv&fileName=IWV_holdings&dataType=fund"
-            df = pd.read_csv(url, skiprows=9)
+            df = pd.read_csv(url, skiprows=9, timeout=10)
             if 'Ticker' in df.columns:
                 tickers = df['Ticker'].dropna().tolist()
                 # Clean up tickers
                 tickers = [t.strip() for t in tickers if isinstance(t, str) and t.strip()]
-                logger.info(f"Fetched {len(tickers)} Russell 3000 tickers from IWV")
+                logger.info(f"✓ Russell 3000 (IWV): Fetched {len(tickers)} tickers")
                 return tickers
         except Exception as e:
-            logger.warning(f"Could not fetch IWV holdings: {e}")
+            logger.warning(f"✗ Russell 3000 (IWV) fetch failed: {type(e).__name__}: {e}")
 
         # Fallback: return empty list, will rely on other sources
         logger.warning("Using NASDAQ + NYSE as Russell 3000 proxy")
@@ -148,7 +150,7 @@ class TickerFetcher:
         self,
         tickers: List[str],
         max_workers: int = 4
-    ) -> Dict[str, Dict]:
+    ) -> dict:
         """
         Get ticker info for multiple symbols in parallel.
 
@@ -157,9 +159,14 @@ class TickerFetcher:
             max_workers: Number of parallel workers
 
         Returns:
-            Dictionary {ticker: info_dict}
+            Dictionary with 'info' (dict) and 'stats' (dict)
         """
         results = {}
+        stats = {
+            'success': 0,
+            'failed': 0,
+            'total': len(tickers)
+        }
 
         def fetch_single(ticker: str) -> tuple:
             try:
@@ -177,20 +184,28 @@ class TickerFetcher:
                     'long_name': info.get('longName', ticker)
                 }
             except Exception as e:
-                logger.debug(f"{ticker}: Error fetching info - {e}")
+                logger.debug(f"{ticker}: Error fetching info - {type(e).__name__}: {e}")
                 return ticker, None
 
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = {executor.submit(fetch_single, t): t for t in tickers}
 
-            for future in tqdm(as_completed(futures), total=len(tickers), desc="Fetching info"):
+            for future in tqdm(as_completed(futures), total=len(tickers), desc="Fetching ticker info"):
                 ticker, info = future.result()
                 if info is not None:
                     results[ticker] = info
+                    stats['success'] += 1
+                else:
+                    stats['failed'] += 1
 
-        return results
+        logger.info(f"Info fetch: {stats['success']:,} succeeded, {stats['failed']:,} failed (total: {stats['total']:,})")
 
-    def filter_tickers(self, ticker_info: Dict[str, Dict]) -> List[Dict]:
+        return {
+            'info': results,
+            'stats': stats
+        }
+
+    def filter_tickers(self, ticker_info: Dict[str, Dict]) -> dict:
         """
         Filter tickers based on criteria.
 
@@ -198,9 +213,17 @@ class TickerFetcher:
             ticker_info: Dictionary of ticker info
 
         Returns:
-            List of filtered ticker dictionaries
+            Dictionary with 'tickers' (list) and 'filter_stats' (dict)
         """
         filtered = []
+        filter_stats = {
+            'total_checked': len(ticker_info),
+            'excluded_market_cap': 0,
+            'excluded_price': 0,
+            'excluded_volume': 0,
+            'excluded_type': 0,
+            'passed': 0
+        }
 
         for ticker, info in ticker_info.items():
             # Skip invalid entries
@@ -214,22 +237,27 @@ class TickerFetcher:
 
             # Apply filters
             if market_cap < self.min_market_cap:
+                filter_stats['excluded_market_cap'] += 1
                 logger.debug(f"{ticker}: Market cap ${market_cap:,.0f} below minimum")
                 continue
 
             if price < self.min_price:
+                filter_stats['excluded_price'] += 1
                 logger.debug(f"{ticker}: Price ${price:.2f} below minimum")
                 continue
 
             if volume < self.min_volume:
+                filter_stats['excluded_volume'] += 1
                 logger.debug(f"{ticker}: Volume {volume:,.0f} below minimum")
                 continue
 
             # Exclude certain security types
             if quote_type in self.exclude_types:
+                filter_stats['excluded_type'] += 1
                 logger.debug(f"{ticker}: Excluded type {quote_type}")
                 continue
 
+            filter_stats['passed'] += 1
             filtered.append({
                 'ticker': ticker,
                 'exchange': info.get('exchange', 'Unknown'),
@@ -243,30 +271,61 @@ class TickerFetcher:
         # Sort by market cap descending
         filtered.sort(key=lambda x: x['market_cap'], reverse=True)
 
-        logger.info(f"Filtered to {len(filtered)} tickers meeting criteria")
-        return filtered
+        # Log filter summary
+        logger.info("=" * 60)
+        logger.info("FILTER SUMMARY")
+        logger.info("=" * 60)
+        logger.info(f"Total checked:         {filter_stats['total_checked']:>6,}")
+        logger.info(f"Excluded (market cap): {filter_stats['excluded_market_cap']:>6,} (< ${self.min_market_cap:,.0f})")
+        logger.info(f"Excluded (price):      {filter_stats['excluded_price']:>6,} (< ${self.min_price:.2f})")
+        logger.info(f"Excluded (volume):     {filter_stats['excluded_volume']:>6,} (< {self.min_volume:,})")
+        logger.info(f"Excluded (type):       {filter_stats['excluded_type']:>6,} ({', '.join(self.exclude_types)})")
+        logger.info("-" * 60)
+        logger.info(f"Passed filters:        {filter_stats['passed']:>6,}")
+        logger.info("=" * 60)
 
-    def fetch_all_tickers(self) -> Set[str]:
+        return {
+            'tickers': filtered,
+            'filter_stats': filter_stats
+        }
+
+    def fetch_all_tickers(self) -> dict:
         """
         Fetch tickers from all sources and remove duplicates.
 
         Returns:
-            Set of unique ticker symbols
+            Dictionary with 'tickers' (set) and 'stats' (dict)
         """
+        stats = {
+            'sp500': 0,
+            'nasdaq': 0,
+            'nyse': 0,
+            'russell3000': 0,
+            'raw_total': 0,
+            'unique_total': 0
+        }
+
         all_tickers = set()
 
         # Fetch from each source
         sp500 = self.fetch_sp500()
+        stats['sp500'] = len(sp500)
         all_tickers.update(sp500)
 
         nasdaq = self.fetch_nasdaq_composite()
+        stats['nasdaq'] = len(nasdaq)
         all_tickers.update(nasdaq)
 
         nyse = self.fetch_nyse_listed()
+        stats['nyse'] = len(nyse)
         all_tickers.update(nyse)
 
         russell3000 = self.fetch_russell3000_proxy()
+        stats['russell3000'] = len(russell3000)
         all_tickers.update(russell3000)
+
+        stats['raw_total'] = stats['sp500'] + stats['nasdaq'] + stats['nyse'] + stats['russell3000']
+        stats['unique_total'] = len(all_tickers)
 
         # Clean up tickers
         cleaned = set()
@@ -277,8 +336,27 @@ class TickerFetcher:
                 if ticker and not any(c in ticker for c in ['$', '^', ' ', '/']):
                     cleaned.add(ticker)
 
-        logger.info(f"Total unique tickers after deduplication: {len(cleaned)}")
-        return cleaned
+        duplicates_removed = len(all_tickers) - len(cleaned)
+
+        logger.info("=" * 60)
+        logger.info("SOURCE SUMMARY")
+        logger.info("=" * 60)
+        logger.info(f"S&P 500:        {stats['sp500']:>6,} tickers")
+        logger.info(f"NASDAQ:         {stats['nasdaq']:>6,} tickers")
+        logger.info(f"NYSE:           {stats['nyse']:>6,} tickers")
+        logger.info(f"Russell 3000:   {stats['russell3000']:>6,} tickers")
+        logger.info("-" * 60)
+        logger.info(f"Raw Total:      {stats['raw_total']:>6,} tickers")
+        logger.info(f"After dedup:    {stats['unique_total']:>6,} unique tickers")
+        logger.info(f"After cleanup:  {len(cleaned):>6,} valid tickers")
+        if duplicates_removed > 0:
+            logger.info(f"Removed:        {duplicates_removed:>6,} invalid/duplicate tickers")
+        logger.info("=" * 60)
+
+        return {
+            'tickers': cleaned,
+            'stats': stats
+        }
 
     def run(self, output_path: Optional[str] = None) -> pd.DataFrame:
         """
@@ -291,34 +369,56 @@ class TickerFetcher:
             DataFrame with filtered tickers
         """
         logger.info("=" * 60)
-        logger.info("Starting Extended Ticker Update")
+        logger.info("Extended Ticker Update - Starting")
         logger.info("=" * 60)
 
         # Fetch all tickers
-        all_tickers = self.fetch_all_tickers()
-        logger.info(f"Fetched {len(all_tickers)} unique tickers")
+        fetch_result = self.fetch_all_tickers()
+        all_tickers = fetch_result['tickers']
+        source_stats = fetch_result['stats']
 
         # Get info for all tickers
+        logger.info("")
         logger.info("Fetching ticker information (this may take a while)...")
         ticker_list = list(all_tickers)
 
         # Process in batches to avoid memory issues
         batch_size = 500
         all_info = {}
+        info_success_total = 0
+        info_failed_total = 0
 
         for i in range(0, len(ticker_list), batch_size):
             batch = ticker_list[i:i + batch_size]
-            logger.info(f"Processing batch {i // batch_size + 1} ({len(batch)} tickers)...")
-            batch_info = self.get_ticker_info_batch(batch, max_workers=4)
-            all_info.update(batch_info)
+            batch_num = i // batch_size + 1
+            total_batches = (len(ticker_list) + batch_size - 1) // batch_size
+            logger.info(f"Processing batch {batch_num}/{total_batches} ({len(batch)} tickers)...")
+            batch_result = self.get_ticker_info_batch(batch, max_workers=4)
+            all_info.update(batch_result['info'])
+            info_success_total += batch_result['stats']['success']
+            info_failed_total += batch_result['stats']['failed']
+
+        logger.info("")
+        logger.info("=" * 60)
+        logger.info("INFO FETCH SUMMARY")
+        logger.info("=" * 60)
+        logger.info(f"Attempted:   {len(ticker_list):>6,}")
+        logger.info(f"Succeeded:   {info_success_total:>6,}")
+        logger.info(f"Failed:      {info_failed_total:>6,}")
+        logger.info("=" * 60)
 
         # Filter tickers
-        filtered = self.filter_tickers(all_info)
+        logger.info("")
+        filter_result = self.filter_tickers(all_info)
+        filtered = filter_result['tickers']
+        filter_stats = filter_result['filter_stats']
 
         # Limit to max_tickers
+        before_limit = len(filtered)
         if len(filtered) > self.max_tickers:
-            logger.info(f"Limiting to top {self.max_tickers} tickers by market cap")
+            logger.info(f"\nLimiting to top {self.max_tickers} tickers by market cap")
             filtered = filtered[:self.max_tickers]
+            logger.info(f"Reduced from {before_limit:,} to {len(filtered):,} tickers")
 
         # Create DataFrame
         df = pd.DataFrame(filtered)
@@ -336,11 +436,22 @@ class TickerFetcher:
         output_path.parent.mkdir(parents=True, exist_ok=True)
         df_output.to_csv(output_path, index=False)
 
-        logger.info("=" * 60)
-        logger.info(f"Update Complete!")
-        logger.info(f"Total tickers saved: {len(df_output)}")
+        # Final Summary
+        logger.info("")
+        logger.info("=" * 80)
+        logger.info("FINAL SUMMARY")
+        logger.info("=" * 80)
+        logger.info(f"Sources fetched → Unique → Info success → Passed filters → Saved")
+        logger.info(
+            f"{source_stats['raw_total']:>6,} → "
+            f"{source_stats['unique_total']:>6,} → "
+            f"{info_success_total:>6,} → "
+            f"{filter_stats['passed']:>6,} → "
+            f"{len(df_output):>6,}"
+        )
+        logger.info("=" * 80)
         logger.info(f"Output file: {output_path}")
-        logger.info("=" * 60)
+        logger.info("=" * 80)
 
         # Print sector distribution
         if 'sector' in df_output.columns:

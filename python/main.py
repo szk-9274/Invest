@@ -114,6 +114,182 @@ def run_backtest_mode(config: dict, tickers: list, args):
         logger.info(f"Trade details saved to: {trades_file}")
 
 
+def explain_stage2(ticker: str, config: dict, use_benchmark: bool, target_date: str = None):
+    """
+    Explain Stage 2 detection results for a specific ticker.
+
+    Args:
+        ticker: Ticker symbol to analyze
+        config: Configuration dictionary
+        use_benchmark: Whether to use benchmark for RS calculation
+        target_date: Optional date to analyze (YYYY-MM-DD)
+    """
+    from data.fetcher import YahooFinanceFetcher
+    from analysis.stage_detector import StageDetector
+    from analysis.indicators import calculate_all_indicators
+
+    print("\n" + "=" * 80)
+    print(f"STAGE 2 ANALYSIS: {ticker}")
+    print("=" * 80)
+
+    fetcher = YahooFinanceFetcher(request_delay=config['performance']['request_delay'])
+    stage_detector = StageDetector(config['stage'])
+
+    # Fetch stock data
+    data = fetcher.fetch_data(ticker, period=config['data']['history_period'])
+    if data is None:
+        print(f"✗ Failed to fetch data for {ticker}")
+        return
+
+    print(f"✓ Data fetched: {len(data)} bars")
+
+    if len(data) < 252:
+        print(f"✗ Insufficient data: {len(data)} bars (need at least 252)")
+        return
+
+    # Fetch benchmark if needed
+    benchmark_data = None
+    if use_benchmark:
+        benchmark_data = fetcher.fetch_benchmark('SPY', period=config['data']['history_period'])
+        if benchmark_data is None:
+            print("⚠ Benchmark fetch failed, switching to no-benchmark mode")
+            use_benchmark = False
+        else:
+            print(f"✓ Benchmark fetched: {len(benchmark_data)} bars")
+
+    if not use_benchmark:
+        print("ℹ Running in NO-BENCHMARK mode (RS condition auto-passed)")
+
+    # Calculate indicators
+    data = calculate_all_indicators(data, benchmark_data)
+
+    # Filter to target date if specified
+    if target_date:
+        target_ts = pd.Timestamp(target_date)
+        if target_ts not in data.index:
+            print(f"✗ Date {target_date} not found in data (available: {data.index[0].date()} to {data.index[-1].date()})")
+            return
+        data = data[data.index <= target_ts]
+        print(f"✓ Analyzing as of {target_date}")
+
+    # Get latest row
+    latest = data.iloc[-1]
+    analysis_date = latest.name.date() if hasattr(latest.name, 'date') else latest.name
+
+    # Detect stage
+    rs_line = data['rs_line'] if use_benchmark else None
+    stage_result = stage_detector.detect_stage(data, rs_line, use_benchmark=use_benchmark)
+
+    print("\n" + "-" * 80)
+    print("STAGE DETECTION RESULT")
+    print("-" * 80)
+    print(f"Stage:           {stage_result['stage']}")
+    print(f"Meets criteria:  {'YES' if stage_result['meets_criteria'] else 'NO'}")
+    print(f"Analysis date:   {analysis_date}")
+
+    # Get 52-week high/low
+    lookback = min(252, len(data))
+    high_52w = data['high'].tail(lookback).max()
+    low_52w = data['low'].tail(lookback).min()
+
+    # Calculate distances
+    distance_from_high_pct = (high_52w - latest['close']) / high_52w * 100
+    distance_from_low_pct = (latest['close'] - low_52w) / low_52w * 100
+
+    print("\n" + "-" * 80)
+    print("PRICE INFORMATION")
+    print("-" * 80)
+    print(f"Current price:        ${latest['close']:.2f}")
+    print(f"52-week high:         ${high_52w:.2f}")
+    print(f"52-week low:          ${low_52w:.2f}")
+    print(f"Distance from high:   {distance_from_high_pct:.1f}%")
+    print(f"Distance from low:    +{distance_from_low_pct:.1f}%")
+    print(f"SMA 50:               ${latest['sma_50']:.2f}")
+    print(f"SMA 150:              ${latest['sma_150']:.2f}")
+    print(f"SMA 200:              ${latest['sma_200']:.2f}")
+    print(f"Volume (50-day avg):  {latest['volume_ma_50']:,.0f}")
+
+    # RS information
+    if use_benchmark and 'rs_line' in data.columns:
+        rs_line_clean = data['rs_line'].dropna()
+        if len(rs_line_clean) >= 252:
+            rs_52w_high = rs_line_clean.tail(252).max()
+            rs_current = rs_line_clean.iloc[-1]
+            rs_distance = (rs_current / rs_52w_high - 1) * 100
+            print(f"\nRS Line (current):    {rs_current:.2f}")
+            print(f"RS Line (52w high):   {rs_52w_high:.2f}")
+            print(f"RS vs 52w high:       {rs_distance:+.1f}%")
+            print(f"RS valid data points: {len(rs_line_clean)}/{len(data)}")
+        else:
+            print(f"\n⚠ RS Line has insufficient valid data: {len(rs_line_clean)}/252")
+
+    # Condition details
+    print("\n" + "-" * 80)
+    print("STAGE 2 CONDITIONS (PASS/FAIL)")
+    print("-" * 80)
+
+    conditions = stage_result['details']
+    params = config['stage']
+
+    # Define condition explanations
+    explanations = {
+        'price_above_sma50': (
+            f"Price > SMA(50)",
+            f"${latest['close']:.2f} > ${latest['sma_50']:.2f}"
+        ),
+        'sma50_above_sma150': (
+            f"SMA(50) > SMA(150)",
+            f"${latest['sma_50']:.2f} > ${latest['sma_150']:.2f}"
+        ),
+        'sma150_above_sma200': (
+            f"SMA(150) > SMA(200)",
+            f"${latest['sma_150']:.2f} > ${latest['sma_200']:.2f}"
+        ),
+        'ma200_uptrend': (
+            f"SMA(200) in uptrend",
+            "slope > 0"
+        ),
+        'above_52w_low': (
+            f"Price > {params['min_price_above_52w_low']:.0%} of 52w low",
+            f"${latest['close']:.2f} >= ${low_52w * params['min_price_above_52w_low']:.2f}"
+        ),
+        'near_52w_high': (
+            f"Price within {100 * (1 - params['max_distance_from_52w_high']):.0f}% of 52w high",
+            f"${latest['close']:.2f} >= ${high_52w * params['max_distance_from_52w_high']:.2f}"
+        ),
+        'ma50_above_ma150_200': (
+            f"SMA(50) > both SMA(150) and SMA(200)",
+            f"${latest['sma_50']:.2f} > ${latest['sma_150']:.2f} and ${latest['sma_200']:.2f}"
+        ),
+        'rs_new_high': (
+            f"RS Line near 52w high (auto-pass if no benchmark)",
+            "RS >= 95% of 52w high" if use_benchmark else "auto-pass (no benchmark)"
+        ),
+        'sufficient_volume': (
+            f"Volume >= {params.get('min_volume', 500_000):,}",
+            f"{latest['volume_ma_50']:,.0f} >= {params.get('min_volume', 500_000):,}"
+        )
+    }
+
+    for cond_name, passed in conditions.items():
+        status = "PASS" if passed else "FAIL"
+        symbol = "✓" if passed else "✗"
+        title, detail = explanations.get(cond_name, (cond_name, ""))
+        print(f"{symbol} [{status:4}] {title}")
+        print(f"          {detail}")
+
+    print("=" * 80)
+
+    if stage_result['meets_criteria']:
+        print(f"\n✓ {ticker} PASSES Stage 2 detection")
+    else:
+        failed_conditions = [k for k, v in conditions.items() if not v]
+        print(f"\n✗ {ticker} FAILS Stage 2 detection")
+        print(f"  Failed conditions: {', '.join(failed_conditions)}")
+
+    print()
+
+
 def main():
     """Main function"""
     # Parse command line arguments
@@ -151,6 +327,28 @@ def main():
         type=str,
         help='Backtest end date (YYYY-MM-DD)'
     )
+    parser.add_argument(
+        '--verbose',
+        action='store_true',
+        help='Enable verbose logging (DEBUG level)'
+    )
+    parser.add_argument(
+        '--diagnose',
+        action='store_true',
+        help='Enable diagnostic mode (shows detailed backtest analysis)'
+    )
+    parser.add_argument(
+        '--explain-stage2',
+        type=str,
+        metavar='TICKER',
+        help='Explain why a ticker passes or fails Stage 2 conditions'
+    )
+    parser.add_argument(
+        '--date',
+        type=str,
+        metavar='YYYY-MM-DD',
+        help='Date for --explain-stage2 analysis (default: latest)'
+    )
 
     # Benchmark options (mutually exclusive)
     benchmark_group = parser.add_mutually_exclusive_group()
@@ -174,10 +372,17 @@ def main():
     config = load_config()
 
     # Setup logger
+    log_level = 'DEBUG' if args.verbose else config['output']['log_level']
     setup_logger(
         log_path=config['output']['log_path'],
-        log_level=config['output']['log_level']
+        log_level=log_level
     )
+
+    # Handle explain-stage2 mode
+    if args.explain_stage2:
+        use_benchmark = not args.no_benchmark
+        explain_stage2(args.explain_stage2, config, use_benchmark, args.date)
+        return
 
     logger.info("=" * 60)
     logger.info("Stock Screening System Started")
