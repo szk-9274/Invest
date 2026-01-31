@@ -1,9 +1,12 @@
 """
 Debug script to analyze Stage 2 detection for specific tickers
 """
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent))
+
 import yaml
 import pandas as pd
-from pathlib import Path
 from loguru import logger
 
 from data.fetcher import YahooFinanceFetcher

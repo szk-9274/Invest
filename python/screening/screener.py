@@ -6,11 +6,15 @@ from typing import List, Dict, Optional
 from loguru import logger
 from tqdm import tqdm
 
-from ..data.fetcher import YahooFinanceFetcher
-from ..analysis.stage_detector import StageDetector
-from ..analysis.vcp_detector import VCPDetector
-from ..analysis.indicators import calculate_all_indicators
-from ..analysis.fundamentals import FundamentalsAnalyzer
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from data.fetcher import YahooFinanceFetcher
+from analysis.stage_detector import StageDetector
+from analysis.vcp_detector import VCPDetector
+from analysis.indicators import calculate_all_indicators
+from analysis.fundamentals import FundamentalsAnalyzer
 
 
 class Screener:

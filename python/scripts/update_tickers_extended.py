@@ -16,8 +16,12 @@ from loguru import logger
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
 import time
+import sys
 
-from ..utils.logger import setup_logger
+# Add project root to path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from utils.logger import setup_logger
 
 
 class TickerFetcher:

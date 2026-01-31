@@ -8,6 +8,10 @@ import pandas as pd
 from pathlib import Path
 from loguru import logger
 import argparse
+import sys
+
+# Add project root to path
+sys.path.insert(0, str(Path(__file__).parent))
 
 from screening.screener import Screener
 from utils.logger import setup_logger
