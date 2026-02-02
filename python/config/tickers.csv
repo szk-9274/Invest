@@ -340,6 +340,7 @@ ASX,NYQ,Technology
 PEG,NYQ,Utilities
 MT,NYQ,Basic Materials
 MCHP,NMS,Technology
+ASTS,NMS,Technology
 TTWO,NMS,Communication Services
 NUE,NYQ,Basic Materials
 FIX,NYQ,Industrials
@@ -574,7 +575,6 @@ MTZ,NYQ,Industrials
 SBS,NYQ,Utilities
 USFD,NYQ,Consumer Defensive
 BWXT,NYQ,Industrials
-RVMD,NMS,Healthcare
 PTC,NMS,Technology
 BURL,NYQ,Consumer Cyclical
 WY,NYQ,Real Estate
@@ -702,9 +702,11 @@ VNOM,NMS,Energy
 CLX,NYQ,Consumer Defensive
 KRMN,NYQ,Industrials
 TOL,NYQ,Consumer Cyclical
+RPM,NYQ,Basic Materials
 DKNG,NMS,Consumer Cyclical
 BBY,NYQ,Consumer Cyclical
 PAA,NMS,Energy
+NBIX,NMS,Healthcare
 HRL,NYQ,Consumer Defensive
 CELH,NCM,Consumer Defensive
 W,NYQ,Consumer Cyclical
@@ -746,9 +748,7 @@ GMED,NYQ,Healthcare
 SWK,NYQ,Industrials
 CCK,NYQ,Consumer Cyclical
 BJ,NYQ,Consumer Defensive
-FIGR,NMS,Financial Services
 IVZ,NYQ,Financial Services
-SBSW,NYQ,Basic Materials
 CHWY,NYQ,Consumer Cyclical
 FHN,NYQ,Financial Services
 GIL,NYQ,Consumer Cyclical
@@ -759,7 +759,6 @@ ELAN,NYQ,Healthcare
 TXRH,NMS,Consumer Cyclical
 ZBRA,NMS,Technology
 AMKR,NMS,Technology
-NYT,NYQ,Communication Services
 SNAP,NYQ,Communication Services
 AEG,NYQ,Financial Services
 WMS,NYQ,Industrials
@@ -838,6 +837,7 @@ REXR,NYQ,Real Estate
 GNRC,NYQ,Industrials
 TTEK,NMS,Industrials
 WAL,NYQ,Financial Services
+SOLS,NMS,Basic Materials
 CART,NMS,Consumer Cyclical
 MOH,NYQ,Healthcare
 DINO,NYQ,Energy
@@ -859,6 +859,7 @@ SFD,NMS,Consumer Defensive
 HBM,NYQ,Basic Materials
 GTLS,NYQ,Industrials
 AXSM,NGM,Healthcare
+ALV,NYQ,Consumer Cyclical
 OSK,NYQ,Industrials
 MGM,NYQ,Consumer Cyclical
 HSIC,NMS,Healthcare
@@ -936,7 +937,6 @@ SANM,NMS,Technology
 TAL,NYQ,Consumer Defensive
 CYTK,NMS,Healthcare
 ZWS,NYQ,Industrials
-G,NYQ,Technology
 PLNT,NYQ,Consumer Cyclical
 VFC,NYQ,Consumer Cyclical
 GRFS,NMS,Healthcare
@@ -1046,7 +1046,6 @@ OTF,NYQ,Financial Services
 LEA,NYQ,Consumer Cyclical
 MTG,NYQ,Financial Services
 GLBE,NMS,Consumer Cyclical
-ESNT,NYQ,Financial Services
 DUOL,NMS,Technology
 MIRM,NGM,Healthcare
 SEE,NYQ,Consumer Cyclical
@@ -1096,7 +1095,6 @@ ALKS,NMS,Healthcare
 MNSO,NYQ,Consumer Cyclical
 CORZ,NMS,Technology
 WH,NYQ,Consumer Cyclical
-AUB,NYQ,Financial Services
 OPCH,NMS,Healthcare
 KBR,NYQ,Industrials
 SLM,NMS,Financial Services
@@ -1120,6 +1118,7 @@ AUGO,NMS,Basic Materials
 MC,NYQ,Financial Services
 KD,NYQ,Technology
 PACS,NYQ,Healthcare
+GVA,NYQ,Industrials
 KRG,NYQ,Real Estate
 ACHR,NYQ,Industrials
 BFAM,NYQ,Consumer Cyclical
@@ -1131,7 +1130,6 @@ TDS,NYQ,Communication Services
 STUB,NYQ,Communication Services
 AROC,NYQ,Energy
 MMS,NYQ,Industrials
-SHC,NMS,Healthcare
 REZI,NYQ,Industrials
 CRNX,NMS,Healthcare
 PTGX,NGM,Healthcare
@@ -1229,6 +1227,7 @@ GPK,NYQ,Consumer Cyclical
 HASI,NYQ,Financial Services
 BILL,NYQ,Technology
 BGC,NMS,Financial Services
+WK,NYQ,Technology
 STNE,NMS,Technology
 FTDR,NMS,Consumer Cyclical
 CZR,NMS,Consumer Cyclical
@@ -1389,7 +1388,6 @@ ARQT,NMS,Healthcare
 BANC,NYQ,Financial Services
 HYMC,NCM,Basic Materials
 TDW,NYQ,Energy
-TGNA,NYQ,Communication Services
 VRRM,NCM,Technology
 HAFN,NYQ,Industrials
 VERA,NGM,Healthcare
@@ -1502,6 +1500,7 @@ BWIN,NMS,Financial Services
 RCUS,NYQ,Healthcare
 POWI,NMS,Technology
 GTM,NMS,Technology
+DRVN,NMS,Consumer Cyclical
 TXG,NMS,Healthcare
 CURB,NYQ,Real Estate
 GOF,NYQ,Financial Services
@@ -1536,7 +1535,6 @@ MLCO,NMS,Consumer Cyclical
 OI,NYQ,Consumer Cyclical
 FA,NMS,Industrials
 BRZE,NMS,Technology
-CIVI,NYQ,Energy
 PTON,NMS,Consumer Cyclical
 PICS,NMS,Technology
 PAX,NMS,Financial Services
@@ -1812,6 +1810,7 @@ DSL,NYQ,Financial Services
 EZPW,NMS,Financial Services
 RERE,NYQ,Consumer Cyclical
 WLTH,NMS,Technology
+WGO,NYQ,Consumer Cyclical
 METC,NMS,Basic Materials
 CSIQ,NMS,Technology
 IMTX,NCM,Healthcare
