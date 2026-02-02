@@ -23,12 +23,33 @@ benchmark:
 # Stage detection parameters
 stage:
   sma_periods: [50, 150, 200]
-  min_price_above_52w_low: 1.30      # 30% above 52-week low
-  max_distance_from_52w_high: 0.75   # Within 25% of 52-week high
+
+  # STRICT MODE (default)
+  strict:
+    min_price_above_52w_low: 1.30      # 30% above 52-week low
+    max_distance_from_52w_high: 0.75   # Within 25% of 52-week high
+    rs_new_high_threshold: 0.95        # RS ≥ 95% of 52w high
+    min_volume: 500000
+
+  # RELAXED MODE (fallback)
+  relaxed:
+    min_price_above_52w_low: 1.20      # 20% above (relaxed)
+    max_distance_from_52w_high: 0.60   # Within 40% of high (relaxed)
+    rs_new_high_threshold: 0.90        # RS ≥ 90% (relaxed)
+    min_volume: 300000                 # Lower volume
+
+  # Fallback behavior
+  auto_fallback_enabled: true
+  min_trades_threshold: 1
+
+  # Legacy parameters (for backward compatibility)
+  min_price_above_52w_low: 1.30
+  max_distance_from_52w_high: 0.75
+  min_volume: 500_000
+
   min_slope_200_days: 20              # 200 MA must be rising for 20 days
   rs_min_rating: 70
   rs_new_high_required: true
-  min_volume: 500_000
 
 # VCP detection parameters
 vcp:

@@ -18,11 +18,34 @@ class StageDetector:
         """
         self.params = params
 
+    def _get_thresholds(self, mode: str) -> Dict:
+        """
+        Get mode-specific thresholds.
+
+        Args:
+            mode: 'strict' or 'relaxed'
+
+        Returns:
+            Dictionary of threshold values
+        """
+        # Check if new config format (with strict/relaxed sections)
+        if 'strict' in self.params and 'relaxed' in self.params:
+            return self.params[mode]
+
+        # Backward compatibility: use legacy params as strict defaults
+        return {
+            'min_price_above_52w_low': self.params.get('min_price_above_52w_low', 1.30),
+            'max_distance_from_52w_high': self.params.get('max_distance_from_52w_high', 0.75),
+            'rs_new_high_threshold': 0.95,  # Default for old config
+            'min_volume': self.params.get('min_volume', 500_000),
+        }
+
     def detect_stage(
         self,
         data: pd.DataFrame,
         rs_line: pd.Series = None,
         use_benchmark: bool = True,
+        mode: str = 'strict',
     ) -> Dict:
         """
         Detect the current stage of the stock.
@@ -31,6 +54,7 @@ class StageDetector:
             data: Stock data with all indicators
             rs_line: RS Line Series (optional; None when benchmark disabled)
             use_benchmark: Whether to require RS condition for Stage 2
+            mode: Threshold mode ('strict' or 'relaxed')
 
         Returns:
             {
@@ -39,8 +63,12 @@ class StageDetector:
                 'details': {...}
             }
         """
+        # Validate mode parameter
+        if mode not in ['strict', 'relaxed']:
+            raise ValueError(f"Invalid mode: {mode}. Must be 'strict' or 'relaxed'")
+
         # Check Stage 2 conditions
-        conditions = self.check_stage2_conditions(data, rs_line, use_benchmark)
+        conditions = self.check_stage2_conditions(data, rs_line, use_benchmark, mode=mode)
 
         # Check if all conditions are met
         meets_all = all(conditions.values())
@@ -66,6 +94,7 @@ class StageDetector:
         data: pd.DataFrame,
         rs_line: pd.Series = None,
         use_benchmark: bool = True,
+        mode: str = 'strict',
     ) -> Dict[str, bool]:
         """
         Check the Stage 2 conditions (Trend Template).
@@ -73,15 +102,27 @@ class StageDetector:
         When use_benchmark is False, the RS new high condition is skipped
         (always True), reducing the criteria to 8 non-benchmark conditions.
 
+        Args:
+            data: Stock data with all indicators
+            rs_line: RS Line Series (optional)
+            use_benchmark: Whether to require RS condition
+            mode: Threshold mode ('strict' or 'relaxed')
+
         Returns:
             Dictionary of condition results
         """
+        # Validate mode parameter
+        if mode not in ['strict', 'relaxed']:
+            raise ValueError(f"Invalid mode: {mode}. Must be 'strict' or 'relaxed'")
         if len(data) < 252:
             return {key: False for key in [
                 'price_above_sma50', 'sma50_above_sma150', 'sma150_above_sma200',
                 'ma200_uptrend', 'above_52w_low', 'near_52w_high',
                 'ma50_above_ma150_200', 'rs_new_high', 'sufficient_volume'
             ]}
+
+        # Get mode-specific thresholds
+        thresholds = self._get_thresholds(mode)
 
         latest = data.iloc[-1]
 
@@ -93,7 +134,7 @@ class StageDetector:
 
         # RS condition: skip (always True) when benchmark is disabled
         if use_benchmark and rs_line is not None:
-            rs_result = self._check_rs_strength(rs_line)
+            rs_result = self._check_rs_strength(rs_line, thresholds['rs_new_high_threshold'])
         else:
             rs_result = True
 
@@ -106,11 +147,11 @@ class StageDetector:
             # 2. 200-day MA in uptrend
             'ma200_uptrend': ma200_slope > 0,
 
-            # 3. 30% above 52-week low
-            'above_52w_low': latest['close'] >= low_52w * self.params['min_price_above_52w_low'],
+            # 3. Above 52-week low (mode-specific threshold)
+            'above_52w_low': latest['close'] >= low_52w * thresholds['min_price_above_52w_low'],
 
-            # 4. Within 25% of 52-week high
-            'near_52w_high': latest['close'] >= high_52w * self.params['max_distance_from_52w_high'],
+            # 4. Near 52-week high (mode-specific threshold)
+            'near_52w_high': latest['close'] >= high_52w * thresholds['max_distance_from_52w_high'],
 
             # 5. 50-day MA above 150 and 200-day MA
             'ma50_above_ma150_200': (
@@ -118,11 +159,11 @@ class StageDetector:
                 latest['sma_50'] > latest['sma_200']
             ),
 
-            # 6. RS new high (auto-True when benchmark disabled)
+            # 6. RS new high (auto-True when benchmark disabled, uses mode-specific threshold)
             'rs_new_high': rs_result,
 
-            # 7. Sufficient volume
-            'sufficient_volume': latest['volume_ma_50'] >= self.params.get('min_volume', 500_000)
+            # 7. Sufficient volume (mode-specific threshold)
+            'sufficient_volume': latest['volume_ma_50'] >= thresholds['min_volume']
         }
 
         return conditions
@@ -153,8 +194,17 @@ class StageDetector:
         slope = ma200_current - ma200_past
         return slope
 
-    def _check_rs_strength(self, rs_line: pd.Series) -> bool:
-        """Check RS strength"""
+    def _check_rs_strength(self, rs_line: pd.Series, threshold: float = 0.95) -> bool:
+        """
+        Check RS strength.
+
+        Args:
+            rs_line: RS Line Series
+            threshold: Minimum ratio to 52-week high (default 0.95)
+
+        Returns:
+            True if RS line is at threshold% of 52-week high
+        """
         if len(rs_line) < 252:
             return False
 
@@ -166,7 +216,7 @@ class StageDetector:
         recent_high = rs_line_clean.tail(252).max()
         current = rs_line_clean.iloc[-1]
 
-        return current >= recent_high * 0.95
+        return current >= recent_high * threshold
 
     def _is_stage4(self, data: pd.DataFrame) -> bool:
         """Stage 4 (Declining) detection"""
