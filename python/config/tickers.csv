@@ -1,206 +1,1892 @@
 ticker,exchange,sector
+NVDA,NMS,Technology
+GOOGL,NMS,Communication Services
+GOOG,NMS,Communication Services
+AAPL,NMS,Technology
+MSFT,NMS,Technology
 AMZN,NMS,Consumer Cyclical
+META,NMS,Communication Services
 TSM,NYQ,Technology
+TSLA,NMS,Consumer Cyclical
+AVGO,NMS,Technology
+WMT,NMS,Consumer Defensive
+LLY,NYQ,Healthcare
+JPM,NYQ,Financial Services
 V,NYQ,Financial Services
+XOM,NYQ,Energy
+ASML,NMS,Technology
+JNJ,NYQ,Healthcare
+MA,NYQ,Financial Services
 ORCL,NYQ,Technology
 MU,NMS,Technology
+COST,NMS,Consumer Defensive
+BABA,NYQ,Consumer Cyclical
+ABBV,NYQ,Healthcare
 BAC,NYQ,Financial Services
+AMD,NMS,Technology
 HD,NYQ,Consumer Cyclical
+PG,NYQ,Consumer Defensive
+NFLX,NMS,Communication Services
+CVX,NYQ,Energy
+PLTR,NMS,Technology
+GE,NYQ,Industrials
 KO,NYQ,Consumer Defensive
+CSCO,NMS,Technology
+CAT,NYQ,Industrials
+HSBC,NYQ,Financial Services
+LRCX,NMS,Technology
+MS,NYQ,Financial Services
+AZN,NMS,Healthcare
+IBM,NYQ,Technology
+NVS,NYQ,Healthcare
+WFC,NYQ,Financial Services
+GS,NYQ,Financial Services
+PM,NYQ,Consumer Defensive
+MRK,NYQ,Healthcare
+RTX,NYQ,Industrials
+NVO,NYQ,Healthcare
+UNH,NYQ,Healthcare
 AMAT,NMS,Technology
+AXP,NYQ,Financial Services
+SAP,NYQ,Technology
+RY,NYQ,Financial Services
+INTC,NMS,Technology
 MCD,NYQ,Consumer Cyclical
+TMUS,NMS,Communication Services
 SHEL,NYQ,Energy
+TMO,NYQ,Healthcare
+LIN,NMS,Basic Materials
+PEP,NMS,Consumer Defensive
+C,NYQ,Financial Services
+MUFG,NYQ,Financial Services
 CRM,NYQ,Technology
+DIS,NYQ,Communication Services
+GEV,NYQ,Industrials
+TXN,NMS,Technology
+ABT,NYQ,Healthcare
+SCHW,NYQ,Financial Services
+SAN,NYQ,Financial Services
 KLAC,NMS,Technology
+VZ,NYQ,Communication Services
+T,NYQ,Communication Services
+AMGN,NMS,Healthcare
+NEE,NYQ,Utilities
+BA,NYQ,Industrials
+RIO,NYQ,Basic Materials
+ISRG,NMS,Healthcare
 BX,NYQ,Financial Services
+ANET,NYQ,Technology
+BHP,NYQ,Basic Materials
 APH,NYQ,Technology
+GILD,NMS,Healthcare
+BLK,NYQ,Financial Services
+SHOP,NMS,Technology
+UBER,NYQ,Technology
+TJX,NYQ,Consumer Cyclical
+HDB,NYQ,Financial Services
 ACN,NYQ,Technology
+QCOM,NMS,Technology
+SPGI,NYQ,Financial Services
+APP,NMS,Communication Services
+TD,NYQ,Financial Services
+SCCO,NYQ,Basic Materials
+TTE,NYQ,Energy
+DHR,NYQ,Healthcare
+HON,NMS,Industrials
 ADI,NMS,Technology
 PFE,NYQ,Healthcare
+LOW,NYQ,Consumer Cyclical
+UL,NYQ,Consumer Defensive
+UBS,NYQ,Financial Services
 LMT,NYQ,Industrials
+BBVA,NYQ,Financial Services
+PDD,NMS,Consumer Cyclical
+DE,NYQ,Industrials
+SYK,NYQ,Healthcare
+UNP,NYQ,Industrials
+BUD,NYQ,Consumer Defensive
+COF,NYQ,Financial Services
+INTU,NMS,Technology
+BSX,NYQ,Healthcare
+ETN,NYQ,Industrials
 SMFG,NYQ,Financial Services
+SONY,NYQ,Technology
+MDT,NYQ,Healthcare
+BTI,NYQ,Consumer Defensive
+COP,NYQ,Energy
+WELL,NYQ,Real Estate
+IBKR,NMS,Financial Services
+NOW,NYQ,Technology
+CB,NYQ,Financial Services
+NEM,NYQ,Basic Materials
+PANW,NMS,Technology
+ADBE,NMS,Technology
+PGR,NYQ,Financial Services
+PLD,NYQ,Real Estate
+VRTX,NMS,Healthcare
+PH,NYQ,Industrials
+CMCSA,NMS,Communication Services
+SNY,NMS,Healthcare
+HCA,NYQ,Healthcare
+BMY,NYQ,Healthcare
+ARM,NMS,Technology
+CRWD,NMS,Technology
+MELI,NMS,Consumer Cyclical
+MFG,NYQ,Financial Services
+ENB,NYQ,Energy
+KKR,NYQ,Financial Services
+SBUX,NMS,Consumer Cyclical
+IBN,NYQ,Financial Services
+GSK,NYQ,Healthcare
+MO,NYQ,Consumer Defensive
 CME,NMS,Financial Services
+MCK,NYQ,Healthcare
+SPOT,NYQ,Communication Services
+BN,NYQ,Financial Services
 CEG,NMS,Utilities
 ADP,NMS,Technology
+ICE,NYQ,Financial Services
+PBR,NYQ,Energy
+SO,NYQ,Utilities
+NOC,NYQ,Industrials
 BMO,NYQ,Financial Services
+BP,NYQ,Energy
+AEM,NYQ,Basic Materials
+GD,NYQ,Industrials
+ITUB,NYQ,Financial Services
+CVS,NYQ,Healthcare
+DUK,NYQ,Utilities
+TT,NYQ,Industrials
+BNS,NYQ,Financial Services
+MCO,NYQ,Financial Services
+BCS,NYQ,Financial Services
+MRSH,NYQ,Financial Services
+NKE,NYQ,Consumer Cyclical
+PNC,NYQ,Financial Services
 UPS,NYQ,Industrials
+WM,NYQ,Industrials
 HOOD,NMS,Financial Services
+SNPS,NMS,Technology
+STX,NMS,Technology
+RCL,NYQ,Consumer Cyclical
+GLW,NYQ,Technology
+SHW,NYQ,Basic Materials
+DASH,NMS,Consumer Cyclical
+LYG,NYQ,Financial Services
+USB,NYQ,Financial Services
+CVNA,NYQ,Consumer Cyclical
+FCX,NYQ,Basic Materials
+CM,NYQ,Financial Services
+NU,NYQ,Financial Services
+MAR,NMS,Consumer Cyclical
 SNDK,NMS,Technology
 ING,NYQ,Financial Services
+WDC,NMS,Technology
+NGG,NYQ,Utilities
+AMT,NYQ,Real Estate
+HWM,NYQ,Industrials
+BK,NYQ,Financial Services
+ORLY,NMS,Consumer Cyclical
+NTES,NMS,Communication Services
+EMR,NYQ,Industrials
+WMB,NYQ,Energy
+CRH,NYQ,Basic Materials
 MMM,NYQ,Industrials
+CDNS,NMS,Technology
+EQIX,NMS,Real Estate
+BAM,NYQ,Financial Services
+ECL,NYQ,Basic Materials
+CMI,NYQ,Industrials
+ABNB,NMS,Consumer Cyclical
 MNST,NMS,Consumer Defensive
+REGN,NMS,Healthcare
+GM,NYQ,Consumer Cyclical
+B,NYQ,Basic Materials
+APO,NYQ,Financial Services
+ELV,NYQ,Healthcare
+CNQ,NYQ,Energy
+CTAS,NMS,Industrials
+DELL,NYQ,Technology
+ITW,NYQ,Industrials
+FDX,NYQ,Industrials
+MDLZ,NMS,Consumer Defensive
+AON,NYQ,Financial Services
+DB,NYQ,Financial Services
+CI,NYQ,Healthcare
+JCI,NYQ,Industrials
+CL,NYQ,Consumer Defensive
+NWG,NYQ,Financial Services
+SLB,NYQ,Energy
+SPG,NYQ,Real Estate
 EPD,NYQ,Energy
+VRT,NYQ,Industrials
+INFY,NYQ,Technology
+PWR,NYQ,Industrials
+CSX,NMS,Industrials
+HLT,NYQ,Consumer Cyclical
+COR,NYQ,Healthcare
+SE,NYQ,Consumer Cyclical
+VALE,NYQ,Basic Materials
+WBD,NMS,Communication Services
+MRVL,NMS,Technology
+KMI,NYQ,Energy
+RSG,NYQ,Industrials
 MSI,NYQ,Technology
+EQNR,NYQ,Energy
+RELX,NYQ,Industrials
+CP,NYQ,Industrials
+SNOW,NYQ,Technology
+TFC,NYQ,Financial Services
+TEL,NYQ,Technology
+NSC,NYQ,Industrials
+PCAR,NMS,Industrials
+SU,NYQ,Energy
+MFC,NYQ,Financial Services
+LHX,NYQ,Industrials
 AEP,NMS,Utilities
+AJG,NYQ,Financial Services
+TRV,NYQ,Financial Services
+ET,NYQ,Energy
+AMX,NYQ,Communication Services
+FTNT,NMS,Technology
+NET,NYQ,Technology
+ROST,NMS,Consumer Cyclical
+EOG,NYQ,Energy
 TRP,NYQ,Energy
+APD,NYQ,Basic Materials
+WPM,NYQ,Basic Materials
+AFL,NYQ,Financial Services
+CNI,NYQ,Industrials
 RACE,NYQ,Consumer Cyclical
+BDX,NYQ,Healthcare
+DLR,NYQ,Real Estate
+PSX,NYQ,Energy
+NXPI,NMS,Technology
+MPLX,NYQ,Energy
+SRE,NYQ,Utilities
+VLO,NYQ,Energy
+O,NYQ,Real Estate
+NDAQ,NMS,Financial Services
+ZTS,NYQ,Healthcare
 F,NYQ,Consumer Cyclical
+BKR,NMS,Energy
+TAK,NYQ,Healthcare
+CCJ,NYQ,Energy
+ADSK,NMS,Technology
+MPWR,NMS,Technology
+VST,NYQ,Utilities
+IDXX,NMS,Healthcare
+MPC,NYQ,Energy
+BIDU,NMS,Communication Services
+BSBR,NYQ,Financial Services
+COIN,NMS,Financial Services
+MET,NYQ,Financial Services
+ALL,NYQ,Financial Services
 CMG,NYQ,Consumer Cyclical
+AME,NYQ,Industrials
+DEO,NYQ,Consumer Defensive
+D,NYQ,Utilities
 CAH,NYQ,Healthcare
+EA,NMS,Communication Services
+CARR,NYQ,Industrials
+FERG,NYQ,Industrials
+CBRE,NYQ,Real Estate
+RKT,NYQ,Financial Services
+PYPL,NMS,Financial Services
+TRI,NMS,Industrials
 OKE,NYQ,Energy
+FAST,NMS,Industrials
+URI,NYQ,Industrials
 CTVA,NYQ,Basic Materials
 ARES,NYQ,Financial Services
+AMP,NYQ,Financial Services
+FER,NMS,Industrials
+CRWV,NMS,Technology
+PSA,NYQ,Real Estate
+TGT,NYQ,Consumer Defensive
+EW,NYQ,Healthcare
+FANG,NMS,Energy
+ROK,NYQ,Industrials
+WDAY,NMS,Technology
+AU,NYQ,Basic Materials
+HLN,NYQ,Healthcare
+LNG,NYQ,Energy
+RBLX,NYQ,Communication Services
+MSCI,NYQ,Financial Services
+FNV,NYQ,Basic Materials
+DDOG,NMS,Technology
+EXC,NMS,Utilities
 GFI,NYQ,Basic Materials
+XEL,NMS,Utilities
+OXY,NYQ,Energy
+ALNY,NMS,Healthcare
+DHI,NYQ,Consumer Cyclical
+MSTR,NMS,Technology
+TRGP,NYQ,Energy
+YUM,NYQ,Consumer Cyclical
+WCN,NYQ,Industrials
+DAL,NYQ,Industrials
+ETR,NYQ,Utilities
 RKLB,NCM,Industrials
+JD,NMS,Consumer Cyclical
+CCEP,NMS,Consumer Defensive
+EBAY,NMS,Consumer Cyclical
+PUK,NYQ,Financial Services
+KR,NYQ,Consumer Defensive
+EL,NYQ,Consumer Defensive
+CCL,NYQ,Consumer Cyclical
+AIG,NYQ,Financial Services
+ASX,NYQ,Technology
+PEG,NYQ,Utilities
+MT,NYQ,Basic Materials
+MCHP,NMS,Technology
+TTWO,NMS,Communication Services
+NUE,NYQ,Basic Materials
+FIX,NYQ,Industrials
+SYY,NYQ,Consumer Defensive
+TCOM,NMS,Consumer Cyclical
+CTSH,NMS,Technology
+ROP,NMS,Technology
+ALC,NYQ,Healthcare
+VMC,NYQ,Basic Materials
+HSY,NYQ,Consumer Defensive
+HMC,NYQ,Consumer Cyclical
+CUK,NYQ,Consumer Cyclical
+WAB,NYQ,Industrials
+CPRT,NMS,Industrials
+IQV,NYQ,Healthcare
+PRU,NYQ,Financial Services
 TEVA,NYQ,Healthcare
+GRMN,NYQ,Technology
+KGC,NYQ,Basic Materials
+ED,NYQ,Utilities
+AXON,NMS,Industrials
+TER,NMS,Technology
+A,NYQ,Healthcare
+CCI,NYQ,Real Estate
+RMD,NYQ,Healthcare
+HIG,NYQ,Financial Services
+KDP,NMS,Consumer Defensive
+CVE,NYQ,Energy
+KEYS,NYQ,Technology
+PAYX,NMS,Technology
+RYAAY,NMS,Industrials
 XYZ,NYQ,Technology
+CPNG,NYQ,Consumer Cyclical
+ERIC,NMS,Technology
 MDLN,NMS,Healthcare
+STT,NYQ,Financial Services
+VTR,NYQ,Real Estate
+ODFL,NMS,Industrials
 LVS,NYQ,Consumer Cyclical
+NOK,NYQ,Technology
+GEHC,NMS,Healthcare
+EQT,NYQ,Energy
 WEC,NYQ,Utilities
+ACGL,NMS,Financial Services
+BE,NYQ,Industrials
 CIEN,NYQ,Technology
+FISV,NMS,Unknown
+MTB,NYQ,Financial Services
+WDS,NYQ,Energy
+VOD,NMS,Communication Services
+IR,NYQ,Industrials
+RDDT,NYQ,Communication Services
+PCG,NYQ,Utilities
+LYV,NYQ,Communication Services
+XYL,NYQ,Industrials
+NTR,NYQ,Basic Materials
+OTIS,NYQ,Industrials
+VEEV,NYQ,Healthcare
+INSM,NMS,Healthcare
 COHR,NYQ,Technology
+KVUE,NYQ,Consumer Defensive
+FITB,NMS,Financial Services
+KMB,NMS,Consumer Defensive
+UAL,NMS,Industrials
+EXPE,NMS,Consumer Cyclical
+RJF,NYQ,Financial Services
+SATS,NMS,Communication Services
 CLS,NYQ,Technology
+ADM,NYQ,Consumer Defensive
+FOXA,NMS,Communication Services
+NTRA,NMS,Healthcare
 SYM,NGM,Industrials
+VIK,NYQ,Consumer Cyclical
+ZS,NMS,Technology
+DG,NYQ,Consumer Defensive
+TEAM,NMS,Technology
 WTW,NMS,Financial Services
+FOX,NMS,Communication Services
+QSR,NYQ,Consumer Cyclical
+EXR,NYQ,Real Estate
+ROL,NYQ,Consumer Cyclical
+VRSK,NMS,Industrials
+MDB,NGM,Technology
+VICI,NYQ,Real Estate
 NRG,NYQ,Utilities
+LPLA,NMS,Financial Services
+AMRZ,NYQ,Basic Materials
+ULTA,NMS,Consumer Cyclical
+FLUT,NYQ,Consumer Cyclical
+FIS,NYQ,Technology
+SOFI,NMS,Financial Services
+HPE,NYQ,Technology
+DXCM,NMS,Healthcare
 HAL,NYQ,Energy
+BNTX,NMS,Healthcare
+STLA,NYQ,Consumer Cyclical
+TME,NYQ,Communication Services
 NTRS,NMS,Financial Services
+KHC,NMS,Consumer Defensive
+AEE,NYQ,Utilities
 FTAI,NMS,Industrials
+DTE,NYQ,Utilities
+LITE,NMS,Technology
+CBOE,BTS,Financial Services
+DOV,NYQ,Industrials
+ZM,NMS,Technology
+HBAN,NMS,Financial Services
+FE,NYQ,Utilities
+PHG,NYQ,Healthcare
+STZ,NYQ,Consumer Defensive
+IRM,NYQ,Real Estate
+CFG,NYQ,Financial Services
+LEN,NYQ,Consumer Cyclical
+EC,NYQ,Energy
+FTS,NYQ,Utilities
+ATO,NYQ,Utilities
+TSCO,NMS,Consumer Cyclical
+PPL,NYQ,Utilities
+EXE,NMS,Energy
 CHTR,NMS,Communication Services
+STLD,NMS,Basic Materials
+BIIB,NMS,Healthcare
+TECK,NYQ,Basic Materials
+TPR,NYQ,Consumer Cyclical
+SYF,NYQ,Financial Services
+PPG,NYQ,Basic Materials
 CSGP,NMS,Real Estate
+WRB,NYQ,Financial Services
+NMR,NYQ,Financial Services
+KEP,NYQ,Utilities
+ES,NYQ,Utilities
+CNP,NYQ,Utilities
+STE,NYQ,Healthcare
 UMC,NYQ,Technology
 AER,NYQ,Industrials
+DVN,NYQ,Energy
+ALAB,NMS,Technology
+JBL,NYQ,Technology
+AVB,NYQ,Real Estate
+AWK,NYQ,Utilities
+STM,NYQ,Technology
+CINF,NMS,Financial Services
+RF,NYQ,Financial Services
+LUV,NYQ,Industrials
+EFX,NYQ,Industrials
 GIS,NYQ,Consumer Defensive
+PHM,NYQ,Consumer Cyclical
+BRO,NYQ,Financial Services
 VLTO,NYQ,Industrials
+EQR,NYQ,Real Estate
+ON,NMS,Technology
+OMC,NYQ,Communication Services
+WSM,NYQ,Consumer Cyclical
 RPRX,NMS,Healthcare
+FSLR,NMS,Technology
+LDOS,NYQ,Technology
+PBA,NYQ,Energy
+BCE,NYQ,Communication Services
 VG,NYQ,Energy
+DLTR,NMS,Consumer Defensive
+EIX,NYQ,Utilities
+KEY,NYQ,Financial Services
+FLEX,NMS,Technology
+HUM,NYQ,Healthcare
+GFS,NMS,Technology
+CHD,NYQ,Consumer Defensive
+TROW,NMS,Financial Services
+AXIA,NYQ,Utilities
+DRI,NYQ,Consumer Cyclical
+TSN,NYQ,Consumer Defensive
+PAAS,NYQ,Basic Materials
+CHRW,NMS,Industrials
+BR,NYQ,Technology
+PSTG,NYQ,Technology
 FTI,NYQ,Energy
 VRSN,NMS,Technology
+VIV,NYQ,Communication Services
+FUTU,NGM,Financial Services
+CRDO,NMS,Technology
+TPG,NMS,Financial Services
+LH,NYQ,Healthcare
+TW,NMS,Financial Services
+TS,NYQ,Energy
+ILMN,NMS,Healthcare
 RGLD,NMS,Basic Materials
+CPAY,NYQ,Technology
 WAT,NYQ,Healthcare
+BG,NYQ,Consumer Defensive
+CTRA,NYQ,Energy
+SQM,NYQ,Basic Materials
+L,NYQ,Financial Services
 EXPD,NYQ,Industrials
+FWONK,NMS,Communication Services
+CMS,NYQ,Utilities
+CYBR,NMS,Technology
+SW,NYQ,Consumer Cyclical
+TU,NYQ,Communication Services
+NBIS,NMS,Communication Services
+RL,NYQ,Consumer Cyclical
+OWL,NYQ,Financial Services
+CNC,NYQ,Healthcare
+IP,NYQ,Consumer Cyclical
 CG,NMS,Financial Services
+BEKE,NYQ,Real Estate
+RBA,NYQ,Industrials
+PFG,NMS,Financial Services
+NI,NYQ,Utilities
+DGX,NYQ,Healthcare
 LULU,NMS,Consumer Cyclical
+RCI,NYQ,Communication Services
+AMCR,NYQ,Consumer Cyclical
+AS,NYQ,Consumer Cyclical
+GMAB,NMS,Healthcare
 Q,NYQ,Technology
+LTM,NYQ,Industrials
+GPN,NYQ,Industrials
+ALB,NYQ,Basic Materials
 PKG,NYQ,Consumer Cyclical
+SSNC,NMS,Technology
+AFRM,NMS,Financial Services
+DOW,NYQ,Basic Materials
+INCY,NMS,Healthcare
+SBAC,NMS,Real Estate
+EXAS,NCM,Healthcare
+GPC,NYQ,Consumer Cyclical
+JBHT,NMS,Industrials
+CHKP,NMS,Technology
+BEP,NYQ,Utilities
+NTAP,NMS,Technology
+WWD,NMS,Industrials
+MTZ,NYQ,Industrials
 SBS,NYQ,Utilities
+USFD,NYQ,Consumer Defensive
+BWXT,NYQ,Industrials
 RVMD,NMS,Healthcare
+PTC,NMS,Technology
+BURL,NYQ,Consumer Cyclical
+WY,NYQ,Real Estate
+TWLO,NYQ,Technology
+SGI,NYQ,Consumer Cyclical
+DD,NYQ,Basic Materials
+TOST,NYQ,Technology
+DKS,NYQ,Consumer Cyclical
+HPQ,NYQ,Technology
+NVT,NYQ,Industrials
 CX,NYQ,Basic Materials
+RIVN,NMS,Consumer Cyclical
+PODD,NMS,Healthcare
 APG,NYQ,Industrials
+ENTG,NMS,Technology
+IFF,NYQ,Basic Materials
+FTV,NYQ,Technology
+NXT,NMS,Technology
+DECK,NYQ,Consumer Cyclical
+EVRG,NMS,Utilities
+IREN,NMS,Financial Services
+FN,NYQ,Technology
+YUMC,NYQ,Consumer Cyclical
 JBS,NYQ,Consumer Defensive
+XPO,NYQ,Industrials
+ESS,NYQ,Real Estate
+KTOS,NMS,Industrials
+SMCI,NMS,Technology
+NWS,NMS,Communication Services
+PNR,NYQ,Industrials
 ZTO,NYQ,Industrials
+ZBH,NYQ,Healthcare
+MRNA,NMS,Healthcare
+XPEV,NYQ,Consumer Cyclical
+LNT,NMS,Utilities
+YPF,NYQ,Energy
+WES,NYQ,Energy
+LI,NMS,Consumer Cyclical
+BIP,NYQ,Utilities
+HOLX,NMS,Healthcare
+THC,NYQ,Healthcare
+SN,NYQ,Consumer Cyclical
+TKO,NYQ,Communication Services
+WST,NYQ,Healthcare
+MKC,NYQ,Consumer Defensive
+ATI,NYQ,Industrials
+CDW,NMS,Technology
+HII,NYQ,Industrials
+APTV,NYQ,Consumer Cyclical
+MTSI,NMS,Technology
+SUI,NYQ,Real Estate
+INVH,NYQ,Real Estate
+NLY,NYQ,Real Estate
+CRCL,NYQ,Financial Services
+IOT,NYQ,Technology
+COO,NMS,Healthcare
+MAA,NYQ,Real Estate
+TRMB,NMS,Technology
+J,NYQ,Industrials
+FFIV,NMS,Technology
+RTO,NYQ,Industrials
+TLN,NMS,Utilities
 IT,NYQ,Technology
+CRS,NYQ,Industrials
+MKSI,NMS,Technology
 LYB,NYQ,Basic Materials
+EWBC,NMS,Financial Services
+NWSA,NMS,Communication Services
+TXT,NYQ,Industrials
+ITT,NYQ,Industrials
+QXO,NYQ,Industrials
+WMG,NMS,Communication Services
+ZG,NMS,Communication Services
+CRBG,NYQ,Financial Services
+AGI,NYQ,Basic Materials
+BALL,NYQ,Consumer Cyclical
+GFL,NYQ,Industrials
+TRU,NYQ,Financial Services
+WPC,NYQ,Real Estate
 Z,NMS,Communication Services
+TSEM,NMS,Technology
+MLI,NYQ,Industrials
+VTRS,NMS,Healthcare
 CF,NYQ,Basic Materials
+HL,NYQ,Basic Materials
+PINS,NYQ,Communication Services
 ROIV,NMS,Healthcare
+OKTA,NMS,Technology
+PFGC,NYQ,Consumer Defensive
+IEX,NYQ,Industrials
+ONON,NYQ,Consumer Cyclical
+H,NYQ,Consumer Cyclical
 TTD,NGM,Communication Services
+GH,NMS,Healthcare
+BBIO,NMS,Healthcare
+GEN,NMS,Technology
 FNF,NYQ,Financial Services
 HUBS,NYQ,Technology
+SNN,NYQ,Healthcare
+AA,NYQ,Basic Materials
+HTHT,NMS,Consumer Cyclical
+GGG,NYQ,Industrials
+MGA,NYQ,Consumer Cyclical
+AVY,NYQ,Consumer Cyclical
+PNFP,NYQ,Financial Services
+KIM,NYQ,Real Estate
+ARCC,NMS,Financial Services
+ALLE,NYQ,Industrials
+IONQ,NYQ,Technology
+ULS,NYQ,Industrials
 ROKU,NMS,Communication Services
+PEN,NYQ,Healthcare
+ICLR,NMS,Healthcare
+UDR,NYQ,Real Estate
+AKAM,NMS,Technology
+DPZ,NMS,Consumer Cyclical
+GDDY,NYQ,Technology
 AVAV,NMS,Industrials
+EQH,NYQ,Financial Services
+BILI,NMS,Communication Services
+BEN,NYQ,Financial Services
+MAS,NYQ,Industrials
 ASND,NMS,Healthcare
-RPM,NYQ,Basic Materials
+VNOM,NMS,Energy
+CLX,NYQ,Consumer Defensive
+KRMN,NYQ,Industrials
+TOL,NYQ,Consumer Cyclical
+DKNG,NMS,Consumer Cyclical
+BBY,NYQ,Consumer Cyclical
+PAA,NMS,Energy
+HRL,NYQ,Consumer Defensive
+CELH,NCM,Consumer Defensive
 W,NYQ,Consumer Cyclical
+CNH,NYQ,Industrials
 REG,NMS,Real Estate
+IONS,NMS,Healthcare
+SOLV,NYQ,Healthcare
+JHX,NYQ,Basic Materials
+HMY,NYQ,Basic Materials
+OHI,NYQ,Real Estate
+EMBJ,NYQ,Industrials
+FMS,NYQ,Healthcare
+AMH,NYQ,Real Estate
+CDE,NYQ,Basic Materials
+ALLY,NYQ,Financial Services
+JKHY,NMS,Technology
 UNM,NYQ,Financial Services
+SNX,NYQ,Technology
+HST,NMS,Real Estate
+FIG,NYQ,Technology
+DTM,NYQ,Energy
+UHS,NYQ,Healthcare
+RYAN,NYQ,Financial Services
+ACM,NYQ,Industrials
+GLPI,NMS,Real Estate
+LOGI,NMS,Technology
+ELS,NYQ,Real Estate
+BLDR,NYQ,Industrials
+RVTY,NYQ,Healthcare
+AGNC,NMS,Real Estate
+JEF,NYQ,Financial Services
+SF,NYQ,Financial Services
+HAS,NMS,Consumer Cyclical
+U,NYQ,Technology
+OKLO,NYQ,Utilities
 PSKY,NMS,Communication Services
+RMBS,NMS,Technology
+GMED,NYQ,Healthcare
+SWK,NYQ,Industrials
+CCK,NYQ,Consumer Cyclical
+BJ,NYQ,Consumer Defensive
+FIGR,NMS,Financial Services
+IVZ,NYQ,Financial Services
+SBSW,NYQ,Basic Materials
+CHWY,NYQ,Consumer Cyclical
+FHN,NYQ,Financial Services
+GIL,NYQ,Consumer Cyclical
+PR,NYQ,Energy
+DOC,NYQ,Real Estate
+GWRE,NYQ,Technology
+ELAN,NYQ,Healthcare
+TXRH,NMS,Consumer Cyclical
+ZBRA,NMS,Technology
 AMKR,NMS,Technology
+NYT,NYQ,Communication Services
+SNAP,NYQ,Communication Services
 AEG,NYQ,Financial Services
+WMS,NYQ,Industrials
+ALGN,NMS,Healthcare
+DCI,NYQ,Industrials
+CPT,NYQ,Real Estate
+EPAM,NYQ,Technology
+SUZ,NYQ,Basic Materials
+DT,NYQ,Technology
+BXP,NYQ,Real Estate
+GLXY,NMS,Financial Services
+GL,NYQ,Financial Services
+CMA,NYQ,Financial Services
+SCI,NYQ,Consumer Cyclical
+RDY,NYQ,Healthcare
+AR,NYQ,Energy
 PNW,NYQ,Utilities
+RBRK,NYQ,Technology
+SJM,NYQ,Consumer Defensive
+WYNN,NMS,Consumer Cyclical
+EXEL,NMS,Healthcare
+DAY,NYQ,Technology
 QGEN,NYQ,Healthcare
+LSCC,NMS,Technology
 OVV,NYQ,Energy
+MICC,NYQ,Consumer Defensive
+STRL,NMS,Industrials
+WTRG,NYQ,Utilities
+RNA,NGM,Healthcare
+DRS,NMS,Industrials
+BMRN,NMS,Healthcare
+CFLT,NMS,Technology
+SUN,NYQ,Energy
+SKM,NYQ,Communication Services
+IAG,NYQ,Basic Materials
 SMMT,NGM,Healthcare
+SEIC,NMS,Financial Services
+RRX,NYQ,Industrials
+GME,NYQ,Consumer Cyclical
+BSY,NMS,Technology
+BAH,NYQ,Industrials
+TEM,NMS,Healthcare
+NTNX,NMS,Technology
+WBS,NYQ,Financial Services
+FIVE,NMS,Consumer Cyclical
+CNM,NYQ,Industrials
 DOCU,NMS,Technology
 AES,NYQ,Utilities
+MP,NYQ,Basic Materials
 GAP,NYQ,Consumer Cyclical
+SPXC,NYQ,Industrials
 CRL,NYQ,Healthcare
+YMM,NYQ,Technology
 BAX,NYQ,Healthcare
+CAE,NYQ,Industrials
 PPC,NMS,Consumer Defensive
+AOS,NYQ,Industrials
+SSB,NYQ,Financial Services
+SARO,NYQ,Industrials
+BWA,NYQ,Consumer Cyclical
 FLS,NYQ,Industrials
+AG,NYQ,Basic Materials
+TIGO,NMS,Communication Services
+WLK,NYQ,Basic Materials
 TTMI,NMS,Technology
+XP,NMS,Financial Services
+ARMK,NYQ,Industrials
+KT,NYQ,Communication Services
+EDU,NYQ,Consumer Defensive
 ONTO,NYQ,Technology
+OC,NYQ,Industrials
+NCLH,NYQ,Consumer Cyclical
+JAZZ,NMS,Healthcare
 TECH,NMS,Healthcare
+REXR,NYQ,Real Estate
+GNRC,NYQ,Industrials
 TTEK,NMS,Industrials
 WAL,NYQ,Financial Services
+CART,NMS,Consumer Cyclical
+MOH,NYQ,Healthcare
+DINO,NYQ,Energy
+MOD,NYQ,Consumer Cyclical
+ARWR,NMS,Healthcare
+ORI,NYQ,Financial Services
+AEIS,NMS,Industrials
+JOBY,NYQ,Industrials
+ONB,NMS,Financial Services
+CHYM,NMS,Technology
+EHC,NYQ,Healthcare
+FDS,NYQ,Financial Services
+TAP,NYQ,Consumer Defensive
+POOL,NMS,Industrials
+APLD,NMS,Technology
+ARE,NYQ,Real Estate
+APA,NMS,Energy
+SFD,NMS,Consumer Defensive
 HBM,NYQ,Basic Materials
+GTLS,NYQ,Industrials
+AXSM,NGM,Healthcare
+OSK,NYQ,Industrials
+MGM,NYQ,Consumer Cyclical
+HSIC,NMS,Healthcare
+ACI,NYQ,Consumer Defensive
+MANH,NMS,Technology
+ALSN,NYQ,Consumer Cyclical
+LUMN,NYQ,Communication Services
+RRC,NYQ,Energy
+DOX,NMS,Technology
+OGE,NYQ,Utilities
+AM,NYQ,Energy
+GGAL,NCM,Financial Services
+TTC,NYQ,Industrials
+GDS,NGM,Technology
+BROS,NYQ,Consumer Cyclical
+KNX,NYQ,Industrials
+LINE,NMS,Real Estate
+BPOP,NMS,Financial Services
 CAG,NYQ,Consumer Defensive
+VIRT,NYQ,Financial Services
 ZION,NMS,Financial Services
+SAIL,NMS,Technology
 COLB,NMS,Financial Services
 STEP,NMS,Financial Services
+PCOR,NYQ,Technology
+AAL,NMS,Industrials
+FRT,NYQ,Real Estate
+BZ,NMS,Communication Services
+AHR,NYQ,Real Estate
+MOS,NYQ,Basic Materials
+AMTM,NYQ,Industrials
+ABVX,NGM,Healthcare
+PRAX,NMS,Healthcare
+KLAR,NYQ,Technology
+BVN,NYQ,Basic Materials
+EGO,NYQ,Basic Materials
+UGI,NYQ,Utilities
+CUBE,NYQ,Real Estate
+CMC,NYQ,Basic Materials
+AGCO,NYQ,Industrials
+LKQ,NMS,Consumer Cyclical
 VIPS,NYQ,Consumer Cyclical
+HALO,NMS,Healthcare
+RGEN,NMS,Healthcare
 PL,NYQ,Industrials
 SWKS,NMS,Technology
+PSO,NYQ,Communication Services
+CPB,NMS,Consumer Defensive
+CTRE,NYQ,Real Estate
+UEC,ASE,Energy
+ADC,NYQ,Real Estate
+JXN,NYQ,Financial Services
+ATR,NYQ,Healthcare
+NXE,NYQ,Energy
+BRX,NYQ,Real Estate
+AXS,NYQ,Financial Services
 PRIM,NYQ,Industrials
 NUVL,NMS,Healthcare
+NFG,NYQ,Energy
+HLNE,NMS,Financial Services
+FR,NYQ,Real Estate
+NNN,NYQ,Real Estate
+EMN,NYQ,Basic Materials
+QBTS,NYQ,Technology
+LNC,NYQ,Financial Services
+CADE,NYQ,Financial Services
 CLF,NYQ,Basic Materials
+DVA,NYQ,Healthcare
+GSAT,NMS,Communication Services
+EQPT,NMS,Industrials
+OMF,NYQ,Financial Services
+LEVI,NYQ,Consumer Cyclical
+CBSH,NMS,Financial Services
+SANM,NMS,Technology
+TAL,NYQ,Consumer Defensive
+CYTK,NMS,Healthcare
+ZWS,NYQ,Industrials
+G,NYQ,Technology
+PLNT,NYQ,Consumer Cyclical
+VFC,NYQ,Consumer Cyclical
+GRFS,NMS,Healthcare
+PDI,NYQ,Financial Services
+ORA,NYQ,Utilities
+PAYC,NYQ,Technology
+INGR,NYQ,Consumer Defensive
+MTCH,NMS,Communication Services
+BEPC,NYQ,Utilities
+PSN,NYQ,Technology
 PEGA,NMS,Technology
+FLR,NYQ,Industrials
+MIDD,NMS,Industrials
+HESM,NYQ,Energy
+PCTY,NMS,Technology
+AVTR,NYQ,Healthcare
+JHG,NYQ,Financial Services
 AAON,NMS,Industrials
+OR,NYQ,Basic Materials
+WING,NMS,Consumer Cyclical
+HQY,NMS,Healthcare
+VOYA,NYQ,Financial Services
+SMTC,NMS,Technology
+MASI,NMS,Healthcare
+CWEN,NYQ,Utilities
+MHK,NYQ,Consumer Cyclical
+TTAN,NMS,Technology
+MBLY,NMS,Consumer Cyclical
+QRVO,NMS,Technology
+AL,NYQ,Industrials
+DAR,NYQ,Consumer Defensive
 CWAN,NYQ,Technology
+AXTA,NYQ,Basic Materials
+STAG,NYQ,Real Estate
+CRK,NYQ,Energy
+FND,NYQ,Consumer Cyclical
+BTSG,NMS,Healthcare
+DOCS,NYQ,Healthcare
+COMP,NYQ,Real Estate
 ESI,NYQ,Basic Materials
+CAVA,NYQ,Consumer Cyclical
 PRMB,NYQ,Consumer Defensive
+PCVX,NMS,Healthcare
+ESTC,NYQ,Technology
 TFPM,NYQ,Basic Materials
+VLY,NMS,Financial Services
+BIRK,NYQ,Consumer Cyclical
+SFM,NMS,Consumer Defensive
+ICL,NYQ,Basic Materials
+LBRDK,NMS,Communication Services
+CHDN,NMS,Consumer Cyclical
 EAT,NYQ,Consumer Cyclical
+LYFT,NMS,Technology
+GKOS,NYQ,Healthcare
+SIRI,NMS,Communication Services
+RYTM,NGM,Healthcare
+ALGM,NMS,Technology
+ARW,NYQ,Technology
+GPGI,NYQ,Industrials
+NOV,NYQ,Energy
+STWD,NYQ,Real Estate
+BYD,NYQ,Consumer Cyclical
+OLLI,NGM,Consumer Defensive
+WFRD,NMS,Energy
+PATH,NYQ,Technology
+PB,NYQ,Financial Services
+MAT,NMS,Consumer Cyclical
+BRKR,NMS,Healthcare
+KVYO,NYQ,Technology
+CRUS,NMS,Technology
 DBX,NMS,Technology
+VNO,NYQ,Real Estate
 HXL,NYQ,Industrials
+GBCI,NYQ,Financial Services
+NICE,NMS,Technology
+KEX,NYQ,Industrials
+ADT,NYQ,Industrials
+KMX,NYQ,Consumer Cyclical
+CAI,NMS,Healthcare
+OTEX,NMS,Technology
+FBIN,NYQ,Industrials
+RRR,NMS,Consumer Cyclical
+CGNX,NMS,Technology
+TKR,NYQ,Industrials
+FROG,NMS,Technology
 LMND,NYQ,Financial Services
+GXO,NYQ,Industrials
+FAF,NYQ,Financial Services
+LTH,NYQ,Consumer Cyclical
+DSGX,NMS,Technology
+LOAR,NYQ,Industrials
+TXNM,NYQ,Utilities
+CWST,NMS,Industrials
+SITE,NYQ,Industrials
+LW,NYQ,Consumer Defensive
+FRO,NYQ,Energy
+TRNO,NYQ,Real Estate
+URBN,NMS,Consumer Cyclical
 EXLS,NMS,Technology
+MKTX,NMS,Financial Services
+VIST,NYQ,Energy
+CIFR,NMS,Financial Services
+PONY,NMS,Technology
 FNB,NYQ,Financial Services
+GPCR,NGM,Healthcare
+OTF,NYQ,Financial Services
+LEA,NYQ,Consumer Cyclical
+MTG,NYQ,Financial Services
+GLBE,NMS,Consumer Cyclical
+ESNT,NYQ,Financial Services
+DUOL,NMS,Technology
+MIRM,NGM,Healthcare
+SEE,NYQ,Consumer Cyclical
+HIMS,NYQ,Healthcare
 IBRX,NMS,Healthcare
+DLB,NYQ,Industrials
+OBDC,NYQ,Financial Services
+VSAT,NMS,Technology
+MIR,NYQ,Industrials
+PTCT,NMS,Healthcare
+RITM,NYQ,Real Estate
+EPRT,NYQ,Real Estate
+HUT,NMS,Financial Services
+RGTI,NCM,Technology
+RAL,NYQ,Technology
 HR,NYQ,Real Estate
+TMHC,NYQ,Consumer Cyclical
+GTES,NYQ,Industrials
+MMYT,NMS,Consumer Cyclical
+BXSL,NYQ,Financial Services
+MNDY,NMS,Technology
+SOBO,NYQ,Energy
+THO,NYQ,Consumer Cyclical
+UBSI,NMS,Financial Services
+ALK,NYQ,Industrials
+GTLB,NMS,Technology
+NTSK,NMS,Technology
+LPX,NYQ,Industrials
+KYMR,NGM,Healthcare
 TKC,NYQ,Communication Services
+OS,NMS,Technology
+HWC,NMS,Financial Services
 RIOT,NCM,Financial Services
+CHRD,NMS,Energy
+BIPC,NYQ,Utilities
+MAIN,NYQ,Financial Services
+HOMB,NYQ,Financial Services
+VIAV,NMS,Technology
+NE,NYQ,Energy
 FLNC,NMS,Utilities
 POR,NYQ,Utilities
+MRCY,NMS,Industrials
+MTDR,NYQ,Energy
+CNX,NYQ,Energy
+WULF,NCM,Financial Services
+ALKS,NMS,Healthcare
+MNSO,NYQ,Consumer Cyclical
+CORZ,NMS,Technology
+WH,NYQ,Consumer Cyclical
+AUB,NYQ,Financial Services
 OPCH,NMS,Healthcare
+KBR,NYQ,Industrials
+SLM,NMS,Financial Services
+COGT,NMS,Healthcare
+BKH,NYQ,Utilities
 VNT,NYQ,Technology
+FLG,NYQ,Financial Services
+FORM,NMS,Technology
+OLED,NMS,Technology
+BOOT,NYQ,Consumer Cyclical
+RDNT,NGM,Healthcare
+UUUU,ASE,Energy
+RLI,NYQ,Financial Services
+SRAD,NMS,Technology
+FRMI,NMS,Unknown
+POST,NYQ,Consumer Defensive
+M,NYQ,Consumer Cyclical
+QS,NMS,Consumer Cyclical
+OZK,NMS,Financial Services
+AUGO,NMS,Basic Materials
+MC,NYQ,Financial Services
 KD,NYQ,Technology
+PACS,NYQ,Healthcare
 KRG,NYQ,Real Estate
+ACHR,NYQ,Industrials
+BFAM,NYQ,Consumer Cyclical
+ETSY,NYQ,Consumer Cyclical
 BC,NYQ,Consumer Cyclical
+IMVT,NMS,Healthcare
+FOUR,NYQ,Technology
+TDS,NYQ,Communication Services
+STUB,NYQ,Communication Services
+AROC,NYQ,Energy
+MMS,NYQ,Industrials
+SHC,NMS,Healthcare
+REZI,NYQ,Industrials
+CRNX,NMS,Healthcare
+PTGX,NGM,Healthcare
+AVT,NMS,Technology
+BETA,NYQ,Industrials
+LAZ,NYQ,Financial Services
+WAY,NMS,Healthcare
+MAC,NYQ,Real Estate
+ELF,NYQ,Consumer Defensive
+LEU,NYQ,Energy
 RUSHA,NMS,Consumer Cyclical
+CELC,NCM,Healthcare
+LGN,NMS,Industrials
+DOCN,NYQ,Technology
+LAUR,NMS,Consumer Defensive
+GNTX,NMS,Consumer Cyclical
+HRB,NYQ,Consumer Cyclical
+ST,NYQ,Technology
+AQN,NYQ,Utilities
+PECO,NMS,Real Estate
+NIQ,NYQ,Unknown
+NJR,NYQ,Utilities
+IRTC,NMS,Healthcare
+MRP,NYQ,Real Estate
+SMR,NYQ,Industrials
+ATAT,NMS,Consumer Cyclical
+CCC,NMS,Technology
+OPEN,NMS,Real Estate
+CNR,NYQ,Energy
+MTH,NYQ,Consumer Cyclical
 USAR,NGM,Basic Materials
+REYN,NMS,Consumer Cyclical
+MGY,NYQ,Energy
+CE,NYQ,Basic Materials
+NOVT,NMS,Technology
 ENPH,NGM,Technology
+WIX,NMS,Technology
+MMSI,NMS,Healthcare
+SGHC,NYQ,Consumer Cyclical
 MTN,NYQ,Consumer Cyclical
+CRC,NYQ,Energy
+PAGP,NMS,Energy
+ATMU,NYQ,Consumer Cyclical
+CRSP,NGM,Healthcare
+CHH,NYQ,Consumer Cyclical
+S,NYQ,Technology
+EOSE,NCM,Industrials
+SON,NYQ,Consumer Cyclical
+VSNT,NMS,Communication Services
+MSM,NYQ,Industrials
+SNDR,NYQ,Industrials
+HCC,NYQ,Basic Materials
+NSA,NYQ,Real Estate
+SAIC,NMS,Technology
+TGTX,NCM,Healthcare
+SBRA,NMS,Real Estate
+IEP,NMS,Energy
+BBAR,NYQ,Financial Services
+SSRM,NMS,Basic Materials
+SLGN,NYQ,Consumer Cyclical
+TFX,NYQ,Healthcare
+EBC,NMS,Financial Services
+ANF,NYQ,Consumer Cyclical
+CROX,NMS,Consumer Cyclical
+TMDX,NGM,Healthcare
 ZETA,NYQ,Technology
+WPP,NYQ,Communication Services
 FFIN,NMS,Financial Services
+BLSH,NYQ,Technology
+LNTH,NGM,Healthcare
 SSL,NYQ,Basic Materials
+ITRI,NMS,Technology
+ASB,NYQ,Financial Services
+SRRK,NMS,Healthcare
+TNL,NYQ,Consumer Cyclical
+ECG,NYQ,Industrials
+ALHC,NMS,Healthcare
+NMRK,NMS,Real Estate
+BBWI,NYQ,Consumer Cyclical
+LIF,NMS,Technology
+WHR,NYQ,Consumer Cyclical
+FOLD,NGM,Healthcare
+ALH,NYQ,Consumer Cyclical
+APGE,NGM,Healthcare
+ACIW,NMS,Technology
+RDN,NYQ,Financial Services
+TREX,NYQ,Industrials
+SKY,NYQ,Consumer Cyclical
 INDV,NMS,Healthcare
+RUN,NMS,Technology
+YOU,NYQ,Technology
+ONDS,NCM,Technology
+VSCO,NYQ,Consumer Cyclical
 GPK,NYQ,Consumer Cyclical
-WK,NYQ,Technology
+HASI,NYQ,Financial Services
+BILL,NYQ,Technology
+BGC,NMS,Financial Services
+STNE,NMS,Technology
+FTDR,NMS,Consumer Cyclical
+CZR,NMS,Consumer Cyclical
+CGON,NMS,Healthcare
+AMRX,NMS,Healthcare
+MUR,NYQ,Energy
+BTU,NYQ,Energy
+ACAD,NMS,Healthcare
+YSS,NYQ,Industrials
+CUZ,NYQ,Real Estate
 MWA,NYQ,Industrials
+CENX,NMS,Basic Materials
+MDU,NYQ,Utilities
+CORT,NCM,Healthcare
+UCB,NYQ,Financial Services
+NWE,NMS,Utilities
+VVV,NYQ,Consumer Cyclical
+TPC,NYQ,Industrials
+PI,NMS,Technology
+GLNG,NMS,Energy
+FHI,NYQ,Financial Services
+OSCR,NYQ,Healthcare
+EPR,NYQ,Real Estate
+ADMA,NGM,Healthcare
+KRC,NYQ,Real Estate
+VAL,NYQ,Energy
+INTR,NMS,Financial Services
 IRT,NYQ,Real Estate
 CNO,NYQ,Financial Services
+OUT,NYQ,Real Estate
+RSI,NYQ,Consumer Cyclical
+CAR,NMS,Industrials
+SIMO,NMS,Technology
+KC,NMS,Technology
+FLY,NGM,Industrials
+TBBB,NYQ,Consumer Defensive
+LBRT,NYQ,Energy
+VISN,NMS,Technology
+CALM,NMS,Consumer Defensive
+HGV,NYQ,Consumer Cyclical
+FG,NYQ,Financial Services
 DLO,NMS,Technology
 SEI,NYQ,Energy
+AEO,NYQ,Consumer Cyclical
+ACLX,NMS,Healthcare
+TFSL,NMS,Financial Services
+AAUC,NYQ,Basic Materials
 NVST,NYQ,Healthcare
+PBF,NYQ,Energy
+WHD,NYQ,Energy
+PRM,NYQ,Basic Materials
+CMBT,NYQ,Energy
+FSK,NYQ,Financial Services
+HSAI,NMS,Consumer Cyclical
+QTWO,NYQ,Technology
+DNP,NYQ,Financial Services
+HPP,NYQ,Real Estate
+CBT,NYQ,Basic Materials
 UPST,NMS,Financial Services
+GRAL,NMS,Healthcare
+CWK,NYQ,Real Estate
+KNF,NYQ,Basic Materials
+LBTYA,NMS,Communication Services
+TAC,NYQ,Utilities
+SHAK,NYQ,Consumer Cyclical
+CVLT,NMS,Technology
 SIG,NYQ,Consumer Cyclical
+ACMR,NGM,Technology
 LBTYK,NMS,Communication Services
+TERN,NMS,Healthcare
+ATGE,NYQ,Consumer Defensive
 SKT,NYQ,Real Estate
+TEX,NYQ,Industrials
+RH,NYQ,Consumer Cyclical
+KBH,NYQ,Consumer Cyclical
+SMG,NYQ,Basic Materials
+FULT,NMS,Financial Services
 YETI,NYQ,Consumer Cyclical
+LRN,NYQ,Consumer Defensive
+RYN,NYQ,Real Estate
+LQDA,NCM,Healthcare
+ASO,NMS,Consumer Cyclical
 BHF,NMS,Financial Services
+BNL,NYQ,Real Estate
+FIBK,NMS,Financial Services
+WSC,NCM,Industrials
+GTX,NMS,Consumer Cyclical
 CNTA,NMS,Healthcare
+BOX,NYQ,Technology
 GBTG,NYQ,Consumer Cyclical
 KGS,NYQ,Energy
+CLBT,NMS,Technology
+MARA,NCM,Financial Services
+PII,NYQ,Consumer Cyclical
+LCID,NMS,Consumer Cyclical
+LIVN,NMS,Healthcare
 RNST,NYQ,Financial Services
+DJT,NGM,Communication Services
+BKU,NYQ,Financial Services
+BKD,NYQ,Healthcare
+MIAX,NYQ,Financial Services
+NG,ASE,Basic Materials
+CDP,NYQ,Real Estate
 SOUN,NGM,Technology
+COLD,NYQ,Real Estate
 TMC,NMS,Basic Materials
+NAMS,NGM,Healthcare
+GBDC,NMS,Financial Services
+BULL,NCM,Technology
 RHI,NYQ,Industrials
+VRNS,NMS,Technology
+HAYW,NYQ,Industrials
+FBP,NYQ,Financial Services
+ERO,NYQ,Basic Materials
+NEA,NYQ,Financial Services
+SKE,NYQ,Basic Materials
+HP,NYQ,Energy
 SPHR,NYQ,Communication Services
+GNW,NYQ,Financial Services
+SLG,NYQ,Real Estate
+FRPT,NGM,Consumer Defensive
+DNLI,NMS,Healthcare
+HNI,NYQ,Consumer Cyclical
+CGAU,NYQ,Basic Materials
+SPSC,NMS,Technology
+DAN,NYQ,Consumer Cyclical
+HTGC,NYQ,Financial Services
+AVA,NYQ,Utilities
+PAY,NYQ,Technology
+KTB,NYQ,Consumer Cyclical
+MCHB,NMS,Financial Services
+AVNT,NYQ,Basic Materials
+BFH,NYQ,Financial Services
+BXMT,NYQ,Real Estate
+STNG,NYQ,Energy
+FHB,NMS,Financial Services
+PAGS,NYQ,Technology
+VKTX,NCM,Healthcare
+SBCF,NMS,Financial Services
+ERAS,NMS,Healthcare
+PPTA,NCM,Basic Materials
+LEGN,NMS,Healthcare
+PCH,NMS,Real Estate
+SYNA,NMS,Technology
 CARG,NMS,Consumer Cyclical
+EXK,NYQ,Basic Materials
+HAE,NYQ,Healthcare
+CRGY,NYQ,Energy
+OPLN,NYQ,Consumer Cyclical
+SHOO,NMS,Consumer Cyclical
+XENE,NGM,Healthcare
+VRDN,NCM,Healthcare
+FRSH,NMS,Technology
+CSTM,NYQ,Basic Materials
+REVG,NYQ,Industrials
 WRBY,NYQ,Healthcare
+ARQT,NMS,Healthcare
+BANC,NYQ,Financial Services
+HYMC,NCM,Basic Materials
+TDW,NYQ,Energy
+TGNA,NYQ,Communication Services
+VRRM,NCM,Technology
+HAFN,NYQ,Industrials
+VERA,NGM,Healthcare
 ALMS,NMS,Healthcare
+EEFT,NMS,Technology
+ITGR,NYQ,Healthcare
+COCO,NMS,Consumer Defensive
+BTDR,NCM,Technology
+ARX,NYQ,Financial Services
+CLSK,NCM,Financial Services
+COLM,NMS,Consumer Cyclical
+WU,NYQ,Financial Services
+MPW,NYQ,Real Estate
+OII,NYQ,Energy
+SA,NYQ,Basic Materials
+VCYT,NGM,Healthcare
+FSM,NYQ,Basic Materials
+FFBC,NMS,Financial Services
+DBRG,NYQ,Financial Services
+KLIC,NMS,Technology
 PVH,NYQ,Consumer Cyclical
+CPRX,NCM,Healthcare
+EWTX,NMS,Healthcare
+AAOI,NGM,Technology
+BRBR,NYQ,Consumer Defensive
 EXG,NYQ,Financial Services
+IAC,NMS,Communication Services
+CALX,NYQ,Technology
+VERX,NGM,Technology
+INSW,NYQ,Energy
+GLOB,NYQ,Technology
+DYN,NMS,Healthcare
+SFNC,NMS,Financial Services
+LXP,NYQ,Real Estate
+XMTR,NMS,Industrials
+IRON,NGM,Healthcare
+TPH,NYQ,Consumer Cyclical
+HUBG,NMS,Industrials
+JPC,NYQ,Financial Services
+CXT,NYQ,Industrials
+PTEN,NMS,Energy
+HIW,NYQ,Real Estate
+ALM,NCM,Basic Materials
+PFS,NYQ,Financial Services
+CAKE,NMS,Consumer Cyclical
+BKV,NYQ,Energy
+AAP,NYQ,Consumer Cyclical
+MRX,NMS,Financial Services
+BL,NMS,Technology
+APLS,NMS,Healthcare
+PRVA,NMS,Healthcare
+NAVN,NMS,Technology
+CON,NYQ,Healthcare
+VNET,NMS,Technology
+AKR,NYQ,Real Estate
+ADPT,NMS,Healthcare
+NAD,NYQ,Financial Services
 IDYA,NMS,Healthcare
 DNOW,NYQ,Industrials
+ABM,NYQ,Industrials
+MH,NYQ,Consumer Defensive
+BEAM,NMS,Healthcare
+WRD,NGM,Technology
+ASH,NYQ,Basic Materials
+WGS,NMS,Healthcare
+CNK,NYQ,Communication Services
+TVTX,NGM,Healthcare
 INTA,NMS,Technology
+DX,NYQ,Real Estate
+RELY,NMS,Technology
+SUPN,NGM,Healthcare
+SUNC,NYQ,Energy
+APLE,NYQ,Real Estate
+AMBA,NMS,Technology
+LFST,NMS,Healthcare
+CTRI,NYQ,Utilities
+HNGE,NYQ,Healthcare
+NVG,NYQ,Financial Services
+TARS,NMS,Healthcare
+TBBK,NMS,Financial Services
 PTRN,NMS,Technology
 LION,NYQ,Unknown
+VSH,NYQ,Technology
+ACLS,NMS,Technology
+BRSL,NYQ,Consumer Cyclical
+IMNM,NCM,Healthcare
+LUNR,NGM,Industrials
+ATRO,NMS,Industrials
 TDC,NYQ,Technology
+GT,NMS,Consumer Cyclical
+CPRI,NYQ,Consumer Cyclical
 IHS,NYQ,Real Estate
+CVBF,NMS,Financial Services
+TENB,NMS,Technology
+UPWK,NMS,Communication Services
+UA,NYQ,Consumer Cyclical
+ZIM,NYQ,Industrials
+HE,NYQ,Utilities
+CALY,NYQ,Consumer Cyclical
+XXI,NYQ,Financial Services
 UE,NYQ,Real Estate
+SBLK,NMS,Industrials
 KMT,NYQ,Industrials
+KYIV,NMS,Communication Services
+KNTK,NYQ,Energy
 UAA,NYQ,Consumer Cyclical
+FCPT,NYQ,Real Estate
+WB,NMS,Communication Services
+BWIN,NMS,Financial Services
+RCUS,NYQ,Healthcare
+POWI,NMS,Technology
+GTM,NMS,Technology
+TXG,NMS,Healthcare
+CURB,NYQ,Real Estate
+GOF,NYQ,Financial Services
+HTFL,NMS,Healthcare
 TWST,NMS,Healthcare
+DXC,NYQ,Technology
+AVPT,NMS,Technology
+TRMD,NMS,Energy
+PTY,NYQ,Financial Services
+WAFD,NMS,Financial Services
+ANDG,NYQ,Consumer Cyclical
+XRAY,NMS,Healthcare
+SYRE,NMS,Healthcare
+IE,ASE,Basic Materials
+KMPR,NYQ,Financial Services
 NCNO,NMS,Technology
+ETOR,NMS,Financial Services
 MLYS,NMS,Healthcare
+NOG,NYQ,Energy
+ASAN,NYQ,Technology
+BKE,NYQ,Consumer Cyclical
+FLO,NYQ,Consumer Defensive
 NZF,NYQ,Financial Services
+HOG,NYQ,Consumer Cyclical
+WVE,NGM,Healthcare
+SDRL,NYQ,Energy
+RXO,NYQ,Industrials
+SPNT,NYQ,Financial Services
+BBT,NYQ,Financial Services
+OLN,NYQ,Basic Materials
 MLCO,NMS,Consumer Cyclical
+OI,NYQ,Consumer Cyclical
+FA,NMS,Industrials
+BRZE,NMS,Technology
+CIVI,NYQ,Energy
+PTON,NMS,Consumer Cyclical
+PICS,NMS,Technology
+PAX,NMS,Financial Services
+CNXC,NMS,Technology
+TRN,NYQ,Industrials
+RARE,NMS,Healthcare
+LASR,NMS,Technology
+BBAI,NYQ,Technology
+DNTH,NCM,Healthcare
 DHT,NYQ,Energy
+PAYO,NGM,Technology
 CVI,NYQ,Energy
+ASGN,NYQ,Technology
+IVT,NYQ,Real Estate
 WT,NYQ,Financial Services
+CSGS,NMS,Technology
+UNFI,NYQ,Consumer Defensive
+GEO,NYQ,Industrials
+HI,NYQ,Industrials
+CC,NYQ,Basic Materials
+INSP,NYQ,Healthcare
+RNG,NYQ,Technology
+TIC,NYQ,Industrials
+SM,NYQ,Energy
+ALKT,NMS,Technology
 NEOG,NMS,Healthcare
+OGN,NYQ,Healthcare
+DAVE,NGM,Technology
+ZGN,NYQ,Consumer Cyclical
+ATEC,NMS,Healthcare
+PK,NYQ,Real Estate
+CHA,NMS,Consumer Cyclical
+GRND,NYQ,Technology
+SLDE,NMS,Financial Services
+SEZL,NCM,Financial Services
 QFIN,NMS,Financial Services
+DEI,NYQ,Real Estate
+CBZ,NYQ,Industrials
+SRPT,NMS,Healthcare
+BHC,NYQ,Healthcare
+BUR,NYQ,Financial Services
+GCMG,NGM,Financial Services
+AVDL,NGM,Healthcare
+IRDM,NMS,Communication Services
+HRMY,NGM,Healthcare
+GNL,NYQ,Real Estate
+EYE,NMS,Consumer Cyclical
+TALO,NYQ,Energy
+KN,NYQ,Technology
+PRDO,NMS,Consumer Defensive
+MGNI,NMS,Communication Services
+QUBT,NCM,Technology
+GENI,NYQ,Communication Services
 PRKS,NYQ,Consumer Cyclical
+SLNO,NCM,Healthcare
+APPN,NGM,Technology
+OLMA,NMS,Healthcare
+PGNY,NMS,Healthcare
+WERN,NMS,Industrials
 PLAB,NMS,Technology
+CMRE,NYQ,Industrials
+OSW,NCM,Consumer Cyclical
+PWP,NMS,Financial Services
+NTCT,NMS,Technology
+UNIT,NMS,Real Estate
+CXW,NYQ,Industrials
+NESR,NCM,Energy
+UCTT,NMS,Technology
+ADEA,NMS,Technology
+ESTA,NCM,Healthcare
+NVTS,NGM,Technology
+RNW,NMS,Utilities
+FMC,NYQ,Basic Materials
+RVLV,NYQ,Consumer Cyclical
+ESRT,NYQ,Real Estate
+KSS,NYQ,Consumer Cyclical
+ARR,NYQ,Real Estate
+EXTR,NMS,Technology
+PRGO,NYQ,Healthcare
+LC,NYQ,Financial Services
+OCUL,NGM,Healthcare
+CLMT,NMS,Basic Materials
+RDW,NYQ,Industrials
+AESI,NYQ,Energy
+NN,NCM,Technology
+RUM,NGM,Communication Services
+PDO,NYQ,Financial Services
+SGRY,NMS,Healthcare
+PARR,NYQ,Energy
+AUPH,NGM,Healthcare
+NOMD,NYQ,Consumer Defensive
+NUV,NYQ,Financial Services
+ODD,NGM,Consumer Defensive
+VECO,NMS,Technology
+NWBI,NMS,Financial Services
+GAB,NYQ,Financial Services
+HUN,NYQ,Basic Materials
+VAC,NYQ,Consumer Cyclical
+IMAX,NYQ,Communication Services
+DRH,NMS,Real Estate
+PENN,NMS,Consumer Cyclical
+FCF,NYQ,Financial Services
+ARDX,NGM,Healthcare
+SEM,NYQ,Healthcare
+MD,NYQ,Healthcare
+HLMN,NGM,Industrials
+SEDG,NMS,Technology
+XPRO,NYQ,Energy
+QDEL,NMS,Healthcare
+ZLAB,NGM,Healthcare
+ATRC,NGM,Healthcare
+FUN,NYQ,Consumer Cyclical
+VCEL,NGM,Healthcare
+DVAX,NMS,Healthcare
+MCW,NMS,Consumer Cyclical
+VOYG,NYQ,Industrials
+NTST,NYQ,Real Estate
+NUVB,NYQ,Healthcare
+PBI,NYQ,Industrials
+SEMR,NYQ,Technology
+AZTA,NMS,Healthcare
+USA,NYQ,Financial Services
+SMPL,NCM,Consumer Defensive
+HLF,NYQ,Consumer Defensive
+FIGS,NYQ,Consumer Cyclical
+DK,NYQ,Energy
+MNKD,NGM,Healthcare
+DV,NYQ,Communication Services
+TE,NYQ,Industrials
+INOD,NGM,Technology
+SNDX,NMS,Healthcare
+PRGS,NMS,Technology
+NAC,NYQ,Financial Services
+AVAH,NMS,Healthcare
+JAMF,NMS,Technology
+AXGN,NCM,Healthcare
+SBET,NCM,Communication Services
+SMA,NYQ,Real Estate
+SONO,NMS,Technology
+CRVS,NGM,Healthcare
+STOK,NMS,Healthcare
+ARRY,NGM,Technology
+YELP,NYQ,Communication Services
+ARCO,NYQ,Consumer Cyclical
+PCT,NCM,Industrials
+ZYME,NMS,Healthcare
+REAL,NMS,Consumer Cyclical
+NRIX,NGM,Healthcare
+MAN,NYQ,Industrials
+VRE,NYQ,Real Estate
+UPB,NMS,Healthcare
+ALVO,NGM,Healthcare
+RAPT,NGM,Healthcare
+NEXA,NYQ,Basic Materials
+SHO,NYQ,Real Estate
+DQ,NYQ,Technology
+ORKA,NGM,Healthcare
+AMRC,NYQ,Industrials
+MBX,NMS,Healthcare
+PSIX,NCM,Industrials
+KDK,NGM,Technology
+ADNT,NYQ,Consumer Cyclical
+TYRA,NMS,Healthcare
+RQI,NYQ,Financial Services
+WLY,NYQ,Communication Services
+DFTX,NMS,Healthcare
+JMIA,NYQ,Consumer Cyclical
+CLDX,NCM,Healthcare
+ABR,NYQ,Real Estate
+BCRX,NMS,Healthcare
+AMPX,NYQ,Industrials
+SVV,NYQ,Consumer Cyclical
+PRCT,NGM,Healthcare
+RCAT,NCM,Industrials
+NSP,NYQ,Industrials
+LZ,NMS,Industrials
+EFC,NYQ,Real Estate
+AGIO,NMS,Healthcare
+RAMP,NYQ,Technology
+LEG,NYQ,Consumer Cyclical
+SHLS,NGM,Technology
+CXM,NYQ,Technology
+ELVN,NMS,Healthcare
+BHVN,NYQ,Healthcare
+AMLX,NMS,Healthcare
+ZD,NMS,Communication Services
+GLUE,NMS,Healthcare
+TNGX,NGM,Healthcare
+BTGO,NYQ,Financial Services
+NEO,NCM,Healthcare
+PGY,NCM,Technology
+LILAK,NMS,Communication Services
+STGW,NMS,Communication Services
+TRIP,NMS,Consumer Cyclical
+FTRE,NMS,Healthcare
+CRML,NGM,Basic Materials
+AI,NYQ,Technology
+FLYW,NMS,Technology
+BCAT,NYQ,Financial Services
+SKYT,NCM,Technology
+MBC,NYQ,Consumer Cyclical
+HOPE,NMS,Financial Services
+UTI,NYQ,Consumer Defensive
+NVRI,NYQ,Industrials
+TTI,NYQ,Industrials
+NTLA,NGM,Healthcare
+TIGR,NMS,Financial Services
+HROW,NGM,Healthcare
+DOLE,NYQ,Consumer Defensive
+ALEX,NYQ,Real Estate
+GCT,NGM,Technology
+ARI,NYQ,Real Estate
+LZB,NYQ,Consumer Cyclical
+MXL,NMS,Technology
+XHR,NYQ,Real Estate
+ENR,NYQ,Industrials
+SBH,NYQ,Consumer Cyclical
+INVA,NMS,Healthcare
+WKC,NYQ,Energy
+VET,NYQ,Energy
+NNE,NCM,Industrials
+WEN,NMS,Consumer Cyclical
+BVC,NCM,Technology
+GLIBK,NMS,Communication Services
+LSPD,NYQ,Technology
+RES,NYQ,Energy
+WTTR,NYQ,Energy
+WWW,NYQ,Consumer Cyclical
+COLL,NMS,Healthcare
+KRP,NYQ,Energy
+HYT,NYQ,Financial Services
+ENVX,NMS,Industrials
+NVAX,NMS,Healthcare
+ARHS,NMS,Consumer Cyclical
+EXPI,NGM,Real Estate
+CTOS,NYQ,Industrials
+MUX,NYQ,Basic Materials
+ORC,NYQ,Real Estate
+BTX,NYQ,Financial Services
+AMSC,NMS,Industrials
+HIMX,NMS,Technology
+ACVA,NYQ,Consumer Cyclical
+QURE,NMS,Healthcare
+TRS,NMS,Consumer Cyclical
+GILT,NMS,Technology
+DHC,NMS,Real Estate
+MSDL,NYQ,Financial Services
+SOC,NYQ,Energy
+NEXT,NCM,Energy
+PUMP,NYQ,Energy
+CERT,NMS,Healthcare
+LADR,NYQ,Real Estate
+KOD,NGM,Healthcare
+NVCR,NMS,Healthcare
+FSLY,NMS,Technology
+FIVN,NGM,Technology
+MLKN,NMS,Consumer Cyclical
+VYX,NYQ,Technology
+HCSG,NMS,Healthcare
+AHCO,NCM,Healthcare
+KW,NYQ,Real Estate
+PEB,NYQ,Real Estate
+TNDM,NGM,Healthcare
+CSWC,NMS,Financial Services
+ARLO,NYQ,Industrials
+TRVI,NGM,Healthcare
+COHU,NMS,Technology
+UMH,NYQ,Real Estate
+RLAY,NGM,Healthcare
+ANAB,NMS,Healthcare
+JKS,NYQ,Technology
+DSL,NYQ,Financial Services
+EZPW,NMS,Financial Services
+RERE,NYQ,Consumer Cyclical
+WLTH,NMS,Technology
+METC,NMS,Basic Materials
+CSIQ,NMS,Technology
+IMTX,NCM,Healthcare
+GOLD,NYQ,Financial Services
+VITL,NGM,Consumer Defensive
+TRIN,NMS,Financial Services
+FINV,NYQ,Financial Services
+JFR,NYQ,Financial Services
+BV,NYQ,Industrials
+LPG,NYQ,Energy
+CRI,NYQ,Consumer Cyclical
+ENOV,NYQ,Healthcare
+ATEN,NYQ,Technology
+AGRO,NYQ,Consumer Defensive
+OUST,NMS,Technology
+THS,NYQ,Consumer Defensive
+AMPL,NCM,Technology
+XERS,NMS,Healthcare
+ACHC,NMS,Healthcare
+ECVT,NYQ,Basic Materials
+DEA,NYQ,Real Estate
+FSCO,NYQ,Financial Services
+SGML,NCM,Basic Materials
+CCOI,NMS,Communication Services
+TWO,NYQ,Real Estate
+CAPR,NCM,Healthcare
+CNMD,NYQ,Healthcare
+PX,NYQ,Financial Services
+GOOS,NYQ,Consumer Cyclical
+OXLC,NGM,Financial Services
+SFL,NYQ,Industrials
+ARDT,NYQ,Healthcare
+HLX,NYQ,Energy
+NPKI,NYQ,Energy
+LMRI,NMS,Healthcare
+PZZA,NMS,Consumer Cyclical
+DAWN,NMS,Healthcare
+ASTH,NCM,Healthcare
+CMPX,NCM,Healthcare
+NABL,NYQ,Technology
+SUPV,NYQ,Financial Services
+RLJ,NYQ,Real Estate
+EYPT,NGM,Healthcare
+VLRS,NYQ,Industrials
+OPRA,NMS,Communication Services
+MLTX,NCM,Healthcare
+HLIT,NMS,Technology
+SVRA,NMS,Healthcare
+MOMO,NMS,Communication Services
+UPBD,NMS,Technology
+CDNA,NGM,Healthcare
+LAR,NYQ,Basic Materials
+OCSL,NMS,Financial Services
+EVLV,NCM,Industrials
+JBGS,NYQ,Real Estate
+OCFC,NMS,Financial Services
+GSBD,NYQ,Financial Services
+BW,NYQ,Industrials
+PHAT,NMS,Healthcare
+INMD,NMS,Healthcare
+PAR,NYQ,Technology
+AKTS,NMS,Healthcare
+AOD,NYQ,Financial Services
+PDM,NYQ,Real Estate
+MFIC,NMS,Financial Services
+ICHR,NMS,Technology
+VIR,NMS,Healthcare
+DEC,NYQ,Energy
+PMT,NYQ,Real Estate
+SDGR,NMS,Healthcare
+CIM,NYQ,Real Estate
+UAMY,ASE,Basic Materials
+AXTI,NMS,Technology
+GLDD,NMS,Industrials
+COUR,NYQ,Consumer Defensive
+PENG,NMS,Technology
+MRTN,NMS,Industrials
+VTYX,NMS,Healthcare
