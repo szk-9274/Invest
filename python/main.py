@@ -46,7 +46,7 @@ def run_backtest_mode(config: dict, tickers: list, args):
 
     Args:
         config: Configuration dictionary
-        tickers: List of ticker symbols
+        tickers: List of ticker symbols (from tickers.csv)
         args: Command line arguments
     """
     logger.info("=" * 60)
@@ -58,6 +58,42 @@ def run_backtest_mode(config: dict, tickers: list, args):
     end_date = args.end if args.end else config['backtest']['end_date']
 
     use_benchmark = not args.no_benchmark
+
+    # ========== STAGE2 RESULT CONNECTION ==========
+    # CRITICAL: Load Stage2 screening results if available
+    # Without this, backtest runs on ALL tickers (ignoring Stage2 filter)
+    screening_results_path = Path(__file__).parent / config['output']['csv_path']
+    stage2_filtered_tickers = None
+
+    if screening_results_path.exists():
+        try:
+            screening_df = pd.read_csv(screening_results_path)
+            if not screening_df.empty and 'ticker' in screening_df.columns:
+                stage2_filtered_tickers = screening_df['ticker'].tolist()
+                logger.info("=" * 60)
+                logger.info("STAGE2 FILTER APPLIED")
+                logger.info("=" * 60)
+                logger.info(f"Stage2 results loaded from: {screening_results_path}")
+                logger.info(f"Backtest universe: {len(tickers)} → {len(stage2_filtered_tickers)} tickers (Stage2 filtered)")
+                logger.info(f"Stage2 candidates: {', '.join(stage2_filtered_tickers[:10])}" +
+                           (f" ... and {len(stage2_filtered_tickers)-10} more" if len(stage2_filtered_tickers) > 10 else ""))
+
+                # Use Stage2 filtered tickers for backtest
+                tickers = stage2_filtered_tickers
+            else:
+                logger.warning("Stage2 results file is empty or missing 'ticker' column")
+        except Exception as e:
+            logger.warning(f"Failed to load Stage2 results: {e}")
+
+    if stage2_filtered_tickers is None:
+        logger.warning("=" * 60)
+        logger.warning("NO STAGE2 FILTER - Using all tickers")
+        logger.warning("=" * 60)
+        logger.warning(f"Stage2 results not found at: {screening_results_path}")
+        logger.warning("Backtest will run on ALL input tickers (may result in 0 trades)")
+        logger.warning("RECOMMENDATION: Run 'python main.py --mode stage2' first")
+        logger.warning("=" * 60)
+    # ============================================
 
     logger.info(f"Period: {start_date} to {end_date}")
     logger.info(f"Tickers: {len(tickers)}")
