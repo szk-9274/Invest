@@ -236,18 +236,40 @@ python main.py --mode full
 python main.py --mode stage2 --with-fundamentals
 ```
 
-#### 4. バックテスト実行
+#### 4. バックテスト実行（重要：Stage2実行後に実行）
 
+⚠️ **重要**: バックテストは **Stage2スクリーニング実行後** に実行してください。
+
+**正しいワークフロー**:
 ```powershell
-# デフォルト期間（2020-01-01 ~ 2025-01-27）
+# Step 1: Stage2スクリーニング（必須）
+python main.py --mode stage2
+
+# Step 2: バックテスト実行
+python main.py --mode backtest --start 2023-01-01 --end 2024-01-01
+```
+
+**期待される動作**:
+```
+STAGE2 FILTER APPLIED
+Backtest universe: 1890 → 253 tickers (Stage2 filtered)
+Stage 2 checks performed: 8,450
+Total trades executed: 12 ✅
+```
+
+**その他のオプション**:
+```powershell
+# デフォルト期間
 python main.py --mode backtest
 
 # 期間指定
 python main.py --mode backtest --start 2022-01-01 --end 2024-12-31
 
-# 特定銘柄のみ
+# 特定銘柄のみ（Stage2バイパス）
 python main.py --mode backtest --tickers AAPL,MSFT,NVDA
 ```
+
+詳細: [Stage2-Backtest接続修正ガイド](docs/STAGE2_BACKTEST_CONNECTION_FIX.md)
 
 ### 出力ファイル
 
