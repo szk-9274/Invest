@@ -6,9 +6,20 @@ ticker+date+mode combinations.
 """
 import json
 import hashlib
+import numpy as np
 from pathlib import Path
 from typing import Dict, Optional
 from loguru import logger
+
+
+class NumpyEncoder(json.JSONEncoder):
+    """Custom JSON encoder for numpy types"""
+    def default(self, obj):
+        if isinstance(obj, (np.bool_, np.integer, np.floating)):
+            return obj.item()
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return super().default(obj)
 
 
 class Stage2Cache:
@@ -108,7 +119,7 @@ class Stage2Cache:
 
         try:
             with open(cache_file, 'w') as f:
-                json.dump(result, f, indent=2)
+                json.dump(result, f, indent=2, cls=NumpyEncoder)
 
             logger.debug(f"Cache SET: {ticker} {date_str} {mode}")
 
