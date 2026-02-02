@@ -176,6 +176,10 @@ class BacktestEngine:
         for ticker in tqdm(tickers, desc="Loading ticker data", unit="ticker"):
             data = self.fetcher.fetch_data(ticker, period='5y')
             if data is not None and len(data) > 252:
+                # Normalize timezone to tz-naive for consistent comparison
+                if data.index.tz is not None:
+                    data.index = data.index.tz_localize(None)
+
                 # Calculate indicators (benchmark may be None)
                 data = calculate_all_indicators(data, benchmark_data)
                 all_data[ticker] = data
