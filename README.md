@@ -273,3 +273,102 @@ python main.py --mode backtest --tickers AAPL,MSFT,NVDA
 - 売上高成長率: 前年同期比 +25%以上
 - 四半期加速: QoQ（四半期対前期）で成長加速
 - 営業利益率: 15%以上（オプション）
+
+## Stage2 Filtering Modes (New!)
+
+The system now supports **two filtering modes** to handle zero-trades scenarios:
+
+### Strict Mode (Default)
+- High-quality setups with tighter thresholds
+- Best for bull markets with many candidates
+- 9 Stage2 conditions all must pass
+
+### Relaxed Mode (Automatic Fallback)
+- Looser thresholds for harsh market conditions
+- Automatically activates if strict mode produces 0 trades
+- Increases trade opportunities while maintaining core trend structure
+
+### Configuration
+
+Edit `python/config/params.yaml`:
+
+```yaml
+stage:
+  # STRICT MODE (default)
+  strict:
+    min_price_above_52w_low: 1.30      # 30% above 52-week low
+    max_distance_from_52w_high: 0.75   # Within 25% of 52-week high
+    rs_new_high_threshold: 0.95        # RS ≥ 95% of 52w high
+    min_volume: 500000
+
+  # RELAXED MODE (fallback)
+  relaxed:
+    min_price_above_52w_low: 1.20      # 20% above (easier)
+    max_distance_from_52w_high: 0.60   # Within 40% of high (easier)
+    rs_new_high_threshold: 0.90        # RS ≥ 90% (easier)
+    min_volume: 300000
+
+  # Fallback behavior
+  auto_fallback_enabled: true          # Enable automatic fallback
+  min_trades_threshold: 1              # Fallback if < 1 trade
+```
+
+**See [docs/STAGE2_TUNING_GUIDE.md](docs/STAGE2_TUNING_GUIDE.md) for detailed tuning instructions.**
+
+## Manual Testing Commands
+
+### Test Stage2 Filtering
+
+```bash
+# 1. Update ticker list (Stage1 filtering)
+python scripts/update_tickers_extended.py
+
+# 2. Run Stage2 screening
+python main.py --mode stage2
+
+# 3. Run backtest to verify trades are generated
+python main.py --mode backtest --start 2023-01-01 --end 2024-01-01
+```
+
+### Debug Specific Ticker
+
+To see why a specific ticker fails Stage2 conditions:
+
+```bash
+python scripts/debug_stage2.py AAPL
+```
+
+### Check Diagnostics
+
+Backtest output shows:
+- Filtering mode used (STRICT or RELAXED)
+- Total Stage2 checks performed
+- Pass/fail breakdown by condition
+- Most common failure reasons
+
+Example output:
+```
+BACKTEST CONFIGURATION
+=========================
+Filtering mode:   STRICT
+Auto fallback:    Enabled
+
+BACKTEST DIAGNOSTICS
+=========================
+Stage 2 checks performed:    8,450
+Stage 2 passed:               156
+Total trades executed:         12
+
+Top Stage 2 failure reasons:
+  near_52w_high            4,234 failures
+  rs_new_high              2,891 failures
+```
+
+### Test Fallback Behavior
+
+```bash
+# Test on harsh market period (should trigger fallback)
+python main.py --mode backtest --start 2022-01-01 --end 2022-12-31
+
+# Look for "[FALLBACK]" messages in logs
+```

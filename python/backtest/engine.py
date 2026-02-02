@@ -17,6 +17,7 @@ from data.fetcher import YahooFinanceFetcher
 from analysis.indicators import calculate_all_indicators
 from analysis.stage_detector import StageDetector
 from analysis.vcp_detector import VCPDetector
+from backtest.fallback_manager import FallbackManager
 
 
 @dataclass
@@ -77,6 +78,13 @@ class BacktestEngine:
         self.stage_detector = StageDetector(config['stage'])
         self.vcp_detector = VCPDetector(config['vcp'])
 
+        # Initialize FallbackManager
+        stage_config = config['stage']
+        self.fallback_manager = FallbackManager(
+            auto_fallback_enabled=stage_config.get('auto_fallback_enabled', True),
+            min_trades_threshold=stage_config.get('min_trades_threshold', 1)
+        )
+
         # Backtest parameters
         self.initial_capital = config['backtest']['initial_capital']
         self.max_positions = config['backtest']['max_positions']
@@ -91,7 +99,10 @@ class BacktestEngine:
             'insufficient_capital': 0,
             'max_positions_reached': 0,
             'insufficient_data': 0,
-            'total_entry_attempts': 0
+            'total_entry_attempts': 0,
+            'fallback_triggered': False,
+            'strict_mode_trades': 0,
+            'relaxed_mode_trades': 0
         }
 
     def run(
@@ -121,6 +132,8 @@ class BacktestEngine:
         logger.info(f"Risk per trade:   {self.risk_per_trade:.1%}")
         logger.info(f"Commission:       {self.commission:.2%}")
         logger.info(f"Benchmark:        {'Enabled (SPY)' if self.use_benchmark else 'Disabled'}")
+        logger.info(f"Filtering mode:   {self.fallback_manager.get_current_mode().upper()}")
+        logger.info(f"Auto fallback:    {'Enabled' if self.fallback_manager.auto_fallback_enabled else 'Disabled'}")
         logger.info("=" * 60)
 
         # Fetch benchmark data (with fallback)
@@ -261,8 +274,9 @@ class BacktestEngine:
                     # Check Stage 2
                     self.diagnostics['stage2_checks'] += 1
                     rs_line = hist_data['rs_line'] if use_benchmark else None
+                    current_mode = self.fallback_manager.get_current_mode()
                     stage_result = self.stage_detector.detect_stage(
-                        hist_data, rs_line, use_benchmark=use_benchmark
+                        hist_data, rs_line, use_benchmark=use_benchmark, mode=current_mode
                     )
 
                     if stage_result['stage'] != 2:
