@@ -24,6 +24,235 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from utils.logger import setup_logger
 from utils.ticker_normalizer import normalize_tickers
+import csv
+from datetime import datetime
+import json
+
+
+class BatchProgressTracker:
+    """Tracks batch processing progress for resumability"""
+
+    def __init__(self, progress_file: str = None):
+        """
+        Initialize the batch progress tracker.
+
+        Args:
+            progress_file: Path to batch_progress.json (default: config/batch_progress.json)
+        """
+        if progress_file is None:
+            progress_file = Path(__file__).parent.parent / "config" / "batch_progress.json"
+        self.progress_file = Path(progress_file)
+
+    def save_batch_progress(self, batch_num: int, total_batches: int, processed_tickers: List[str]):
+        """
+        Save progress for a completed batch.
+
+        Args:
+            batch_num: Current batch number (0-indexed)
+            total_batches: Total number of batches
+            processed_tickers: List of tickers processed in this batch
+        """
+        # Load existing progress or create new
+        progress = self.load_progress() or {
+            "completed_batches": [],
+            "current_batch": -1,
+            "total_batches": total_batches,
+            "last_updated": None
+        }
+
+        # Update progress
+        if batch_num not in progress["completed_batches"]:
+            progress["completed_batches"].append(batch_num)
+
+        progress["current_batch"] = batch_num
+        progress["total_batches"] = total_batches
+        progress["last_updated"] = datetime.now().isoformat()
+
+        # Ensure parent directory exists
+        self.progress_file.parent.mkdir(parents=True, exist_ok=True)
+
+        # Save to file
+        with open(self.progress_file, 'w', encoding='utf-8') as f:
+            json.dump(progress, f, indent=2)
+
+        logger.info(
+            f"[PROGRESS] Batch {batch_num + 1}/{total_batches} completed "
+            f"({len(progress['completed_batches'])}/{total_batches} total)"
+        )
+
+    def load_progress(self) -> Optional[Dict]:
+        """
+        Load saved progress from file.
+
+        Returns:
+            Progress dictionary or None if file doesn't exist
+        """
+        if not self.progress_file.exists():
+            return None
+
+        try:
+            with open(self.progress_file, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e:
+            logger.warning(f"[WARN] Failed to load progress file: {e}")
+            return None
+
+    def is_batch_completed(self, batch_num: int) -> bool:
+        """
+        Check if a specific batch is already completed.
+
+        Args:
+            batch_num: Batch number to check
+
+        Returns:
+            True if batch is completed, False otherwise
+        """
+        progress = self.load_progress()
+        if progress is None:
+            return False
+
+        return batch_num in progress.get("completed_batches", [])
+
+    def get_next_batch_to_process(self, total_batches: int) -> int:
+        """
+        Get the next batch number that needs processing.
+
+        Args:
+            total_batches: Total number of batches
+
+        Returns:
+            Next batch number to process (0-indexed)
+        """
+        progress = self.load_progress()
+        if progress is None:
+            return 0
+
+        completed = set(progress.get("completed_batches", []))
+
+        # Find first non-completed batch
+        for i in range(total_batches):
+            if i not in completed:
+                return i
+
+        # All batches completed
+        return total_batches
+
+    def clear_progress(self):
+        """Clear the progress file (typically after successful completion)"""
+        if self.progress_file.exists():
+            self.progress_file.unlink()
+            logger.info("[PROGRESS] Progress file cleared")
+
+
+class FailedTickerTracker:
+    """Tracks failed ticker API calls for retry and skip logic"""
+
+    def __init__(self, csv_path: str = None):
+        """
+        Initialize the failed ticker tracker.
+
+        Args:
+            csv_path: Path to failed_tickers.csv (default: config/failed_tickers.csv)
+        """
+        if csv_path is None:
+            csv_path = Path(__file__).parent.parent / "config" / "failed_tickers.csv"
+        self.csv_path = Path(csv_path)
+
+    def record_failure(self, ticker: str, error_type: str, error_message: str):
+        """
+        Record a failed ticker API call.
+
+        Args:
+            ticker: Ticker symbol that failed
+            error_type: Type of error (HTTPError, TimeoutError, ParseError, etc.)
+            error_message: Detailed error message
+        """
+        # Calculate retry count
+        current_retry_count = self.get_retry_count(ticker)
+        new_retry_count = current_retry_count + 1
+
+        # Prepare row data
+        row = {
+            "ticker": ticker,
+            "error_type": error_type,
+            "error_message": error_message,
+            "timestamp": datetime.now().isoformat(),
+            "retry_count": new_retry_count
+        }
+
+        # Ensure parent directory exists
+        self.csv_path.parent.mkdir(parents=True, exist_ok=True)
+
+        # Check if file exists to determine if we need to write headers
+        file_exists = self.csv_path.exists()
+
+        # Append to CSV (create if doesn't exist)
+        with open(self.csv_path, 'a', newline='', encoding='utf-8') as f:
+            fieldnames = ["ticker", "error_type", "error_message", "timestamp", "retry_count"]
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+
+            # Write header if file is new
+            if not file_exists:
+                writer.writeheader()
+
+            writer.writerow(row)
+
+    def load_failed_tickers(self) -> Set[str]:
+        """
+        Load set of all failed tickers from CSV.
+
+        Returns:
+            Set of ticker symbols that have failed
+        """
+        if not self.csv_path.exists():
+            return set()
+
+        try:
+            df = pd.read_csv(self.csv_path)
+            return set(df["ticker"].unique())
+        except Exception as e:
+            logger.warning(f"[WARN] Failed to load failed tickers CSV: {e}")
+            return set()
+
+    def get_retry_count(self, ticker: str) -> int:
+        """
+        Get the current retry count for a specific ticker.
+
+        Args:
+            ticker: Ticker symbol
+
+        Returns:
+            Number of times this ticker has failed (0 if never failed)
+        """
+        if not self.csv_path.exists():
+            return 0
+
+        try:
+            df = pd.read_csv(self.csv_path)
+            ticker_records = df[df["ticker"] == ticker]
+            if len(ticker_records) == 0:
+                return 0
+            # Return the count of records for this ticker
+            return len(ticker_records)
+        except Exception as e:
+            logger.warning(f"[WARN] Failed to get retry count for {ticker}: {e}")
+            return 0
+
+    def should_retry(self, ticker: str, max_retries: int = 3) -> bool:
+        """
+        Determine if a ticker should be retried based on retry count.
+
+        Args:
+            ticker: Ticker symbol
+            max_retries: Maximum number of retries allowed
+
+        Returns:
+            True if ticker should be retried, False otherwise
+        """
+        retry_count = self.get_retry_count(ticker)
+        # Allow retry if we haven't exceeded max_retries
+        # Example: max_retries=3 means we allow up to 3 failures (retry_count 1,2,3)
+        return retry_count <= max_retries
 
 
 class TickerFetcher:
@@ -53,6 +282,92 @@ class TickerFetcher:
         self.max_tickers = max_tickers
         self.request_delay = request_delay
         self.exclude_types = ['ETF', 'REIT', 'ADR', 'CEF']
+
+        # Initialize failed ticker tracker
+        self.failed_tracker = FailedTickerTracker()
+
+        # Initialize batch progress tracker
+        self.batch_tracker = BatchProgressTracker()
+
+        # Initialize cooldown and exponential backoff
+        self.consecutive_failures = 0
+        self.cooldown_threshold = 5  # Trigger cooldown after 5 consecutive failures
+        self.cooldown_enabled = True
+        self.max_cooldown = 300  # Maximum 5 minutes cooldown
+
+    def prioritize_tickers(
+        self,
+        tickers: List[str],
+        ticker_info: Dict[str, Dict]
+    ) -> List[str]:
+        """
+        Prioritize tickers by market cap (largest first).
+
+        Args:
+            tickers: List of ticker symbols
+            ticker_info: Dictionary mapping ticker to info dict
+
+        Returns:
+            Sorted list of tickers by market cap (descending)
+        """
+        if not tickers:
+            return []
+
+        # Create list of (ticker, market_cap) tuples
+        ticker_caps = []
+        for ticker in tickers:
+            info = ticker_info.get(ticker, {})
+            market_cap = info.get('market_cap', 0) or 0  # Handle None
+            ticker_caps.append((ticker, market_cap))
+
+        # Sort by market cap descending (largest first)
+        ticker_caps.sort(key=lambda x: x[1], reverse=True)
+
+        # Extract just the ticker symbols
+        prioritized = [ticker for ticker, _ in ticker_caps]
+
+        # Log prioritization for top tickers
+        if prioritized and ticker_info:
+            top_ticker = prioritized[0]
+            top_info = ticker_info.get(top_ticker, {})
+            top_cap = top_info.get('market_cap', 0) or 0
+            if top_cap > 0:
+                logger.info(
+                    f"[PRIORITY] Processing {len(prioritized)} tickers by market cap "
+                    f"(largest: {top_ticker} @ ${top_cap/1e9:.1f}B)"
+                )
+
+        return prioritized
+
+    def calculate_cooldown(self, failure_count: int) -> float:
+        """
+        Calculate exponential backoff cooldown time.
+
+        Args:
+            failure_count: Number of consecutive failures
+
+        Returns:
+            Cooldown time in seconds (capped at max_cooldown)
+        """
+        # Exponential backoff: 5s, 10s, 20s, 40s, 80s, ...
+        base_cooldown = 5  # seconds
+        cooldown = base_cooldown * (2 ** (failure_count - 1))
+        return min(cooldown, self.max_cooldown)
+
+    def apply_cooldown(self, wait_time: float):
+        """
+        Apply cooldown by sleeping for specified time.
+
+        Args:
+            wait_time: Time to wait in seconds
+        """
+        if not self.cooldown_enabled:
+            return
+
+        logger.warning(
+            f"[COOLDOWN] Waiting {wait_time:.1f}s due to {self.consecutive_failures} consecutive failures"
+        )
+        time.sleep(wait_time)
 
     def fetch_sp500(self) -> List[str]:
         """
@@ -168,9 +483,17 @@ class TickerFetcher:
         """
         for attempt in range(max_retries):
             try:
+                # Apply cooldown if we've hit the threshold
+                if self.consecutive_failures >= self.cooldown_threshold:
+                    cooldown_time = self.calculate_cooldown(self.consecutive_failures)
+                    self.apply_cooldown(cooldown_time)
+
                 time.sleep(self.request_delay)
                 stock = yf.Ticker(ticker)
                 info = stock.info
+
+                # Success - reset consecutive failures
+                self.consecutive_failures = 0
 
                 # Return extracted data (using snake_case keys for consistency with filter_tickers)
                 return {
@@ -185,18 +508,24 @@ class TickerFetcher:
                 }
 
             except Exception as e:
+                error_type = type(e).__name__
+                error_message = str(e)
+
                 if attempt < max_retries - 1:
                     # Exponential backoff: 1s, 2s, 4s
                     wait_time = 2 ** attempt
                     logger.debug(
                         f"{ticker}: Attempt {attempt + 1}/{max_retries} failed "
-                        f"({type(e).__name__}), retrying in {wait_time}s..."
+                        f"({error_type}), retrying in {wait_time}s..."
                     )
                     time.sleep(wait_time)
                 else:
+                    # All retries exhausted - increment consecutive failures and record
+                    self.consecutive_failures += 1
                     logger.debug(
-                        f"{ticker}: All {max_retries} attempts failed - {type(e).__name__}: {e}"
+                        f"[FAIL] {ticker}: All {max_retries} attempts failed - {error_type}: {error_message}"
                     )
+                    self.failed_tracker.record_failure(ticker, error_type, error_message)
                     return None
 
         return None
@@ -461,22 +790,58 @@ class TickerFetcher:
         logger.info("Fetching ticker information (this may take a while)...")
         ticker_list = list(all_tickers)
 
+        # Prioritize S&P 500 tickers (likely to have higher market caps)
+        sp500_tickers = set(self.fetch_sp500())
+        priority_tickers = [t for t in ticker_list if t in sp500_tickers]
+        other_tickers = [t for t in ticker_list if t not in sp500_tickers]
+        ticker_list = priority_tickers + other_tickers
+
+        if priority_tickers:
+            logger.info(
+                f"[PRIORITY] Processing {len(priority_tickers)} S&P 500 tickers first "
+                f"(likely higher market cap)"
+            )
+
+        # Load previously failed tickers for skip/retry logic
+        previously_failed = self.failed_tracker.load_failed_tickers()
+        if previously_failed:
+            logger.info(f"[SKIP] Loaded {len(previously_failed)} previously failed tickers")
+            # For now, we'll attempt all tickers (including previously failed ones)
+            # In future, could add --retry-failed-only flag to only retry failures
+            logger.info(f"[INFO] Will attempt all tickers (including {len(previously_failed)} with previous failures)")
+
         # Process in batches to avoid memory issues and rate limits
         # Reduced from 500 to 250 to reduce Yahoo Finance API rate limit issues
         batch_size = 250
         all_info = {}
         info_success_total = 0
         info_failed_total = 0
+        total_batches = (len(ticker_list) + batch_size - 1) // batch_size
+
+        # Check for existing progress
+        existing_progress = self.batch_tracker.load_progress()
+        if existing_progress:
+            completed_count = len(existing_progress.get('completed_batches', []))
+            logger.info(f"[RESUME] Found existing progress: {completed_count}/{total_batches} batches completed")
 
         for i in range(0, len(ticker_list), batch_size):
+            batch_num = i // batch_size  # 0-indexed
+            batch_display = batch_num + 1  # 1-indexed for display
+
+            # Skip if batch already completed
+            if self.batch_tracker.is_batch_completed(batch_num):
+                logger.info(f"[SKIP] Batch {batch_display}/{total_batches} already completed, skipping...")
+                continue
+
             batch = ticker_list[i:i + batch_size]
-            batch_num = i // batch_size + 1
-            total_batches = (len(ticker_list) + batch_size - 1) // batch_size
-            logger.info(f"Processing batch {batch_num}/{total_batches} ({len(batch)} tickers)...")
+            logger.info(f"Processing batch {batch_display}/{total_batches} ({len(batch)} tickers)...")
             batch_result = self.get_ticker_info_batch(batch, max_workers=4)
             all_info.update(batch_result['info'])
             info_success_total += batch_result['stats']['success']
             info_failed_total += batch_result['stats']['failed']
+
+            # Save progress after each batch
+            self.batch_tracker.save_batch_progress(batch_num, total_batches, batch)
 
             # Add delay between batches to avoid rate limiting (except after last batch)
             if i + batch_size < len(ticker_list):
@@ -522,6 +887,9 @@ class TickerFetcher:
 
         output_path.parent.mkdir(parents=True, exist_ok=True)
         df_output.to_csv(output_path, index=False)
+
+        # Clear batch progress after successful completion
+        self.batch_tracker.clear_progress()
 
         # Final Summary with enhanced diagnostics
         logger.info("")

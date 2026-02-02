@@ -31,7 +31,7 @@ class YahooFinanceFetcher:
         retry_attempts: int = 3,
         cache_dir: Optional[str] = None,
         cache_enabled: bool = True,
-        cache_max_age_hours: int = 12,
+        cache_max_age_hours: int = 24,  # Extended from 12h to 24h for Task 4
     ):
         """
         Initialize the fetcher.
@@ -47,6 +47,10 @@ class YahooFinanceFetcher:
         self.retry_attempts = retry_attempts
         self.cache_enabled = cache_enabled
         self.cache_max_age_hours = cache_max_age_hours
+
+        # Initialize cooldown configuration
+        self.cooldown_enabled = True
+        self.consecutive_failures = 0
 
         if cache_dir:
             self.cache_dir = Path(cache_dir)
@@ -73,6 +77,7 @@ class YahooFinanceFetcher:
 
         cache_file = self._cache_path(symbol, period, interval)
         if not cache_file.exists():
+            logger.debug(f"[CACHE MISS] {symbol}: No cache file found")
             return None
 
         # Check age
@@ -81,16 +86,16 @@ class YahooFinanceFetcher:
         age_hours = age_seconds / 3600
 
         if age_hours > self.cache_max_age_hours:
-            logger.debug(f"{symbol}: Cache expired ({age_hours:.1f}h > {self.cache_max_age_hours}h)")
+            logger.debug(f"[CACHE MISS] {symbol}: Cache expired ({age_hours:.1f}h > {self.cache_max_age_hours}h)")
             return None
 
         try:
             with open(cache_file, "rb") as f:
                 data = pickle.load(f)
-            logger.debug(f"{symbol}: Loaded from cache ({len(data)} bars, {age_hours:.1f}h old)")
+            logger.debug(f"[CACHE HIT] {symbol}: Loaded from cache ({len(data)} bars, {age_hours:.1f}h old)")
             return data
         except Exception as e:
-            logger.warning(f"{symbol}: Cache read error - {e}")
+            logger.warning(f"[CACHE MISS] {symbol}: Cache read error - {e}")
             return None
 
     def _save_to_cache(self, symbol: str, period: str, interval: str, data: pd.DataFrame) -> None:
