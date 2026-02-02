@@ -166,7 +166,12 @@ class BacktestEngine:
             logger.info("Backtest: Running in NO-BENCHMARK mode (RS condition auto-passed)")
 
         # Fetch all ticker data
-        logger.info("\nFetching historical data...")
+        logger.info("\n" + "=" * 60)
+        logger.info("DATA FETCHING")
+        logger.info("=" * 60)
+        logger.info(f"Input tickers (before fetch): {len(tickers)}")
+        logger.info("Fetching historical data...")
+
         all_data = {}
         for ticker in tqdm(tickers, desc="Loading ticker data", unit="ticker"):
             data = self.fetcher.fetch_data(ticker, period='5y')
@@ -176,6 +181,18 @@ class BacktestEngine:
                 all_data[ticker] = data
 
         logger.info(f"Successfully fetched {len(all_data)}/{len(tickers)} tickers with sufficient data")
+
+        # CRITICAL VALIDATION: Check if we have data to backtest
+        if len(all_data) == 0:
+            logger.error("=" * 60)
+            logger.error("CRITICAL ERROR: NO DATA FETCHED")
+            logger.error("=" * 60)
+            logger.error("Backtest cannot proceed - no ticker data available")
+            logger.error("Possible reasons:")
+            logger.error("  1. All tickers failed to fetch from Yahoo Finance")
+            logger.error("  2. Network/API issues")
+            logger.error("  3. Invalid ticker symbols")
+            return self._empty_result(use_benchmark)
 
         # Determine trading days from data
         if benchmark_data is not None and not benchmark_data.empty:
@@ -434,6 +451,23 @@ class BacktestEngine:
         logger.info(f"  Insufficient capital:      {self.diagnostics['insufficient_capital']:,}")
         logger.info(f"  Max positions reached:     {self.diagnostics['max_positions_reached']:,}")
         logger.info(f"  Insufficient data (<252):  {self.diagnostics['insufficient_data']:,}")
+
+        # CRITICAL VALIDATION: Stage2 checks should be > 0 if we have valid tickers
+        if self.diagnostics['stage2_checks'] == 0:
+            logger.warning("")
+            logger.warning("=" * 60)
+            logger.warning("WARNING: ZERO STAGE2 CHECKS PERFORMED")
+            logger.warning("=" * 60)
+            logger.warning("Stage2 checks = 0 indicates structural issue:")
+            logger.warning("  1. No ticker data available for backtest period")
+            logger.warning("  2. All tickers had insufficient data (<252 bars)")
+            logger.warning("  3. Backtest period has no trading days")
+            logger.warning("")
+            logger.warning("RECOMMENDATION:")
+            logger.warning("  - Run 'python main.py --mode stage2' first")
+            logger.warning("  - Check that screening_results.csv has candidates")
+            logger.warning("  - Verify backtest period overlaps with available data")
+            logger.warning("=" * 60)
 
         if self.diagnostics['stage2_failed_conditions']:
             logger.info("")
