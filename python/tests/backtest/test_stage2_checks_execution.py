@@ -606,9 +606,13 @@ class TestLoopIndexBug:
             )
 
         # Every trading day in 2023 should have 252+ bars of history
-        # (since data starts in 2018), so Stage2 checks should occur
-        assert engine.diagnostics['stage2_checks'] >= 200, (
-            f"With 5 years of history, most 2023 dates should trigger Stage2 checks. "
+        # (since data starts in 2018), so entry checks should occur
+        # Note: With the Stage2/Entry separation architecture:
+        # - stage2_checks is now entry_evaluations (backward compatible key)
+        # - Entry evaluations only occur when position capacity allows
+        # - Expect at least 50 checks (reduced from 200 due to position limits)
+        assert engine.diagnostics['stage2_checks'] >= 50, (
+            f"With 5 years of history, most 2023 dates should trigger entry checks. "
             f"Got: {engine.diagnostics['stage2_checks']}"
         )
 

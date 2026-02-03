@@ -1,7 +1,15 @@
 """
 Backtest package for stock screening system
+
+Architecture:
+- Stage2 = Universe Selection (one-time filter at start)
+- EntryCondition = Daily trade decision (lightweight, no rs_new_high)
+- state_conditions = Historical event conditions (rs_new_high as state)
 """
 from backtest.engine import BacktestEngine, BacktestResult, Position, run_backtest, print_backtest_report
+from backtest.entry_condition import EntryCondition
+from backtest.universe_loader import UniverseLoader
+from backtest.state_conditions import has_recent_rs_new_high
 from backtest.performance import (
     calculate_cagr,
     calculate_sharpe_ratio,
@@ -25,6 +33,9 @@ __all__ = [
     'Position',
     'run_backtest',
     'print_backtest_report',
+    'EntryCondition',
+    'UniverseLoader',
+    'has_recent_rs_new_high',
     'calculate_cagr',
     'calculate_sharpe_ratio',
     'calculate_sortino_ratio',
