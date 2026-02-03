@@ -4,30 +4,30 @@
 
 ```
 .claude/
-├── agents/                    # 👤 人格・役割分担（思考モード）
+├── agents/                    # 人格・役割分担（思考モード）
 │   ├── planner.md             # 設計担当：実装前に計画を立てる
 │   ├── tdd-guide.md           # テスト担当：TDD・最小再現テストを要求
 │   └── code-reviewer.md       # レビュアー：品質・リスク・設計妥当性を確認
 │
-├── commands/                  # 🚀 起動装置（人が明示的に呼ぶワークフロー）
+├── commands/                  # 起動装置（人が明示的に呼ぶワークフロー）
 │   ├── plan.md                # /plan - 実装計画の作成
 │   ├── tdd.md                 # /tdd - テスト駆動で修正・実装
 │   ├── code-review.md         # /code-review - 変更差分のレビュー
 │   └── build-fix.md           # /build-fix - ビルド／実行エラー修正
 │
-├── rules/                     # 📜 条例（分野別の詳細ルール）
+├── rules/                     # 条例（分野別の詳細ルール）
 │   ├── coding-style.md        # コーディング規約
 │   ├── testing.md             # テスト必須条件・実行ルール
 │   ├── git-workflow.md        # ブランチ戦略・PR運用
 │   └── security.md            # セキュリティ・危険操作禁止
 │
-├── skills/                    # 🧠 技能（再利用可能な作業ノウハウ）
+├── skills/                    # 技能（再利用可能な作業ノウハウ）
 │   ├── tdd-workflow.md        # TDDの具体的手順
 │   └── electron-patterns.md   # Electron実装パターン（※他PJ流用可）
 │
-├── rules.md                   # 🏛 憲法（最上位ルール・思想）
-├── settings.json              # ⚙️ Claude Code 共通設定（共有）
-└── settings.local.json        # 🔐 ローカル専用設定（個人環境）
+├── rules.md                   # 憲法（最上位ルール・思想）
+├── settings.json              # Claude Code 共通設定（共有）
+└── settings.local.json        # ローカル専用設定（個人環境）
 
 ```
 
@@ -238,7 +238,7 @@ python main.py --mode stage2 --with-fundamentals
 
 #### 4. バックテスト実行（重要：Stage2実行後に実行）
 
-⚠️ **重要**: バックテストは **Stage2スクリーニング実行後** に実行してください。
+**重要**: バックテストは **Stage2スクリーニング実行後** に実行してください。
 
 **正しいワークフロー**:
 ```powershell
@@ -254,7 +254,7 @@ python main.py --mode backtest --start 2023-01-01 --end 2024-01-01
 STAGE2 FILTER APPLIED
 Backtest universe: 1890 → 253 tickers (Stage2 filtered)
 Stage 2 checks performed: 8,450
-Total trades executed: 12 ✅
+Total trades executed: 12
 ```
 
 **その他のオプション**:

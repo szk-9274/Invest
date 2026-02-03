@@ -1,14 +1,31 @@
-# CLAUDE.md
-
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This document defines mandatory behaviors and constraints for Claude Code when working in this repository. 
+These rules take precedence over any implicit assumptions or general expectations. 
+Failure to follow these rules will be considered a task failure.
 
 ## Project Overview
 
-Electron + React + TypeScript desktop application for Windows, bundled with Vite.
+This project is a Python-based stock screening and backtesting system designed as a data pipeline.
+
+The system operates in clearly separated stages:
+
+- Stage1: Build and normalize a broad stock universe from multiple sources.
+- Stage2: Apply technical screening rules to generate trade candidates.
+- Backtest: Simulate trade execution over a historical period using Stage2 results.
+
+The primary interaction method is a CLI interface (`main.py --mode ...`).
+There is no frontend or UI layer.
+
+Each stage produces explicit outputs (CSV, logs, cache files) that are reused by downstream stages.
+Stages must remain loosely coupled and executable independently.
+
+This project prioritizes:
+- Debuggability via structured logging
+- Deterministic and reproducible runs
+- Incremental execution and re-runs without recomputing completed stages
 
 ## Critical Rules
 
-### 1. Test-Driven Development (MANDATORY)
+### Test-Driven Development (MANDATORY) ※Process Description
 
 **Always write tests FIRST:**
 1. Write failing test (RED)
@@ -18,110 +35,94 @@ Electron + React + TypeScript desktop application for Windows, bundled with Vite
 
 Use `/tdd` command to enforce this workflow.
 
-### 2. Code Organization
+### Testing　※Types of Tests
+
+- TDD: Write tests first
+- 80% minimum coverage
+- Unit tests for utilities
+- Integration tests for APIs
+- E2E tests for critical flows
+
+### Code Organization
 
 - Many small files over few large files
-- 200-400 lines typical, 800 max per file
-- Organize by feature/domain
 - High cohesion, low coupling
+- 200-400 lines typical, 800 max per file
+- Organize by feature/domain, not by type
 
-### 3. Security (Electron-Critical)
+### Code Style
 
-- contextIsolation: true (ALWAYS)
-- nodeIntegration: false (ALWAYS)
-- No hardcoded secrets
-- Validate all IPC inputs
-- Use environment variables for sensitive data
-
-### 4. Code Style
-
-- Immutability always - never mutate objects or arrays
+- No emojis in code, comments, or documentation
 - No console.log in production code
 - Proper error handling with try/catch
-- TypeScript strict mode
 
-## Build and Development Commands
+### 4. Security
 
-### Development (with hot reload)
-```bash
-npm run dev:hmr
-```
-Runs three processes concurrently: TypeScript watch, Vite dev server, Electron with nodemon.
+- No hardcoded secrets
+- Environment variables for sensitive data
+- Validate all user inputs
 
-### Production preview
-```bash
-npm run start:prod
-```
-Builds and runs the app in production mode.
+## File Structure
 
-### Build only
-```bash
-npm run build
-```
-Compiles TypeScript and builds the Vite renderer to `renderer-dist/`.
+- main.py  
+  Entry point. Controls execution modes (stage2, backtest).
+- python/stage2/  
+  Stage 2 technical screening logic. Outputs screening_results.csv.
+- python/backtest/  
+  Backtest engine. Consumes Stage 2 output and simulates trades.
+- python/scripts/  
+  Standalone scripts (e.g. ticker universe update).
+- python/config/  
+  Configuration, thresholds, and constants.
+- python/utils/  
+  Shared helpers (logging, data loading, I/O).
+- python/output/  
+  Generated artifacts (screening results, backtest outputs).
 
-### Create Windows installer
-```bash
-npm run dist
-```
-Builds and creates NSIS installer in `release/`.
+### Role Discipline
+Claude Code must explicitly switch roles as required. Before taking any action, it should clearly state which agent is currently active.
 
-### Clean build artifacts
-```bash
-npm run clean
-```
-Removes `dist/`, `renderer-dist/`, and `release/` directories.
+#### **planner**
+* Task decomposition, scope clarification, and execution planning.
 
-### Testing (when configured)
-```bash
-npm test              # Run tests
-npm run test:coverage # Run with coverage
-```
+#### **tdd-guide**
+* Writing or updating tests prior to, or in parallel with, implementation.
+* **Mandatory** for data pipelines, scripts, and changes to logic involving side effects.
 
-## Architecture
+#### **code-reviewer**
+* Identification of risks, assumptions, and constraints.
+* Verification of the safety and maintainability of changes.
 
-### Directory Structure
-```
-src/                    # Electron main process
-  main.ts               # Entry, window management, IPC handlers
-  preload.ts            # Context bridge (window.win, window.gitlab)
-
-renderer/               # React frontend
-  src/
-    App.tsx             # Main component
-    components/         # UI components
-    hooks/              # Custom hooks
-    types/              # TypeScript declarations
-
-.claude/                # Claude Code configuration
-  agents/               # Specialized subagents
-  commands/             # Slash commands
-  rules/                # Always-follow guidelines
-  skills/               # Workflow definitions
-```
-
-### IPC Communication
-- Main process handles: `win:minimize`, `win:close`, `gitlab:openProjectWeb`
-- Preload exposes: `window.win.minimize()`, `window.win.close()`, `window.gitlab.openProjectWeb()`
-
-### TypeScript Configuration
-- Root `tsconfig.json` - Main/preload process (CommonJS, outputs to `dist/`)
-- `renderer/tsconfig.json` - React frontend (noEmit, Vite handles bundling)
-
-### Dev vs Production Mode
-Controlled by `USE_DEV_SERVER` environment variable:
-- `true`: Loads from Vite dev server (http://127.0.0.1:5173), auto-opens DevTools
-- `false`: Loads built static files from `renderer-dist/`
-
-## Available Commands
-
-- `/tdd` - Test-driven development workflow
-- `/plan` - Create implementation plan
-- `/code-review` - Review code quality
-- `/build-fix` - Fix build errors
+### Available Commands
+* `/tdd` – Test-Driven Development workflow.
+* `/plan` – Create an implementation plan.
+* `/code-review` – Perform a code quality review.
+* `/build-fix` – Resolve build errors.
 
 ## Git Workflow
 
 - Conventional commits: `feat:`, `fix:`, `refactor:`, `docs:`, `test:`
-- All tests must pass before commit
-- Use `/code-review` before PR
+- Never commit to main directly
+- PRs require review
+- All tests must pass before merge
+
+## python
+
+### 3. Script-Specific Rules (python/scripts)
+Files located under `python/scripts/` are treated as **executable entry points**.
+
+When modifying these files:
+* **Assume direct execution**: Design scripts to be invoked directly via CLI.
+* **Validate CLI argument parsing**: Ensure parameters are correctly handled.
+* **Guarantee crash-free startup**: Ensure scripts initialize without errors.
+* **Prioritize smoke tests**: Focus on runtime execution checks over complex logic tests for scripts.
+* **Fail fast and clearly**: Scripts must exit immediately with clear errors on invalid input.
+
+### Future Roadmap (Non-binding): React + TypeScript 
+Looking ahead, the project is intended to evolve into a full-stack desktop application.
+* **`npm run dev:hmr`**: Dev mode (TS watch + Vite + Electron).
+* **`npm run start:prod`**: Production mode preview.
+* **`npm run build`**: Compile TS and build renderer to `renderer-dist/`.
+* **`npm run dist`**: Generate NSIS installer in `release/`.
+* **`npm run clean`**: Remove `dist/`, `renderer-dist/`, and `release/`.
+* **`npm test`**: Run tests / **`npm run test:coverage`**: Run with coverage.
