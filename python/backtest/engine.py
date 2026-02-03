@@ -234,8 +234,12 @@ class BacktestEngine:
         )
 
         for i, date in pbar:
-            if i < 252:  # Need at least 252 days of history
-                continue
+            # NOTE: The historical data requirement (252 bars) is checked per-ticker
+            # at line 291 (len(hist_data) < 252), NOT by loop iteration index.
+            # The old `if i < 252: continue` was incorrect because:
+            # - trading_days is filtered to backtest period (may be < 252 days)
+            # - Each ticker has its own full historical data (fetched with period='5y')
+            # - We check if ticker has sufficient history before the simulation date
 
             # Update progress bar with current status
             current_equity = capital
