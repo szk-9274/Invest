@@ -62,10 +62,15 @@ vcp:
   pivot_min_high_52w_ratio: 0.95
   pivot_buffer_atr: 0.5
 
-# Entry conditions
+# Entry conditions (daily evaluation during backtest)
+# NOTE: Entry conditions are SEPARATE from Stage2 conditions.
+# Stage2 is for universe selection (one-time at start).
+# Entry conditions are lightweight checks for daily trade decisions.
+# Entry conditions do NOT include rs_new_high (that's a Stage2 condition).
 entry:
   buy_zone_pct: 0.03                 # Within 3% of pivot
   breakout_vol_ratio: 1.5            # Volume 1.5x 50-day average
+  min_volume: 500000                 # Minimum 50-day avg volume for entry
 
 # Risk management
 risk:
