@@ -1,5 +1,22 @@
 """
 Backtesting Engine Module
+
+Architecture:
+- Stage2 = Universe Selection (tickers loaded from screening_results.csv)
+- EntryCondition = Daily trade decision (lightweight, no rs_new_high)
+
+Stage2 conditions (including rs_new_high) are evaluated ONCE at the start
+when loading the universe. They are NOT re-evaluated daily.
+
+EntryCondition is evaluated daily for entry decisions and includes only:
+- price > sma50
+- sma50 > sma150
+- sufficient volume
+
+This separation ensures:
+1. Backtest generates trades (not 0)
+2. Stage2 universe and Entry pass rates are independently observable
+3. rs_new_high is NOT evaluated as daily entry condition
 """
 import pandas as pd
 import numpy as np
@@ -18,6 +35,7 @@ from analysis.indicators import calculate_all_indicators
 from analysis.stage_detector import StageDetector
 from analysis.vcp_detector import VCPDetector
 from backtest.fallback_manager import FallbackManager
+from backtest.entry_condition import EntryCondition
 
 
 @dataclass
@@ -85,17 +103,36 @@ class BacktestEngine:
             min_trades_threshold=stage_config.get('min_trades_threshold', 1)
         )
 
+        # Initialize EntryCondition for daily entry checks
+        # NOTE: EntryCondition does NOT include rs_new_high
+        # Stage2 (with rs_new_high) is only used for universe selection
+        self.entry_condition = EntryCondition(
+            config=config,
+            mode=self.fallback_manager.get_current_mode()
+        )
+
         # Backtest parameters
         self.initial_capital = config['backtest']['initial_capital']
         self.max_positions = config['backtest']['max_positions']
         self.commission = config['backtest']['commission']
         self.risk_per_trade = config['risk']['risk_per_trade']
 
-        # Diagnostics
+        # Diagnostics with separate Stage2 and Entry tracking
         self.diagnostics = {
+            # Stage2 is for universe selection (one-time at start)
+            'stage2_universe_size': 0,
+
+            # Entry evaluation is for daily trade decisions
+            'entry_evaluations': 0,
+            'entry_passed': 0,
+            'entry_failed_conditions': {},
+
+            # Legacy keys for backward compatibility
             'stage2_checks': 0,
             'stage2_passed': 0,
             'stage2_failed_conditions': {},
+
+            # Other diagnostics
             'insufficient_capital': 0,
             'max_positions_reached': 0,
             'insufficient_data': 0,
@@ -296,22 +333,34 @@ class BacktestEngine:
                         self.diagnostics['insufficient_data'] += 1
                         continue
 
-                    # Check Stage 2
-                    self.diagnostics['stage2_checks'] += 1
-                    rs_line = hist_data['rs_line'] if use_benchmark else None
-                    current_mode = self.fallback_manager.get_current_mode()
-                    stage_result = self.stage_detector.detect_stage(
-                        hist_data, rs_line, use_benchmark=use_benchmark, mode=current_mode
-                    )
+                    # ============================================================
+                    # ARCHITECTURAL CHANGE: Use EntryCondition instead of Stage2
+                    # ============================================================
+                    # Stage2 is for UNIVERSE SELECTION (one-time at backtest start)
+                    # EntryCondition is for DAILY ENTRY DECISIONS (no rs_new_high)
+                    #
+                    # The tickers here have already passed Stage2 (loaded from
+                    # screening_results.csv by main.py). We only need to check
+                    # lightweight entry conditions for daily trade decisions.
+                    # ============================================================
 
-                    if stage_result['stage'] != 2:
-                        # Track which conditions failed
-                        for condition, passed in stage_result['details'].items():
+                    self.diagnostics['entry_evaluations'] += 1
+                    # Legacy key for backward compatibility
+                    self.diagnostics['stage2_checks'] += 1
+
+                    # Use EntryCondition for daily checks (excludes rs_new_high)
+                    entry_result = self.entry_condition.evaluate(hist_data)
+
+                    if not entry_result['passed']:
+                        # Track which entry conditions failed
+                        for condition, passed in entry_result['conditions'].items():
                             if not passed:
-                                self.diagnostics['stage2_failed_conditions'][condition] = \
-                                    self.diagnostics['stage2_failed_conditions'].get(condition, 0) + 1
+                                self.diagnostics['entry_failed_conditions'][condition] = \
+                                    self.diagnostics['entry_failed_conditions'].get(condition, 0) + 1
                         continue
 
+                    self.diagnostics['entry_passed'] += 1
+                    # Legacy key for backward compatibility
                     self.diagnostics['stage2_passed'] += 1
                     self.diagnostics['total_entry_attempts'] += 1
 
@@ -452,21 +501,29 @@ class BacktestEngine:
         logger.info("=" * 60)
         logger.info(f"Total trades executed:       {total_trades}")
         logger.info("")
-        logger.info("Entry Analysis:")
-        logger.info(f"  Stage 2 checks performed:  {self.diagnostics['stage2_checks']:,}")
-        logger.info(f"  Stage 2 passed:            {self.diagnostics['stage2_passed']:,}")
-        logger.info(f"  Entry attempts (Stage 2+): {self.diagnostics['total_entry_attempts']:,}")
+
+        # Stage2 Universe (one-time selection)
+        logger.info("Stage2 Universe (one-time selection):")
+        logger.info(f"  Universe size:             {self.diagnostics.get('stage2_universe_size', 'N/A')}")
+        logger.info("  Note: Stage2 tickers loaded from screening_results.csv")
+        logger.info("")
+
+        # Entry Evaluation (daily checks, excludes rs_new_high)
+        logger.info("Entry Evaluation (daily checks, excludes rs_new_high):")
+        logger.info(f"  Entry evaluations:         {self.diagnostics['entry_evaluations']:,}")
+        logger.info(f"  Entry passed:              {self.diagnostics['entry_passed']:,}")
+        logger.info(f"  Entry attempts:            {self.diagnostics['total_entry_attempts']:,}")
         logger.info(f"  Insufficient capital:      {self.diagnostics['insufficient_capital']:,}")
         logger.info(f"  Max positions reached:     {self.diagnostics['max_positions_reached']:,}")
         logger.info(f"  Insufficient data (<252):  {self.diagnostics['insufficient_data']:,}")
 
-        # CRITICAL VALIDATION: Stage2 checks should be > 0 if we have valid tickers
-        if self.diagnostics['stage2_checks'] == 0:
+        # CRITICAL VALIDATION: Entry evaluations should be > 0 if we have valid tickers
+        if self.diagnostics['entry_evaluations'] == 0:
             logger.warning("")
             logger.warning("=" * 60)
-            logger.warning("WARNING: ZERO STAGE2 CHECKS PERFORMED")
+            logger.warning("WARNING: ZERO ENTRY EVALUATIONS PERFORMED")
             logger.warning("=" * 60)
-            logger.warning("Stage2 checks = 0 indicates structural issue:")
+            logger.warning("Entry evaluations = 0 indicates structural issue:")
             logger.warning("  1. No ticker data available for backtest period")
             logger.warning("  2. All tickers had insufficient data (<252 bars)")
             logger.warning("  3. Backtest period has no trading days")
@@ -477,11 +534,11 @@ class BacktestEngine:
             logger.warning("  - Verify backtest period overlaps with available data")
             logger.warning("=" * 60)
 
-        if self.diagnostics['stage2_failed_conditions']:
+        if self.diagnostics['entry_failed_conditions']:
             logger.info("")
-            logger.info("Top Stage 2 failure reasons:")
+            logger.info("Top Entry failure reasons (rs_new_high excluded):")
             sorted_failures = sorted(
-                self.diagnostics['stage2_failed_conditions'].items(),
+                self.diagnostics['entry_failed_conditions'].items(),
                 key=lambda x: x[1],
                 reverse=True
             )
@@ -489,27 +546,29 @@ class BacktestEngine:
                 logger.info(f"  {condition:25} {count:>6,} failures")
 
         # Calculate pass rate
-        if self.diagnostics['stage2_checks'] > 0:
-            pass_rate = self.diagnostics['stage2_passed'] / self.diagnostics['stage2_checks'] * 100
+        if self.diagnostics['entry_evaluations'] > 0:
+            pass_rate = self.diagnostics['entry_passed'] / self.diagnostics['entry_evaluations'] * 100
             logger.info("")
-            logger.info(f"Stage 2 pass rate:           {pass_rate:.1f}%")
+            logger.info(f"Entry pass rate:             {pass_rate:.1f}%")
+            logger.info("  (Entry conditions: price>sma50, sma50>sma150, volume)")
+            logger.info("  (rs_new_high NOT included in daily entry checks)")
 
         # Warnings if no trades
         if total_trades == 0:
             logger.warning("")
             logger.warning("NO TRADES EXECUTED - Possible issues:")
-            if self.diagnostics['stage2_passed'] == 0:
-                logger.warning("  • No stocks passed Stage 2 conditions")
-                if self.diagnostics['stage2_failed_conditions']:
+            if self.diagnostics['entry_passed'] == 0:
+                logger.warning("  - No stocks passed Entry conditions")
+                if self.diagnostics['entry_failed_conditions']:
                     top_failure = max(
-                        self.diagnostics['stage2_failed_conditions'].items(),
+                        self.diagnostics['entry_failed_conditions'].items(),
                         key=lambda x: x[1]
                     )
                     logger.warning(f"    Most common failure: {top_failure[0]} ({top_failure[1]:,} times)")
             elif self.diagnostics['insufficient_capital'] > 0:
-                logger.warning("  • Insufficient capital to open positions")
+                logger.warning("  - Insufficient capital to open positions")
             elif self.diagnostics['total_entry_attempts'] > 0:
-                logger.warning("  • Stage 2 passed but entry conditions not met")
+                logger.warning("  - Entry passed but position sizing failed")
 
         logger.info("=" * 60)
 
