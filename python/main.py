@@ -24,6 +24,14 @@ try:
 except (ImportError, AttributeError, Exception):
     VISUALIZATION_AVAILABLE = False
 
+try:
+    from backtest.ticker_charts import generate_price_chart, generate_top_bottom_charts
+    CHART_GENERATION_AVAILABLE = generate_price_chart is not None
+except (ImportError, AttributeError, Exception):
+    CHART_GENERATION_AVAILABLE = False
+    generate_price_chart = None
+    generate_top_bottom_charts = None
+
 
 def load_config(config_path: str = "config/params.yaml") -> dict:
     """Load configuration file"""
@@ -148,6 +156,123 @@ def run_backtest_mode(config: dict, tickers: list, args):
         trades_file = output_dir / "trades.csv"
         trades_df.to_csv(trades_file, index=False)
         logger.info(f"Trade details saved to: {trades_file}")
+
+    # ========== AUTO CHART GENERATION (Phase 2) ==========
+    # Generate top/bottom P&L charts with IN/OUT markers
+    if CHART_GENERATION_AVAILABLE and not args.no_charts:
+        _generate_backtest_charts(output_dir, start_date, end_date)
+    elif args.no_charts:
+        logger.info("Chart generation skipped (--no-charts flag)")
+    else:
+        logger.warning("Chart generation not available (mplfinance/yfinance not installed)")
+
+
+def _generate_backtest_charts(output_dir: Path, start_date: str, end_date: str):
+    """
+    Generate top/bottom P&L charts with IN/OUT markers after backtest.
+
+    Args:
+        output_dir: Backtest output directory (contains trade_log.csv, ticker_stats.csv)
+        start_date: Backtest start date (YYYY-MM-DD)
+        end_date: Backtest end date (YYYY-MM-DD)
+    """
+    # Check for required output files
+    trade_log_path = output_dir / "trade_log.csv"
+    ticker_stats_path = output_dir / "ticker_stats.csv"
+
+    if not trade_log_path.exists():
+        logger.warning(f"trade_log.csv not found at {trade_log_path}, skipping chart generation")
+        return
+
+    if not ticker_stats_path.exists():
+        logger.warning(f"ticker_stats.csv not found at {ticker_stats_path}, skipping chart generation")
+        return
+
+    logger.info("=" * 60)
+    logger.info("GENERATING TOP/BOTTOM P&L CHARTS")
+    logger.info("=" * 60)
+
+    try:
+        chart_paths = generate_top_bottom_charts(
+            ticker_stats_path=str(ticker_stats_path),
+            trade_log_path=str(trade_log_path),
+            output_dir=str(output_dir),
+            top_n=5,
+            bottom_n=5,
+            start_date=start_date,
+            end_date=end_date
+        )
+
+        if chart_paths:
+            logger.info(f"Generated {len(chart_paths)} charts:")
+            for path in chart_paths:
+                logger.info(f"  - {path.name}")
+            print(f"\nCharts saved to: {output_dir / 'charts'}")
+        else:
+            logger.warning("No charts generated (insufficient data or no tickers)")
+
+    except Exception as e:
+        logger.error(f"Failed to generate charts: {e}")
+
+
+def run_chart_mode(config: dict, ticker: str, args):
+    """
+    Generate chart for a single ticker.
+
+    Args:
+        config: Configuration dictionary
+        ticker: Ticker symbol to chart
+        args: Command line arguments
+    """
+    if not CHART_GENERATION_AVAILABLE:
+        logger.error("Chart generation not available (mplfinance/yfinance not installed)")
+        print("Error: Chart generation requires mplfinance and yfinance packages")
+        return
+
+    logger.info("=" * 60)
+    logger.info("CHART MODE")
+    logger.info("=" * 60)
+    logger.info(f"Ticker: {ticker}")
+
+    # Determine dates
+    if args.start and args.end:
+        start_date = args.start
+        end_date = args.end
+    else:
+        # Default to 1 year of data
+        from datetime import datetime
+        end_date = datetime.now().strftime('%Y-%m-%d')
+        start_dt = datetime.now() - pd.DateOffset(years=1)
+        start_date = start_dt.strftime('%Y-%m-%d')
+
+    logger.info(f"Period: {start_date} to {end_date}")
+
+    # Check for trade_log
+    output_dir = Path(__file__).parent / "output"
+    trade_log_path = output_dir / "trade_log.csv"
+    trade_log_str = str(trade_log_path) if trade_log_path.exists() else None
+
+    if trade_log_str:
+        logger.info(f"Trade log found: {trade_log_path}")
+    else:
+        logger.info("No trade log found, generating chart without markers")
+
+    try:
+        chart_path = generate_price_chart(
+            ticker=ticker,
+            start_date=start_date,
+            end_date=end_date,
+            output_dir=str(output_dir),
+            style="tradingview",
+            trade_log_path=trade_log_str
+        )
+
+        logger.info(f"Chart saved: {chart_path}")
+        print(f"\nChart saved to: {chart_path}")
+
+    except Exception as e:
+        logger.error(f"Failed to generate chart: {e}")
+        print(f"Error: {e}")
 
 
 def explain_stage2(ticker: str, config: dict, use_benchmark: bool, target_date: str = None):
@@ -334,9 +459,9 @@ def main():
     )
     parser.add_argument(
         '--mode',
-        choices=['full', 'stage2', 'test', 'backtest'],
+        choices=['full', 'stage2', 'test', 'backtest', 'chart'],
         default='full',
-        help='Mode: full (Stage2 only, VCP disabled), stage2 (Stage2 only), test (quick test), backtest (backtest engine)'
+        help='Mode: full (Stage2 only, VCP disabled), stage2 (Stage2 only), test (quick test), backtest (backtest engine), chart (single ticker chart)'
     )
     parser.add_argument(
         '--tickers',
@@ -384,6 +509,18 @@ def main():
         type=str,
         metavar='YYYY-MM-DD',
         help='Date for --explain-stage2 analysis (default: latest)'
+    )
+    parser.add_argument(
+        '--ticker',
+        type=str,
+        metavar='TICKER',
+        help='Single ticker symbol for chart mode (e.g., --ticker AAPL)'
+    )
+    parser.add_argument(
+        '--no-charts',
+        action='store_true',
+        default=False,
+        help='Skip automatic chart generation after backtest'
     )
 
     # Benchmark options (mutually exclusive)
@@ -440,6 +577,15 @@ def main():
     # Run backtest mode
     if args.mode == 'backtest':
         run_backtest_mode(config, tickers, args)
+        return
+
+    # Run chart mode
+    if args.mode == 'chart':
+        if not args.ticker:
+            print("Error: --ticker argument required for chart mode")
+            print("Example: python main.py --mode chart --ticker AAPL")
+            return
+        run_chart_mode(config, args.ticker, args)
         return
 
     # Determine benchmark usage

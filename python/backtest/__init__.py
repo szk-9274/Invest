@@ -31,11 +31,13 @@ try:
     from backtest.ticker_charts import (
         generate_price_chart,
         generate_price_chart_from_dataframe,
+        generate_top_bottom_charts,
         TickerCharts,
     )
 except (ImportError, AttributeError, Exception):
     generate_price_chart = None
     generate_price_chart_from_dataframe = None
+    generate_top_bottom_charts = None
     TickerCharts = None
 
 __all__ = [
@@ -59,5 +61,6 @@ __all__ = [
     'generate_html_report',
     'generate_price_chart',
     'generate_price_chart_from_dataframe',
+    'generate_top_bottom_charts',
     'TickerCharts',
 ]
