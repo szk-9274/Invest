@@ -27,6 +27,17 @@ except (ImportError, AttributeError, Exception):
     visualize_backtest_results = None
     generate_html_report = None
 
+try:
+    from backtest.ticker_charts import (
+        generate_price_chart,
+        generate_price_chart_from_dataframe,
+        TickerCharts,
+    )
+except (ImportError, AttributeError, Exception):
+    generate_price_chart = None
+    generate_price_chart_from_dataframe = None
+    TickerCharts = None
+
 __all__ = [
     'BacktestEngine',
     'BacktestResult',
@@ -46,4 +57,7 @@ __all__ = [
     'generate_performance_summary',
     'visualize_backtest_results',
     'generate_html_report',
+    'generate_price_chart',
+    'generate_price_chart_from_dataframe',
+    'TickerCharts',
 ]

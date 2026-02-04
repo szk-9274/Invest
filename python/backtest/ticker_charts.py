@@ -1,17 +1,20 @@
 """
 Ticker Charts Module
 
+Phase 1: TradingView-like Price Chart Generator
 Generates candlestick charts with:
-- SMA20 / SMA50 overlays
+- Dark background (TradingView-like)
+- SMA 20, 50, 200 overlays
+- Bollinger Bands (20, 2)
+- Volume panel below price
+- Clean layout with monthly date ticks
+
+Phase 2 (not yet implemented):
 - ENTRY markers (up arrow)
 - EXIT markers (down arrow)
 
-Charts are generated for:
-- Top 5 profitable tickers
-- Bottom 5 losing tickers
-
 Output:
-- python/output/charts/{TICKER}.png
+- output/charts/{TICKER}_price_chart.png
 """
 import os
 from datetime import datetime
@@ -19,15 +22,329 @@ from pathlib import Path
 from typing import List, Dict, Optional, Union, Tuple
 
 import pandas as pd
+import numpy as np
 from loguru import logger
 
 # Try to import mplfinance, handle gracefully if not installed
 try:
+    import matplotlib
+    matplotlib.use('Agg')  # Use non-interactive backend for headless operation
     import mplfinance as mpf
+    import matplotlib.pyplot as plt
     MPLFINANCE_AVAILABLE = True
 except ImportError:
     MPLFINANCE_AVAILABLE = False
+    mpf = None
+    plt = None
+    matplotlib = None
     logger.warning("mplfinance not installed. Chart generation will be skipped.")
+
+# Try to import yfinance for data fetching
+try:
+    import yfinance as yf
+    YFINANCE_AVAILABLE = True
+except ImportError:
+    YFINANCE_AVAILABLE = False
+    yf = None
+    logger.warning("yfinance not installed. Data fetching will not be available.")
+
+
+# Minimum data points required for SMA200
+MIN_DATA_POINTS = 50
+
+
+def _create_tradingview_style() -> dict:
+    """
+    Create a TradingView-like dark style for mplfinance.
+
+    Returns:
+        Style dictionary for mplfinance
+    """
+    if not MPLFINANCE_AVAILABLE:
+        return {}
+
+    # TradingView dark mode colors
+    tradingview_style = mpf.make_mpf_style(
+        base_mpf_style='nightclouds',
+        marketcolors=mpf.make_marketcolors(
+            up='#26a69a',       # Green for up candles
+            down='#ef5350',     # Red for down candles
+            edge='inherit',
+            wick='inherit',
+            volume={'up': '#26a69a', 'down': '#ef5350'},
+        ),
+        facecolor='#131722',    # Dark background
+        edgecolor='#2a2e39',
+        figcolor='#131722',
+        gridcolor='#2a2e39',
+        gridstyle='-',
+        gridaxis='both',
+        y_on_right=True,
+        rc={
+            'axes.labelcolor': '#787b86',
+            'axes.titlecolor': '#d1d4dc',
+            'xtick.color': '#787b86',
+            'ytick.color': '#787b86',
+            'text.color': '#d1d4dc',
+            'figure.facecolor': '#131722',
+            'axes.facecolor': '#131722',
+        }
+    )
+    return tradingview_style
+
+
+def _normalize_dataframe(data: pd.DataFrame) -> pd.DataFrame:
+    """
+    Normalize DataFrame column names to match mplfinance requirements.
+
+    Args:
+        data: OHLCV DataFrame
+
+    Returns:
+        Normalized DataFrame with proper column names
+
+    Raises:
+        ValueError: If required columns are missing
+    """
+    if data is None:
+        raise ValueError("Data cannot be None")
+
+    if data.empty:
+        raise ValueError("No data available for chart generation")
+
+    df = data.copy()
+
+    # Normalize column names to title case (mplfinance expects Open, High, Low, Close, Volume)
+    column_mapping = {}
+    required_cols = {'open', 'high', 'low', 'close', 'volume'}
+    found_cols = set()
+
+    for col in df.columns:
+        col_lower = col.lower()
+        if col_lower in required_cols:
+            column_mapping[col] = col_lower.title()
+            found_cols.add(col_lower)
+
+    # Check for missing columns
+    missing_cols = required_cols - found_cols
+    if missing_cols:
+        raise ValueError(f"Missing required columns: {missing_cols}")
+
+    df = df.rename(columns=column_mapping)
+
+    # Ensure DatetimeIndex
+    if not isinstance(df.index, pd.DatetimeIndex):
+        try:
+            df.index = pd.to_datetime(df.index)
+        except Exception as e:
+            raise ValueError(f"Cannot convert index to DatetimeIndex: {e}")
+
+    return df
+
+
+def _calculate_indicators(data: pd.DataFrame) -> List:
+    """
+    Calculate technical indicators for the chart.
+
+    Args:
+        data: Normalized OHLCV DataFrame
+
+    Returns:
+        List of mplfinance addplot objects
+    """
+    if not MPLFINANCE_AVAILABLE:
+        return []
+
+    addplots = []
+
+    close = data['Close']
+
+    # SMA 20 (cyan/turquoise)
+    sma20 = close.rolling(window=20).mean()
+    addplots.append(mpf.make_addplot(
+        sma20,
+        color='#00bcd4',
+        width=1.0,
+        label='SMA20'
+    ))
+
+    # SMA 50 (yellow/gold)
+    sma50 = close.rolling(window=50).mean()
+    addplots.append(mpf.make_addplot(
+        sma50,
+        color='#ffeb3b',
+        width=1.0,
+        label='SMA50'
+    ))
+
+    # SMA 200 (magenta/pink)
+    sma200 = close.rolling(window=200).mean()
+    addplots.append(mpf.make_addplot(
+        sma200,
+        color='#e91e63',
+        width=1.0,
+        label='SMA200'
+    ))
+
+    # Bollinger Bands (20, 2)
+    bb_middle = close.rolling(window=20).mean()
+    bb_std = close.rolling(window=20).std()
+    bb_upper = bb_middle + (bb_std * 2)
+    bb_lower = bb_middle - (bb_std * 2)
+
+    # Upper band (gray, dashed effect via alpha)
+    addplots.append(mpf.make_addplot(
+        bb_upper,
+        color='#9e9e9e',
+        width=0.8,
+        linestyle='--',
+        alpha=0.7
+    ))
+
+    # Lower band (gray, dashed effect via alpha)
+    addplots.append(mpf.make_addplot(
+        bb_lower,
+        color='#9e9e9e',
+        width=0.8,
+        linestyle='--',
+        alpha=0.7
+    ))
+
+    return addplots
+
+
+def generate_price_chart_from_dataframe(
+    ticker: str,
+    data: pd.DataFrame,
+    output_dir: str,
+    style: str = "tradingview"
+) -> Path:
+    """
+    Generate a TradingView-like price chart from a DataFrame.
+
+    This is the core chart generation function that accepts data directly.
+    Use generate_price_chart() if you want to fetch data automatically.
+
+    Args:
+        ticker: Stock ticker symbol
+        data: OHLCV DataFrame with DatetimeIndex
+        output_dir: Directory path for chart output
+        style: Chart style ("tradingview" for dark mode)
+
+    Returns:
+        Path to saved chart image
+
+    Raises:
+        ValueError: If data is missing, empty, or has insufficient rows
+        RuntimeError: If chart generation fails
+    """
+    if not MPLFINANCE_AVAILABLE:
+        raise RuntimeError("mplfinance not installed. Cannot generate charts.")
+
+    # Normalize data
+    chart_data = _normalize_dataframe(data)
+
+    # Check minimum data points
+    if len(chart_data) < MIN_DATA_POINTS:
+        raise ValueError(
+            f"Insufficient data for chart generation. "
+            f"Minimum {MIN_DATA_POINTS} data points required, got {len(chart_data)}."
+        )
+
+    # Create output directory
+    charts_dir = Path(output_dir) / "charts"
+    charts_dir.mkdir(parents=True, exist_ok=True)
+
+    # Sanitize ticker for filename (replace dots with dashes)
+    safe_ticker = ticker.replace('.', '-')
+    chart_path = charts_dir / f"{safe_ticker}_price_chart.png"
+
+    # Get style
+    chart_style = _create_tradingview_style() if style == "tradingview" else 'charles'
+
+    # Calculate indicators
+    addplots = _calculate_indicators(chart_data)
+
+    # Generate chart
+    try:
+        fig, axes = mpf.plot(
+            chart_data,
+            type='candle',
+            style=chart_style,
+            title=f'{ticker} - Price Chart',
+            ylabel='Price',
+            ylabel_lower='Volume',
+            volume=True,
+            addplot=addplots if addplots else None,
+            figsize=(16, 10),
+            tight_layout=True,
+            returnfig=True,
+            panel_ratios=(3, 1),  # Price panel 3x larger than volume
+            xrotation=0,
+            datetime_format='%b %Y',  # Monthly date format
+        )
+
+        # Save figure
+        fig.savefig(
+            chart_path,
+            dpi=100,
+            bbox_inches='tight',
+            facecolor='#131722' if style == "tradingview" else 'white',
+            edgecolor='none'
+        )
+        plt.close(fig)
+
+        logger.info(f"Chart generated: {chart_path}")
+        return chart_path
+
+    except Exception as e:
+        logger.error(f"Failed to generate chart for {ticker}: {e}")
+        raise RuntimeError(f"Chart generation failed for {ticker}: {e}")
+
+
+def generate_price_chart(
+    ticker: str,
+    start_date: str,
+    end_date: str,
+    output_dir: str,
+    style: str = "tradingview"
+) -> Path:
+    """
+    Generate a TradingView-like price chart by fetching data from yfinance.
+
+    This function fetches ~1 year of data and generates a candlestick chart
+    with SMA 20/50/200, Bollinger Bands, and volume panel.
+
+    Args:
+        ticker: Stock ticker symbol (e.g., "AAPL")
+        start_date: Start date in YYYY-MM-DD format
+        end_date: End date in YYYY-MM-DD format
+        output_dir: Directory path for chart output
+        style: Chart style ("tradingview" for dark mode, default)
+
+    Returns:
+        Path to saved chart image
+
+    Raises:
+        ValueError: If data is missing or has insufficient rows
+        RuntimeError: If chart generation fails
+    """
+    if not YFINANCE_AVAILABLE:
+        raise RuntimeError("yfinance not installed. Cannot fetch data.")
+
+    # Fetch data from yfinance
+    stock = yf.Ticker(ticker)
+    data = stock.history(start=start_date, end=end_date)
+
+    if data is None or data.empty:
+        raise ValueError(f"No data available for ticker {ticker} from {start_date} to {end_date}")
+
+    return generate_price_chart_from_dataframe(
+        ticker=ticker,
+        data=data,
+        output_dir=output_dir,
+        style=style
+    )
 
 
 class TickerCharts:
