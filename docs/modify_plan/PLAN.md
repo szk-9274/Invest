@@ -1,154 +1,170 @@
-# Task: TradingView-like Chart Generation Improvement (Phase 1)
+# 📌 Claude Code 指示書（Phase 2 実装）
 
-## Context
-Current chart generation exists but does not meet usability requirements.
-The generated charts:
-- Are not year-scale price charts
-- Do not resemble TradingView UI
-- Do not clearly show trend, moving averages, or trade context
-- Do not yet visualize IN/OUT points per trade
+## 🎯 目的（Phase 2）
 
-This task focuses ONLY on improving the chart generation UI and structure.
-Trade IN/OUT markers will be handled in a later task.
+Phase 1 で実装済みの **TradingView 風チャート生成機能**を拡張し、  
+**実際のトレード履歴（trade_log）と連携して IN / OUT を可視化**する。
 
 ---
 
-## Objective (Phase 1 Only)
-Implement a TradingView-inspired annual price chart generator that:
-- Displays ~1 year of daily OHLC data
-- Visually resembles TradingView as closely as possible using matplotlib / mplfinance
-- Includes common indicators (moving averages, volume)
-- Can generate a chart for an arbitrary ticker via function arguments
-- Saves the generated chart image deterministically to disk
+## 1️⃣ 現状整理（前提）
 
-NO trade markers (IN/OUT) are required in this phase.
-
----
-
-## Explicit Non-Goals (Do NOT implement yet)
-- Do not draw ENTRY / EXIT markers
-- Do not connect to trade_log.csv yet
-- Do not rank tickers
-- Do not remove existing chart features
-- Do not change backtest logic
+- Phase 1 では以下が実装済み：
+  - 年間ローソク足チャート
+  - SMA 20 / 50 / 200
+  - Bollinger Bands
+  - Volume
+  - ダークテーマ（TradingView 風）
+- **IN / OUT マーカーは未実装**
+- trade_log.csv は既に存在し、以下を含む：
+  - ticker
+  - entry_date / exit_date
+  - entry_price / exit_price
+  - side (LONG / SHORT)
+  - pnl
 
 ---
 
-## Functional Requirements
+## 2️⃣ Phase 2 で実装する内容
 
-### 1. Chart Generator API
-Create or refactor a function with the following signature:
+### A. チャートへの IN / OUT マーカー描画
 
-```
-generate_price_chart(
-    ticker: str,
-    start_date: str,
-    end_date: str,
-    output_dir: str,
-    style: str = "tradingview"
-) -> Path
-```
+#### 要件
+- 対象：`trade_log.csv`
+- 各ティッカーについて：
+  - ENTRY → ▲（緑）
+  - EXIT → ▼（赤）
+- 複数トレードが **同一チャート上に全て描画されること**
+- 年間チャート（Phase 1 と同一 UI）
 
-Behavior:
-- Generates ONE chart image per call
-- Returns the saved image path
-- Deterministic output filename: `{ticker}_price_chart.png`
+#### 実装方針
+- `generate_price_chart()` を拡張 or ラッパー関数を追加
+- trade_log をティッカー単位でフィルタ
+- matplotlib / mplfinance の `make_addplot` を使用
 
 ---
 
-### 2. Chart Visual Specification (TradingView-like)
+### B. デフォルトモードの自動チャート生成
 
-The chart MUST include:
+#### 挙動（重要）
 
-#### Price Panel
-- Candlestick chart (daily)
-- Black / dark background
-- Green for up candles, red for down candles
-- Proper candle wicks and bodies
+バックテスト完了後に以下を自動実行：
 
-#### Indicators
-- SMA 20
-- SMA 50
-- SMA 200
-- Bollinger Bands (20, 2) if feasible
-- Volume bars aligned under price panel
+1. `ticker_stats.csv` から  
+   - **P&L 上位5銘柄**
+   - **P&L 下位5銘柄**
+   を抽出
 
-#### Layout
-- Single figure
-- Price chart on top
-- Volume panel below
-- Shared x-axis (date)
-- Proper margins (no cramped layout)
+2. 各銘柄について：
+   - 年間チャートを生成
+   - IN / OUT マーカーをすべて描画
+   - 以下に保存：
 
-#### Styling
-- Dark background (similar to TradingView dark mode)
-- Thin grid lines
-- Clear date labels (monthly ticks)
-- No overlapping text
-- No debug text printed on chart
+output/charts/
+├── top_01_AAPL.png
+├── top_02_NVDA.png
+├── ...
+├── bottom_01_TSLA.png
+└── bottom_02_META.png
+
+yaml
+コードをコピーする
 
 ---
 
-### 3. Data Scope
-- Use approximately 1 year of data (start_date → end_date)
-- If data is missing, fail loudly with a clear exception
-- Do NOT silently skip chart generation
+### C. CLI / 実行モードの設計
+
+#### 新しいデフォルト挙動
+
+python main.py backtest
+
+diff
+コードをコピーする
+
+⬇ 自動で以下を実行：
+
+- バックテスト
+- trade_log.csv 出力
+- ticker_stats.csv 出力
+- 上位5 / 下位5 銘柄のチャート生成（IN/OUT付き）
+
+#### オプション指定（任意）
+
+python main.py chart --ticker AAPL
+
+yaml
+コードをコピーする
+
+- 単一ティッカーのチャート生成
+- trade_log が存在すれば IN / OUT を描画
 
 ---
 
-### 4. Output Behavior
-- Charts must be saved to:
-  ```
-  output/charts/{ticker}_price_chart.png
-  ```
-- Ensure directory exists or create it
-- After generation, log:
-  ```
-  INFO | Chart generated: output/charts/{ticker}_price_chart.png
-  ```
+## 3️⃣ README.md への追記（必須）
+
+### 追記内容（そのまま使える）
+
+```md
+## Chart Generation (TradingView-like)
+
+### Generate charts after backtest (default)
+```bash
+python main.py backtest
+This will:
+
+Run backtest
+
+Generate trade_log.csv and ticker_stats.csv
+
+Automatically generate charts for:
+
+Top 5 profitable tickers
+
+Bottom 5 least profitable tickers
+
+Charts include:
+
+Candlesticks
+
+SMA 20 / 50 / 200
+
+Bollinger Bands
+
+Volume
+
+IN / OUT trade markers
+
+Generate chart for a specific ticker
+bash
+コードをコピーする
+python main.py chart --ticker AAPL
+Output:
+
+bash
+コードをコピーする
+output/charts/AAPL.png
+yaml
+コードをコピーする
 
 ---
 
-## Implementation Guidance
+## 4️⃣ テスト方針（TDD 継続）
 
-### Libraries
-- Use mplfinance where possible
-- matplotlib customization is allowed
-- Do NOT introduce new visualization libraries unless strictly necessary
+### 追加テスト
 
-### Code Location
-Prefer:
-```
-python/backtest/ticker_charts.py
-```
-
-Refactor if needed, but keep chart logic isolated.
+- trade_log がある場合：
+  - ENTRY / EXIT マーカーが描画される
+- trade_log がない場合：
+  - マーカーなしでもエラーにならない
+- 上位 / 下位銘柄が正しく選ばれる
+- 出力ファイル名が期待通り
 
 ---
 
-## Acceptance Criteria
+## 5️⃣ Phase 2 完了条件（Definition of Done）
 
-- Running the generator for a single ticker produces:
-  - A visually readable, year-scale candlestick chart
-  - Moving averages clearly visible
-  - Volume visible
-  - Saved image confirmed on disk
-- Chart resembles TradingView UI more than the current implementation
-- No trade markers are drawn yet
-- Existing features are not broken
-
----
-
-## Next Planned Task (Not in this PR)
-Phase 2 will:
-- Load trade_log.csv
-- Overlay ENTRY / EXIT markers
-- Annotate IN / OUT reasons per trade
-
-Do NOT implement Phase 2 now.
-
----
-
-## Instruction
-Proceed step by step.
-If any ambiguity exists, prefer explicit failure over silent behavior.
+- [ ] IN / OUT がチャート上に可視化される
+- [ ] 上位5 / 下位5 銘柄のチャートが自動生成される
+- [ ] README にコマンド使用方法が明記されている
+- [ ] 既存テストが壊れない
+- [ ] coverage 80%以上維持
