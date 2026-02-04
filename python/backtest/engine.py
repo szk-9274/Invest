@@ -36,6 +36,8 @@ from analysis.stage_detector import StageDetector
 from analysis.vcp_detector import VCPDetector
 from backtest.fallback_manager import FallbackManager
 from backtest.entry_condition import EntryCondition
+from backtest.trade_logger import TradeLogger
+from backtest.ticker_analysis import TickerAnalysis
 
 
 @dataclass
@@ -117,6 +119,14 @@ class BacktestEngine:
         self.commission = config['backtest']['commission']
         self.risk_per_trade = config['risk']['risk_per_trade']
 
+        # Initialize TradeLogger for trade action logging (Task 2)
+        output_config = config.get('output', {})
+        output_dir = output_config.get('csv_path', 'python/output')
+        # If csv_path points to a file, use its parent directory
+        if output_dir.endswith('.csv'):
+            output_dir = str(Path(output_dir).parent)
+        self.trade_logger = TradeLogger(output_dir=output_dir)
+
         # Diagnostics with separate Stage2 and Entry tracking
         self.diagnostics = {
             # Stage2 is for universe selection (one-time at start)
@@ -139,7 +149,11 @@ class BacktestEngine:
             'total_entry_attempts': 0,
             'fallback_triggered': False,
             'strict_mode_trades': 0,
-            'relaxed_mode_trades': 0
+            'relaxed_mode_trades': 0,
+
+            # Data fetch diagnostics (Task 1: Universe Size Display Bug Fix)
+            'data_fetch_success_count': 0,
+            'data_fetch_filtered_count': 0
         }
 
     def run(
@@ -206,7 +220,10 @@ class BacktestEngine:
         logger.info("\n" + "=" * 60)
         logger.info("DATA FETCHING")
         logger.info("=" * 60)
-        logger.info(f"Input tickers (before fetch): {len(tickers)}")
+
+        # Task 1: Record Stage2 input ticker count BEFORE data fetch
+        self.diagnostics['stage2_universe_size'] = len(tickers)
+        logger.info(f"Stage2 input tickers: {self.diagnostics['stage2_universe_size']}")
         logger.info("Fetching historical data...")
 
         all_data = {}
@@ -221,7 +238,12 @@ class BacktestEngine:
                 data = calculate_all_indicators(data, benchmark_data)
                 all_data[ticker] = data
 
-        logger.info(f"Successfully fetched {len(all_data)}/{len(tickers)} tickers with sufficient data")
+        # Task 1: Record data fetch results
+        self.diagnostics['data_fetch_success_count'] = len(all_data)
+        self.diagnostics['data_fetch_filtered_count'] = len(tickers) - len(all_data)
+
+        logger.info(f"After data fetch:     {self.diagnostics['data_fetch_success_count']}")
+        logger.info(f"Filtered out:         {self.diagnostics['data_fetch_filtered_count']}")
 
         # CRITICAL VALIDATION: Check if we have data to backtest
         if len(all_data) == 0:
@@ -315,6 +337,17 @@ class BacktestEngine:
                             logger.info(
                                 f"EXIT: {pos.ticker} @ ${pos.exit_price:.2f} "
                                 f"({pos.exit_reason}) | P&L: ${pos.pnl:+.2f} ({pos.pnl_pct:+.1%})"
+                            )
+
+                            # Task 2: Log EXIT action
+                            self.trade_logger.log_exit(
+                                date=date,
+                                ticker=pos.ticker,
+                                price=pos.exit_price,
+                                shares=pos.shares,
+                                reason=pos.exit_reason,
+                                pnl=pos.pnl,
+                                capital_after=capital
                             )
 
             # Check entry conditions for new positions
@@ -457,6 +490,16 @@ class BacktestEngine:
                         f"{shares} shares | Stop: ${stop_price:.2f}"
                     )
 
+                    # Task 2: Log ENTRY action
+                    self.trade_logger.log_entry(
+                        date=date,
+                        ticker=ticker,
+                        price=entry_price,
+                        shares=shares,
+                        reason='entry_signal',
+                        capital_after=capital
+                    )
+
                     if len(positions) >= self.max_positions:
                         break
             else:
@@ -485,7 +528,33 @@ class BacktestEngine:
                     pos.pnl = (pos.exit_price - pos.entry_price) * pos.shares
                     pos.pnl -= (pos.entry_price + pos.exit_price) * pos.shares * self.commission
                     pos.pnl_pct = (pos.exit_price - pos.entry_price) / pos.entry_price
+
+                    # Update capital for final exit
+                    capital += pos.shares * pos.exit_price * (1 - self.commission)
                     closed_positions.append(pos)
+
+                    # Task 2: Log EXIT action for end_of_backtest
+                    self.trade_logger.log_exit(
+                        date=last_date,
+                        ticker=pos.ticker,
+                        price=pos.exit_price,
+                        shares=pos.shares,
+                        reason=pos.exit_reason,
+                        pnl=pos.pnl,
+                        capital_after=capital
+                    )
+
+        # Save trade log to CSV (Task 2)
+        if self.trade_logger.entries:
+            trade_log_path = self.trade_logger.save()
+            logger.info(f"Trade log saved to: {trade_log_path}")
+
+            # Run ticker-level P&L analysis (Task 3)
+            ticker_analyzer = TickerAnalysis(output_dir=self.trade_logger.output_dir)
+            ticker_analyzer.analyze(self.trade_logger.entries)
+            ticker_stats_path = ticker_analyzer.save()
+            logger.info(f"Ticker stats saved to: {ticker_stats_path}")
+            ticker_analyzer.print_summary()
 
         # Print diagnostics
         self._print_diagnostics(len(closed_positions))
@@ -502,9 +571,11 @@ class BacktestEngine:
         logger.info(f"Total trades executed:       {total_trades}")
         logger.info("")
 
-        # Stage2 Universe (one-time selection)
-        logger.info("Stage2 Universe (one-time selection):")
-        logger.info(f"  Universe size:             {self.diagnostics.get('stage2_universe_size', 'N/A')}")
+        # Stage2 Universe (one-time selection) with data fetch details
+        logger.info("Stage2 Universe:")
+        logger.info(f"  Stage2 input tickers:      {self.diagnostics.get('stage2_universe_size', 'N/A')}")
+        logger.info(f"  After data fetch:          {self.diagnostics.get('data_fetch_success_count', 'N/A')}")
+        logger.info(f"  Filtered out:              {self.diagnostics.get('data_fetch_filtered_count', 'N/A')}")
         logger.info("  Note: Stage2 tickers loaded from screening_results.csv")
         logger.info("")
 
