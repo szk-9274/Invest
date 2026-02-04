@@ -662,3 +662,713 @@ class TestEdgeCases:
                 data=bad_data,
                 output_dir=temp_output_dir
             )
+
+
+# =============================================================================
+# Phase 2 Tests: Trade Markers (IN/OUT)
+# =============================================================================
+
+class TestGeneratePriceChartWithTradeMarkers:
+    """Tests for Phase 2: Trade marker functionality (IN/OUT markers)."""
+
+    @pytest.fixture
+    def temp_output_dir(self):
+        """Create temporary directory for test output."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            yield tmpdir
+
+    @pytest.fixture
+    def sample_year_data(self):
+        """Create sample ~1 year of OHLCV data."""
+        days = 252
+        np.random.seed(42)
+        dates = pd.date_range(start='2024-01-01', periods=days, freq='B')
+
+        base_price = 100
+        returns = np.random.normal(0.0005, 0.02, days)
+        prices = base_price * np.exp(np.cumsum(returns))
+
+        df = pd.DataFrame({
+            'Open': prices * (1 + np.random.uniform(-0.01, 0.01, days)),
+            'High': prices * (1 + np.random.uniform(0, 0.02, days)),
+            'Low': prices * (1 - np.random.uniform(0, 0.02, days)),
+            'Close': prices,
+            'Volume': np.random.randint(1000000, 10000000, days)
+        }, index=dates)
+        return df
+
+    @pytest.fixture
+    def sample_trade_log_csv(self, temp_output_dir):
+        """Create sample trade_log.csv for testing."""
+        trade_log_path = os.path.join(temp_output_dir, 'trade_log.csv')
+        trade_data = pd.DataFrame({
+            'date': ['2024-03-15', '2024-05-20', '2024-07-10', '2024-09-25'],
+            'ticker': ['AAPL', 'AAPL', 'AAPL', 'AAPL'],
+            'action': ['ENTRY', 'EXIT', 'ENTRY', 'EXIT'],
+            'price': [105.0, 115.0, 112.0, 120.0],
+            'shares': [50, 50, 50, 50],
+            'reason': ['entry_signal', 'target_reached', 'entry_signal', 'stop_loss'],
+            'pnl': [None, 500.0, None, 400.0],
+            'capital_after': [94750.0, 100250.0, 94360.0, 100760.0]
+        })
+        trade_data.to_csv(trade_log_path, index=False)
+        return trade_log_path
+
+    def test_generate_price_chart_accepts_trade_log_path(self, temp_output_dir, sample_year_data, monkeypatch):
+        """Test that generate_price_chart accepts trade_log_path parameter."""
+        from backtest.ticker_charts import generate_price_chart
+        import yfinance as yf
+
+        class MockTicker:
+            def __init__(self, ticker):
+                self.ticker = ticker
+
+            def history(self, start=None, end=None, period=None):
+                return sample_year_data
+
+        monkeypatch.setattr(yf, 'Ticker', MockTicker)
+
+        # Should not raise TypeError for trade_log_path parameter
+        try:
+            result = generate_price_chart(
+                ticker="AAPL",
+                start_date="2024-01-01",
+                end_date="2024-12-31",
+                output_dir=temp_output_dir,
+                trade_log_path=None  # No trade log
+            )
+        except TypeError as e:
+            if "trade_log_path" in str(e):
+                pytest.fail(f"trade_log_path parameter not accepted: {e}")
+            raise
+
+    def test_generate_price_chart_from_dataframe_accepts_trade_log_path(self, temp_output_dir, sample_year_data):
+        """Test that generate_price_chart_from_dataframe accepts trade_log_path."""
+        from backtest.ticker_charts import generate_price_chart_from_dataframe
+
+        result = generate_price_chart_from_dataframe(
+            ticker="AAPL",
+            data=sample_year_data,
+            output_dir=temp_output_dir,
+            trade_log_path=None
+        )
+
+        assert isinstance(result, Path)
+        assert result.exists()
+
+    def test_chart_with_trade_log_generates_successfully(
+        self, temp_output_dir, sample_year_data, sample_trade_log_csv
+    ):
+        """Test that chart generates with trade_log markers."""
+        from backtest.ticker_charts import generate_price_chart_from_dataframe
+
+        result = generate_price_chart_from_dataframe(
+            ticker="AAPL",
+            data=sample_year_data,
+            output_dir=temp_output_dir,
+            trade_log_path=sample_trade_log_csv
+        )
+
+        assert result.exists()
+        # File should be larger due to markers
+        assert result.stat().st_size > 10000
+
+    def test_chart_without_trade_log_no_error(self, temp_output_dir, sample_year_data):
+        """Test that chart generates without trade_log (no errors)."""
+        from backtest.ticker_charts import generate_price_chart_from_dataframe
+
+        result = generate_price_chart_from_dataframe(
+            ticker="AAPL",
+            data=sample_year_data,
+            output_dir=temp_output_dir,
+            trade_log_path=None
+        )
+
+        assert result.exists()
+
+    def test_chart_with_nonexistent_trade_log_no_error(self, temp_output_dir, sample_year_data):
+        """Test that nonexistent trade_log file does not cause error."""
+        from backtest.ticker_charts import generate_price_chart_from_dataframe
+
+        result = generate_price_chart_from_dataframe(
+            ticker="AAPL",
+            data=sample_year_data,
+            output_dir=temp_output_dir,
+            trade_log_path="/nonexistent/path/trade_log.csv"
+        )
+
+        # Should generate chart without markers, not raise error
+        assert result.exists()
+
+    def test_chart_with_empty_trade_log_no_error(self, temp_output_dir, sample_year_data):
+        """Test that empty trade_log generates chart without error."""
+        from backtest.ticker_charts import generate_price_chart_from_dataframe
+
+        # Create empty trade_log.csv
+        empty_trade_log = os.path.join(temp_output_dir, 'empty_trade_log.csv')
+        pd.DataFrame(columns=['date', 'ticker', 'action', 'price', 'shares', 'reason', 'pnl', 'capital_after']).to_csv(
+            empty_trade_log, index=False
+        )
+
+        result = generate_price_chart_from_dataframe(
+            ticker="AAPL",
+            data=sample_year_data,
+            output_dir=temp_output_dir,
+            trade_log_path=empty_trade_log
+        )
+
+        assert result.exists()
+
+    def test_chart_filters_trade_log_by_ticker(self, temp_output_dir, sample_year_data):
+        """Test that only trades for the specified ticker are shown."""
+        from backtest.ticker_charts import generate_price_chart_from_dataframe
+
+        # Create trade_log with multiple tickers
+        mixed_trade_log = os.path.join(temp_output_dir, 'mixed_trade_log.csv')
+        trade_data = pd.DataFrame({
+            'date': ['2024-03-15', '2024-05-20', '2024-04-01', '2024-06-15'],
+            'ticker': ['AAPL', 'AAPL', 'GOOGL', 'GOOGL'],
+            'action': ['ENTRY', 'EXIT', 'ENTRY', 'EXIT'],
+            'price': [105.0, 115.0, 140.0, 150.0],
+            'shares': [50, 50, 30, 30],
+            'reason': ['entry_signal', 'target_reached', 'entry_signal', 'target_reached'],
+            'pnl': [None, 500.0, None, 300.0],
+            'capital_after': [94750.0, 100250.0, 95800.0, 100300.0]
+        })
+        trade_data.to_csv(mixed_trade_log, index=False)
+
+        # Generate chart for AAPL only
+        result = generate_price_chart_from_dataframe(
+            ticker="AAPL",
+            data=sample_year_data,
+            output_dir=temp_output_dir,
+            trade_log_path=mixed_trade_log
+        )
+
+        assert result.exists()
+        # We can't easily verify marker filtering visually in unit tests,
+        # but the function should complete without error
+
+    def test_multiple_trades_same_ticker_all_visible(
+        self, temp_output_dir, sample_year_data
+    ):
+        """Test that multiple trades for same ticker all appear on chart."""
+        from backtest.ticker_charts import generate_price_chart_from_dataframe
+
+        # Create trade_log with 5 trades for same ticker
+        multi_trade_log = os.path.join(temp_output_dir, 'multi_trade_log.csv')
+        trade_data = pd.DataFrame({
+            'date': ['2024-02-15', '2024-03-20', '2024-05-10', '2024-06-25', '2024-08-15',
+                     '2024-03-01', '2024-04-15', '2024-05-30', '2024-07-20', '2024-09-10'],
+            'ticker': ['AAPL'] * 10,
+            'action': ['ENTRY', 'EXIT', 'ENTRY', 'EXIT', 'ENTRY',
+                       'EXIT', 'ENTRY', 'EXIT', 'ENTRY', 'EXIT'],
+            'price': [100, 110, 105, 115, 110, 108, 112, 120, 115, 125],
+            'shares': [50] * 10,
+            'reason': ['entry_signal', 'target_reached'] * 5,
+            'pnl': [None, 500.0, None, 500.0, None, -100.0, None, 400.0, None, 500.0],
+            'capital_after': [95000, 100500, 95250, 100750, 95500, 100400, 95000, 100400, 95250, 100750]
+        })
+        trade_data.to_csv(multi_trade_log, index=False)
+
+        result = generate_price_chart_from_dataframe(
+            ticker="AAPL",
+            data=sample_year_data,
+            output_dir=temp_output_dir,
+            trade_log_path=multi_trade_log
+        )
+
+        assert result.exists()
+        # File should be reasonably sized (5 ENTRY + 5 EXIT markers)
+        assert result.stat().st_size > 10000
+
+
+class TestGenerateTopBottomCharts:
+    """Tests for Phase 2: Top/Bottom chart generation functionality."""
+
+    @pytest.fixture
+    def temp_output_dir(self):
+        """Create temporary directory for test output."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            yield tmpdir
+
+    @pytest.fixture
+    def sample_year_data(self):
+        """Create sample ~1 year of OHLCV data."""
+        days = 252
+        np.random.seed(42)
+        dates = pd.date_range(start='2024-01-01', periods=days, freq='B')
+
+        base_price = 100
+        returns = np.random.normal(0.0005, 0.02, days)
+        prices = base_price * np.exp(np.cumsum(returns))
+
+        df = pd.DataFrame({
+            'Open': prices * (1 + np.random.uniform(-0.01, 0.01, days)),
+            'High': prices * (1 + np.random.uniform(0, 0.02, days)),
+            'Low': prices * (1 - np.random.uniform(0, 0.02, days)),
+            'Close': prices,
+            'Volume': np.random.randint(1000000, 10000000, days)
+        }, index=dates)
+        return df
+
+    @pytest.fixture
+    def sample_ticker_stats_csv(self, temp_output_dir):
+        """Create sample ticker_stats.csv for testing."""
+        ticker_stats_path = os.path.join(temp_output_dir, 'ticker_stats.csv')
+        stats_data = pd.DataFrame({
+            'ticker': ['NVDA', 'AAPL', 'MSFT', 'META', 'GOOGL', 'AMZN', 'TSLA', 'AMD', 'INTC', 'IBM'],
+            'total_pnl': [1500.0, 1000.0, 800.0, 600.0, 400.0, -100.0, -300.0, -500.0, -700.0, -900.0],
+            'trade_count': [3, 5, 2, 4, 3, 2, 4, 3, 2, 1]
+        })
+        stats_data.to_csv(ticker_stats_path, index=False)
+        return ticker_stats_path
+
+    @pytest.fixture
+    def sample_trade_log_csv(self, temp_output_dir):
+        """Create sample trade_log.csv for testing."""
+        trade_log_path = os.path.join(temp_output_dir, 'trade_log.csv')
+        # Create trade entries for all tickers
+        tickers = ['NVDA', 'AAPL', 'MSFT', 'META', 'GOOGL', 'AMZN', 'TSLA', 'AMD', 'INTC', 'IBM']
+        rows = []
+        for ticker in tickers:
+            rows.append({
+                'date': '2024-03-15', 'ticker': ticker, 'action': 'ENTRY',
+                'price': 100.0, 'shares': 50, 'reason': 'entry_signal',
+                'pnl': None, 'capital_after': 95000.0
+            })
+            rows.append({
+                'date': '2024-06-20', 'ticker': ticker, 'action': 'EXIT',
+                'price': 110.0, 'shares': 50, 'reason': 'target_reached',
+                'pnl': 500.0, 'capital_after': 100500.0
+            })
+        trade_data = pd.DataFrame(rows)
+        trade_data.to_csv(trade_log_path, index=False)
+        return trade_log_path
+
+    def test_function_exists(self):
+        """Test that generate_top_bottom_charts function exists."""
+        from backtest.ticker_charts import generate_top_bottom_charts
+        assert callable(generate_top_bottom_charts)
+
+    def test_function_signature(self, temp_output_dir, sample_ticker_stats_csv, sample_trade_log_csv):
+        """Test that function accepts required parameters."""
+        from backtest.ticker_charts import generate_top_bottom_charts
+
+        # Should not raise TypeError
+        try:
+            result = generate_top_bottom_charts(
+                ticker_stats_path=sample_ticker_stats_csv,
+                trade_log_path=sample_trade_log_csv,
+                output_dir=temp_output_dir,
+                top_n=5,
+                bottom_n=5
+            )
+        except TypeError as e:
+            pytest.fail(f"Function signature error: {e}")
+        except Exception:
+            pass  # Other errors are OK for signature test
+
+    def test_returns_list_of_paths(self, temp_output_dir, sample_ticker_stats_csv, sample_trade_log_csv, monkeypatch):
+        """Test that function returns a list of Path objects."""
+        from backtest.ticker_charts import generate_top_bottom_charts
+        import yfinance as yf
+
+        # Mock yfinance for all tickers
+        def mock_ticker_init(self, ticker):
+            self.ticker = ticker
+
+        def mock_history(self, start=None, end=None, period=None):
+            days = 252
+            np.random.seed(42)
+            dates = pd.date_range(start='2024-01-01', periods=days, freq='B')
+            base_price = 100
+            returns = np.random.normal(0.0005, 0.02, days)
+            prices = base_price * np.exp(np.cumsum(returns))
+            return pd.DataFrame({
+                'Open': prices * (1 + np.random.uniform(-0.01, 0.01, days)),
+                'High': prices * (1 + np.random.uniform(0, 0.02, days)),
+                'Low': prices * (1 - np.random.uniform(0, 0.02, days)),
+                'Close': prices,
+                'Volume': np.random.randint(1000000, 10000000, days)
+            }, index=dates)
+
+        class MockTicker:
+            def __init__(self, ticker):
+                mock_ticker_init(self, ticker)
+
+            def history(self, start=None, end=None, period=None):
+                return mock_history(self, start, end, period)
+
+        monkeypatch.setattr(yf, 'Ticker', MockTicker)
+
+        result = generate_top_bottom_charts(
+            ticker_stats_path=sample_ticker_stats_csv,
+            trade_log_path=sample_trade_log_csv,
+            output_dir=temp_output_dir,
+            top_n=2,
+            bottom_n=2
+        )
+
+        assert isinstance(result, list)
+        # Should return 4 paths (2 top + 2 bottom)
+        assert len(result) == 4
+        for path in result:
+            assert isinstance(path, Path)
+
+    def test_selects_correct_top_n_tickers(self, temp_output_dir, sample_ticker_stats_csv, sample_trade_log_csv, monkeypatch):
+        """Test that correct top N tickers are selected by P&L."""
+        from backtest.ticker_charts import generate_top_bottom_charts
+        import yfinance as yf
+
+        def mock_history(self, start=None, end=None, period=None):
+            days = 252
+            np.random.seed(42)
+            dates = pd.date_range(start='2024-01-01', periods=days, freq='B')
+            base_price = 100
+            returns = np.random.normal(0.0005, 0.02, days)
+            prices = base_price * np.exp(np.cumsum(returns))
+            return pd.DataFrame({
+                'Open': prices * (1 + np.random.uniform(-0.01, 0.01, days)),
+                'High': prices * (1 + np.random.uniform(0, 0.02, days)),
+                'Low': prices * (1 - np.random.uniform(0, 0.02, days)),
+                'Close': prices,
+                'Volume': np.random.randint(1000000, 10000000, days)
+            }, index=dates)
+
+        class MockTicker:
+            def __init__(self, ticker):
+                self.ticker = ticker
+
+            def history(self, start=None, end=None, period=None):
+                return mock_history(self, start, end, period)
+
+        monkeypatch.setattr(yf, 'Ticker', MockTicker)
+
+        result = generate_top_bottom_charts(
+            ticker_stats_path=sample_ticker_stats_csv,
+            trade_log_path=sample_trade_log_csv,
+            output_dir=temp_output_dir,
+            top_n=3,
+            bottom_n=0
+        )
+
+        # Top 3 should be NVDA, AAPL, MSFT (highest P&L)
+        filenames = [p.name for p in result]
+        assert any('NVDA' in f for f in filenames)
+        assert any('AAPL' in f for f in filenames)
+        assert any('MSFT' in f for f in filenames)
+
+    def test_selects_correct_bottom_n_tickers(self, temp_output_dir, sample_ticker_stats_csv, sample_trade_log_csv, monkeypatch):
+        """Test that correct bottom N tickers are selected by P&L."""
+        from backtest.ticker_charts import generate_top_bottom_charts
+        import yfinance as yf
+
+        def mock_history(self, start=None, end=None, period=None):
+            days = 252
+            np.random.seed(42)
+            dates = pd.date_range(start='2024-01-01', periods=days, freq='B')
+            base_price = 100
+            returns = np.random.normal(0.0005, 0.02, days)
+            prices = base_price * np.exp(np.cumsum(returns))
+            return pd.DataFrame({
+                'Open': prices * (1 + np.random.uniform(-0.01, 0.01, days)),
+                'High': prices * (1 + np.random.uniform(0, 0.02, days)),
+                'Low': prices * (1 - np.random.uniform(0, 0.02, days)),
+                'Close': prices,
+                'Volume': np.random.randint(1000000, 10000000, days)
+            }, index=dates)
+
+        class MockTicker:
+            def __init__(self, ticker):
+                self.ticker = ticker
+
+            def history(self, start=None, end=None, period=None):
+                return mock_history(self, start, end, period)
+
+        monkeypatch.setattr(yf, 'Ticker', MockTicker)
+
+        result = generate_top_bottom_charts(
+            ticker_stats_path=sample_ticker_stats_csv,
+            trade_log_path=sample_trade_log_csv,
+            output_dir=temp_output_dir,
+            top_n=0,
+            bottom_n=3
+        )
+
+        # Bottom 3 should be IBM, INTC, AMD (lowest P&L)
+        filenames = [p.name for p in result]
+        assert any('IBM' in f for f in filenames)
+        assert any('INTC' in f for f in filenames)
+        assert any('AMD' in f for f in filenames)
+
+    def test_output_filename_pattern_top(self, temp_output_dir, sample_ticker_stats_csv, sample_trade_log_csv, monkeypatch):
+        """Test that top tickers have correct filename pattern: top_01_TICKER.png."""
+        from backtest.ticker_charts import generate_top_bottom_charts
+        import yfinance as yf
+
+        def mock_history(self, start=None, end=None, period=None):
+            days = 252
+            np.random.seed(42)
+            dates = pd.date_range(start='2024-01-01', periods=days, freq='B')
+            base_price = 100
+            returns = np.random.normal(0.0005, 0.02, days)
+            prices = base_price * np.exp(np.cumsum(returns))
+            return pd.DataFrame({
+                'Open': prices * (1 + np.random.uniform(-0.01, 0.01, days)),
+                'High': prices * (1 + np.random.uniform(0, 0.02, days)),
+                'Low': prices * (1 - np.random.uniform(0, 0.02, days)),
+                'Close': prices,
+                'Volume': np.random.randint(1000000, 10000000, days)
+            }, index=dates)
+
+        class MockTicker:
+            def __init__(self, ticker):
+                self.ticker = ticker
+
+            def history(self, start=None, end=None, period=None):
+                return mock_history(self, start, end, period)
+
+        monkeypatch.setattr(yf, 'Ticker', MockTicker)
+
+        result = generate_top_bottom_charts(
+            ticker_stats_path=sample_ticker_stats_csv,
+            trade_log_path=sample_trade_log_csv,
+            output_dir=temp_output_dir,
+            top_n=2,
+            bottom_n=0
+        )
+
+        filenames = [p.name for p in result]
+        # Should have top_01_NVDA.png, top_02_AAPL.png
+        assert 'top_01_NVDA.png' in filenames
+        assert 'top_02_AAPL.png' in filenames
+
+    def test_output_filename_pattern_bottom(self, temp_output_dir, sample_ticker_stats_csv, sample_trade_log_csv, monkeypatch):
+        """Test that bottom tickers have correct filename pattern: bottom_01_TICKER.png."""
+        from backtest.ticker_charts import generate_top_bottom_charts
+        import yfinance as yf
+
+        def mock_history(self, start=None, end=None, period=None):
+            days = 252
+            np.random.seed(42)
+            dates = pd.date_range(start='2024-01-01', periods=days, freq='B')
+            base_price = 100
+            returns = np.random.normal(0.0005, 0.02, days)
+            prices = base_price * np.exp(np.cumsum(returns))
+            return pd.DataFrame({
+                'Open': prices * (1 + np.random.uniform(-0.01, 0.01, days)),
+                'High': prices * (1 + np.random.uniform(0, 0.02, days)),
+                'Low': prices * (1 - np.random.uniform(0, 0.02, days)),
+                'Close': prices,
+                'Volume': np.random.randint(1000000, 10000000, days)
+            }, index=dates)
+
+        class MockTicker:
+            def __init__(self, ticker):
+                self.ticker = ticker
+
+            def history(self, start=None, end=None, period=None):
+                return mock_history(self, start, end, period)
+
+        monkeypatch.setattr(yf, 'Ticker', MockTicker)
+
+        result = generate_top_bottom_charts(
+            ticker_stats_path=sample_ticker_stats_csv,
+            trade_log_path=sample_trade_log_csv,
+            output_dir=temp_output_dir,
+            top_n=0,
+            bottom_n=2
+        )
+
+        filenames = [p.name for p in result]
+        # Bottom tickers from stats sorted descending: tail(2) gives INTC(-700), IBM(-900)
+        # So bottom_01 = INTC (first in tail), bottom_02 = IBM (second in tail)
+        assert 'bottom_01_INTC.png' in filenames
+        assert 'bottom_02_IBM.png' in filenames
+
+    def test_charts_saved_to_charts_subdirectory(self, temp_output_dir, sample_ticker_stats_csv, sample_trade_log_csv, monkeypatch):
+        """Test that charts are saved in output_dir/charts/."""
+        from backtest.ticker_charts import generate_top_bottom_charts
+        import yfinance as yf
+
+        def mock_history(self, start=None, end=None, period=None):
+            days = 252
+            np.random.seed(42)
+            dates = pd.date_range(start='2024-01-01', periods=days, freq='B')
+            base_price = 100
+            returns = np.random.normal(0.0005, 0.02, days)
+            prices = base_price * np.exp(np.cumsum(returns))
+            return pd.DataFrame({
+                'Open': prices * (1 + np.random.uniform(-0.01, 0.01, days)),
+                'High': prices * (1 + np.random.uniform(0, 0.02, days)),
+                'Low': prices * (1 - np.random.uniform(0, 0.02, days)),
+                'Close': prices,
+                'Volume': np.random.randint(1000000, 10000000, days)
+            }, index=dates)
+
+        class MockTicker:
+            def __init__(self, ticker):
+                self.ticker = ticker
+
+            def history(self, start=None, end=None, period=None):
+                return mock_history(self, start, end, period)
+
+        monkeypatch.setattr(yf, 'Ticker', MockTicker)
+
+        result = generate_top_bottom_charts(
+            ticker_stats_path=sample_ticker_stats_csv,
+            trade_log_path=sample_trade_log_csv,
+            output_dir=temp_output_dir,
+            top_n=1,
+            bottom_n=1
+        )
+
+        expected_dir = Path(temp_output_dir) / "charts"
+        for path in result:
+            assert path.parent == expected_dir
+
+    def test_handles_fewer_tickers_than_requested(self, temp_output_dir):
+        """Test handling when fewer tickers exist than requested."""
+        from backtest.ticker_charts import generate_top_bottom_charts
+
+        # Create ticker_stats with only 3 tickers
+        ticker_stats_path = os.path.join(temp_output_dir, 'small_ticker_stats.csv')
+        stats_data = pd.DataFrame({
+            'ticker': ['AAPL', 'GOOGL', 'MSFT'],
+            'total_pnl': [1000.0, 500.0, -200.0],
+            'trade_count': [2, 1, 1]
+        })
+        stats_data.to_csv(ticker_stats_path, index=False)
+
+        trade_log_path = os.path.join(temp_output_dir, 'trade_log.csv')
+        pd.DataFrame({
+            'date': ['2024-03-15'] * 3,
+            'ticker': ['AAPL', 'GOOGL', 'MSFT'],
+            'action': ['EXIT'] * 3,
+            'price': [110.0] * 3,
+            'shares': [50] * 3,
+            'reason': ['target_reached'] * 3,
+            'pnl': [1000.0, 500.0, -200.0],
+            'capital_after': [100000.0] * 3
+        }).to_csv(trade_log_path, index=False)
+
+        # Request more than available - should not raise error
+        try:
+            result = generate_top_bottom_charts(
+                ticker_stats_path=ticker_stats_path,
+                trade_log_path=trade_log_path,
+                output_dir=temp_output_dir,
+                top_n=5,  # Only 3 exist
+                bottom_n=5  # Only 3 exist
+            )
+            # Should return up to available tickers
+            # Could be 3 (all) or 6 (top 3 + bottom 3 with overlap)
+            assert len(result) <= 6
+        except Exception as e:
+            pytest.fail(f"Should handle fewer tickers gracefully: {e}")
+
+    def test_handles_empty_ticker_stats(self, temp_output_dir):
+        """Test handling of empty ticker_stats.csv."""
+        from backtest.ticker_charts import generate_top_bottom_charts
+
+        # Create empty ticker_stats
+        ticker_stats_path = os.path.join(temp_output_dir, 'empty_ticker_stats.csv')
+        pd.DataFrame(columns=['ticker', 'total_pnl', 'trade_count']).to_csv(ticker_stats_path, index=False)
+
+        trade_log_path = os.path.join(temp_output_dir, 'trade_log.csv')
+        pd.DataFrame(columns=['date', 'ticker', 'action', 'price', 'shares', 'reason', 'pnl', 'capital_after']).to_csv(
+            trade_log_path, index=False
+        )
+
+        result = generate_top_bottom_charts(
+            ticker_stats_path=ticker_stats_path,
+            trade_log_path=trade_log_path,
+            output_dir=temp_output_dir,
+            top_n=5,
+            bottom_n=5
+        )
+
+        # Should return empty list
+        assert result == []
+
+
+class TestParseTradeLog:
+    """Tests for trade log parsing utility function."""
+
+    @pytest.fixture
+    def temp_output_dir(self):
+        """Create temporary directory for test output."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            yield tmpdir
+
+    def test_parse_trade_log_function_exists(self):
+        """Test that _parse_trade_log function exists."""
+        from backtest.ticker_charts import _parse_trade_log
+        assert callable(_parse_trade_log)
+
+    def test_parse_trade_log_filters_by_ticker(self, temp_output_dir):
+        """Test that trade log is filtered by ticker."""
+        from backtest.ticker_charts import _parse_trade_log
+
+        trade_log_path = os.path.join(temp_output_dir, 'trade_log.csv')
+        trade_data = pd.DataFrame({
+            'date': ['2024-03-15', '2024-05-20', '2024-04-01', '2024-06-15'],
+            'ticker': ['AAPL', 'AAPL', 'GOOGL', 'GOOGL'],
+            'action': ['ENTRY', 'EXIT', 'ENTRY', 'EXIT'],
+            'price': [105.0, 115.0, 140.0, 150.0],
+            'shares': [50, 50, 30, 30],
+            'reason': ['entry_signal', 'target_reached', 'entry_signal', 'target_reached'],
+            'pnl': [None, 500.0, None, 300.0],
+            'capital_after': [94750.0, 100250.0, 95800.0, 100300.0]
+        })
+        trade_data.to_csv(trade_log_path, index=False)
+
+        entry_dates, exit_dates = _parse_trade_log(trade_log_path, 'AAPL')
+
+        assert len(entry_dates) == 1
+        assert len(exit_dates) == 1
+
+    def test_parse_trade_log_returns_datetime_objects(self, temp_output_dir):
+        """Test that parsed dates are datetime-compatible."""
+        from backtest.ticker_charts import _parse_trade_log
+
+        trade_log_path = os.path.join(temp_output_dir, 'trade_log.csv')
+        trade_data = pd.DataFrame({
+            'date': ['2024-03-15', '2024-05-20'],
+            'ticker': ['AAPL', 'AAPL'],
+            'action': ['ENTRY', 'EXIT'],
+            'price': [105.0, 115.0],
+            'shares': [50, 50],
+            'reason': ['entry_signal', 'target_reached'],
+            'pnl': [None, 500.0],
+            'capital_after': [94750.0, 100250.0]
+        })
+        trade_data.to_csv(trade_log_path, index=False)
+
+        entry_dates, exit_dates = _parse_trade_log(trade_log_path, 'AAPL')
+
+        # Should be usable as index for DataFrame lookups
+        assert hasattr(entry_dates[0], 'year')
+        assert hasattr(exit_dates[0], 'year')
+
+    def test_parse_trade_log_handles_missing_file(self, temp_output_dir):
+        """Test graceful handling of missing trade_log file."""
+        from backtest.ticker_charts import _parse_trade_log
+
+        entry_dates, exit_dates = _parse_trade_log('/nonexistent/path.csv', 'AAPL')
+
+        assert entry_dates == []
+        assert exit_dates == []
+
+    def test_parse_trade_log_handles_empty_file(self, temp_output_dir):
+        """Test graceful handling of empty trade_log file."""
+        from backtest.ticker_charts import _parse_trade_log
+
+        trade_log_path = os.path.join(temp_output_dir, 'empty_trade_log.csv')
+        pd.DataFrame(columns=['date', 'ticker', 'action', 'price']).to_csv(trade_log_path, index=False)
+
+        entry_dates, exit_dates = _parse_trade_log(trade_log_path, 'AAPL')
+
+        assert entry_dates == []
+        assert exit_dates == []

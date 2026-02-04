@@ -9,12 +9,15 @@ Generates candlestick charts with:
 - Volume panel below price
 - Clean layout with monthly date ticks
 
-Phase 2 (not yet implemented):
-- ENTRY markers (up arrow)
-- EXIT markers (down arrow)
+Phase 2: Trade Markers and Auto-Generation
+- ENTRY markers (up arrow, green)
+- EXIT markers (down arrow, red)
+- Auto-generate top/bottom P&L charts after backtest
 
 Output:
 - output/charts/{TICKER}_price_chart.png
+- output/charts/top_01_{TICKER}.png
+- output/charts/bottom_01_{TICKER}.png
 """
 import os
 from datetime import datetime
@@ -142,6 +145,133 @@ def _normalize_dataframe(data: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def _parse_trade_log(
+    trade_log_path: Optional[str],
+    ticker: str
+) -> Tuple[List, List]:
+    """
+    Parse trade_log.csv and extract ENTRY/EXIT dates for a specific ticker.
+
+    Args:
+        trade_log_path: Path to trade_log.csv file (can be None)
+        ticker: Ticker symbol to filter trades for
+
+    Returns:
+        Tuple of (entry_dates, exit_dates) as lists of Timestamps
+    """
+    entry_dates = []
+    exit_dates = []
+
+    if trade_log_path is None:
+        return entry_dates, exit_dates
+
+    # Check if file exists
+    if not os.path.exists(trade_log_path):
+        logger.debug(f"Trade log not found: {trade_log_path}")
+        return entry_dates, exit_dates
+
+    try:
+        df = pd.read_csv(trade_log_path)
+
+        if df.empty:
+            return entry_dates, exit_dates
+
+        # Filter by ticker
+        ticker_trades = df[df['ticker'] == ticker]
+
+        if ticker_trades.empty:
+            return entry_dates, exit_dates
+
+        # Convert date column to datetime
+        ticker_trades = ticker_trades.copy()
+        ticker_trades['date'] = pd.to_datetime(ticker_trades['date'])
+
+        # Extract ENTRY dates
+        entries = ticker_trades[ticker_trades['action'] == 'ENTRY']
+        entry_dates = entries['date'].tolist()
+
+        # Extract EXIT dates
+        exits = ticker_trades[ticker_trades['action'] == 'EXIT']
+        exit_dates = exits['date'].tolist()
+
+    except Exception as e:
+        logger.warning(f"Failed to parse trade log: {e}")
+
+    return entry_dates, exit_dates
+
+
+def _create_trade_markers(
+    data: pd.DataFrame,
+    entry_dates: List,
+    exit_dates: List
+) -> List:
+    """
+    Create mplfinance addplot objects for trade markers.
+
+    Args:
+        data: Normalized OHLCV DataFrame
+        entry_dates: List of ENTRY dates
+        exit_dates: List of EXIT dates
+
+    Returns:
+        List of mplfinance addplot objects for markers
+    """
+    if not MPLFINANCE_AVAILABLE:
+        return []
+
+    addplots = []
+
+    # Create marker series for ENTRY (up arrows at low)
+    if entry_dates:
+        entry_markers = pd.Series(index=data.index, dtype=float)
+        for date in entry_dates:
+            # Find closest date in index
+            if date in data.index:
+                entry_markers.loc[date] = data.loc[date, 'Low'] * 0.98
+            else:
+                # Try to find the closest date
+                closest_dates = data.index[data.index >= date]
+                if len(closest_dates) > 0:
+                    closest = closest_dates[0]
+                    entry_markers.loc[closest] = data.loc[closest, 'Low'] * 0.98
+
+        if not entry_markers.dropna().empty:
+            ap_entry = mpf.make_addplot(
+                entry_markers,
+                type='scatter',
+                markersize=120,
+                marker='^',
+                color='#26a69a'  # Green (TradingView style)
+            )
+            addplots.append(ap_entry)
+
+    # Create marker series for EXIT (down arrows at high)
+    if exit_dates:
+        exit_markers = pd.Series(index=data.index, dtype=float)
+        for date in exit_dates:
+            # Find closest date in index
+            if date in data.index:
+                exit_markers.loc[date] = data.loc[date, 'High'] * 1.02
+            else:
+                # Try to find the closest date
+                closest_dates = data.index[data.index >= date]
+                if len(closest_dates) > 0:
+                    closest = closest_dates[0]
+                    exit_markers.loc[closest] = data.loc[closest, 'High'] * 1.02
+
+        if not exit_markers.dropna().empty:
+            ap_exit = mpf.make_addplot(
+                exit_markers,
+                type='scatter',
+                markersize=120,
+                marker='v',
+                color='#ef5350'  # Red (TradingView style)
+            )
+            addplots.append(ap_exit)
+
+    return addplots
+
+
 def _calculate_indicators(data: pd.DataFrame) -> List:
     """
     Calculate technical indicators for the chart.
@@ -217,7 +347,9 @@ def generate_price_chart_from_dataframe(
     ticker: str,
     data: pd.DataFrame,
     output_dir: str,
-    style: str = "tradingview"
+    style: str = "tradingview",
+    trade_log_path: Optional[str] = None,
+    output_filename: Optional[str] = None
 ) -> Path:
     """
     Generate a TradingView-like price chart from a DataFrame.
@@ -230,6 +362,8 @@ def generate_price_chart_from_dataframe(
         data: OHLCV DataFrame with DatetimeIndex
         output_dir: Directory path for chart output
         style: Chart style ("tradingview" for dark mode)
+        trade_log_path: Optional path to trade_log.csv for IN/OUT markers (Phase 2)
+        output_filename: Optional custom filename for the chart
 
     Returns:
         Path to saved chart image
@@ -255,15 +389,25 @@ def generate_price_chart_from_dataframe(
     charts_dir = Path(output_dir) / "charts"
     charts_dir.mkdir(parents=True, exist_ok=True)
 
-    # Sanitize ticker for filename (replace dots with dashes)
-    safe_ticker = ticker.replace('.', '-')
-    chart_path = charts_dir / f"{safe_ticker}_price_chart.png"
+    # Determine filename
+    if output_filename:
+        chart_path = charts_dir / output_filename
+    else:
+        # Sanitize ticker for filename (replace dots with dashes)
+        safe_ticker = ticker.replace('.', '-')
+        chart_path = charts_dir / f"{safe_ticker}_price_chart.png"
 
     # Get style
     chart_style = _create_tradingview_style() if style == "tradingview" else 'charles'
 
     # Calculate indicators
     addplots = _calculate_indicators(chart_data)
+
+    # Parse trade log and add markers (Phase 2)
+    if trade_log_path:
+        entry_dates, exit_dates = _parse_trade_log(trade_log_path, ticker)
+        marker_plots = _create_trade_markers(chart_data, entry_dates, exit_dates)
+        addplots.extend(marker_plots)
 
     # Generate chart
     try:
@@ -307,7 +451,8 @@ def generate_price_chart(
     start_date: str,
     end_date: str,
     output_dir: str,
-    style: str = "tradingview"
+    style: str = "tradingview",
+    trade_log_path: Optional[str] = None
 ) -> Path:
     """
     Generate a TradingView-like price chart by fetching data from yfinance.
@@ -321,6 +466,7 @@ def generate_price_chart(
         end_date: End date in YYYY-MM-DD format
         output_dir: Directory path for chart output
         style: Chart style ("tradingview" for dark mode, default)
+        trade_log_path: Optional path to trade_log.csv for IN/OUT markers (Phase 2)
 
     Returns:
         Path to saved chart image
@@ -343,7 +489,8 @@ def generate_price_chart(
         ticker=ticker,
         data=data,
         output_dir=output_dir,
-        style=style
+        style=style,
+        trade_log_path=trade_log_path
     )
 
 
@@ -579,3 +726,128 @@ class TickerCharts:
             trades_by_ticker[ticker] = self.extract_trades_for_ticker(ticker, trades)
 
         return self.create_charts_for_tickers(all_tickers, ticker_data, trades_by_ticker)
+
+
+def generate_top_bottom_charts(
+    ticker_stats_path: str,
+    trade_log_path: str,
+    output_dir: str,
+    top_n: int = 5,
+    bottom_n: int = 5,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None
+) -> List[Path]:
+    """
+    Generate charts for top N winners and bottom N losers based on P&L.
+
+    This function reads ticker_stats.csv to identify top/bottom performers,
+    then generates TradingView-style charts with IN/OUT markers for each.
+
+    Args:
+        ticker_stats_path: Path to ticker_stats.csv
+        trade_log_path: Path to trade_log.csv
+        output_dir: Directory path for chart output
+        top_n: Number of top performing tickers to chart (default 5)
+        bottom_n: Number of bottom performing tickers to chart (default 5)
+        start_date: Optional start date for data fetch (YYYY-MM-DD)
+        end_date: Optional end date for data fetch (YYYY-MM-DD)
+
+    Returns:
+        List of Path objects to generated charts
+
+    Raises:
+        RuntimeError: If required dependencies are not available
+    """
+    if not YFINANCE_AVAILABLE:
+        raise RuntimeError("yfinance not installed. Cannot fetch data.")
+
+    if not MPLFINANCE_AVAILABLE:
+        raise RuntimeError("mplfinance not installed. Cannot generate charts.")
+
+    # Load ticker stats
+    if not os.path.exists(ticker_stats_path):
+        logger.warning(f"Ticker stats not found: {ticker_stats_path}")
+        return []
+
+    try:
+        stats_df = pd.read_csv(ticker_stats_path)
+    except Exception as e:
+        logger.error(f"Failed to read ticker stats: {e}")
+        return []
+
+    if stats_df.empty:
+        logger.warning("Ticker stats is empty")
+        return []
+
+    # Ensure sorted by P&L descending
+    stats_df = stats_df.sort_values('total_pnl', ascending=False)
+
+    # Get top N tickers
+    top_tickers = stats_df.head(min(top_n, len(stats_df)))['ticker'].tolist() if top_n > 0 else []
+
+    # Get bottom N tickers
+    bottom_tickers = stats_df.tail(min(bottom_n, len(stats_df)))['ticker'].tolist() if bottom_n > 0 else []
+
+    # Calculate default date range (1 year)
+    if end_date is None:
+        end_date = datetime.now().strftime('%Y-%m-%d')
+    if start_date is None:
+        start_dt = datetime.now() - pd.DateOffset(years=1)
+        start_date = start_dt.strftime('%Y-%m-%d')
+
+    # Generate charts
+    chart_paths = []
+    charts_dir = Path(output_dir) / "charts"
+    charts_dir.mkdir(parents=True, exist_ok=True)
+
+    # Generate top ticker charts
+    for idx, ticker in enumerate(top_tickers, start=1):
+        try:
+            stock = yf.Ticker(ticker)
+            data = stock.history(start=start_date, end=end_date)
+
+            if data is None or data.empty or len(data) < MIN_DATA_POINTS:
+                logger.warning(f"Insufficient data for {ticker}, skipping")
+                continue
+
+            filename = f"top_{idx:02d}_{ticker}.png"
+            chart_path = generate_price_chart_from_dataframe(
+                ticker=ticker,
+                data=data,
+                output_dir=output_dir,
+                style="tradingview",
+                trade_log_path=trade_log_path,
+                output_filename=filename
+            )
+            chart_paths.append(chart_path)
+            logger.info(f"Generated top chart: {filename}")
+
+        except Exception as e:
+            logger.error(f"Failed to generate chart for {ticker}: {e}")
+
+    # Generate bottom ticker charts
+    for idx, ticker in enumerate(bottom_tickers, start=1):
+        try:
+            stock = yf.Ticker(ticker)
+            data = stock.history(start=start_date, end=end_date)
+
+            if data is None or data.empty or len(data) < MIN_DATA_POINTS:
+                logger.warning(f"Insufficient data for {ticker}, skipping")
+                continue
+
+            filename = f"bottom_{idx:02d}_{ticker}.png"
+            chart_path = generate_price_chart_from_dataframe(
+                ticker=ticker,
+                data=data,
+                output_dir=output_dir,
+                style="tradingview",
+                trade_log_path=trade_log_path,
+                output_filename=filename
+            )
+            chart_paths.append(chart_path)
+            logger.info(f"Generated bottom chart: {filename}")
+
+        except Exception as e:
+            logger.error(f"Failed to generate chart for {ticker}: {e}")
+
+    return chart_paths

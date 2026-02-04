@@ -278,9 +278,60 @@ python main.py --mode backtest --tickers AAPL,MSFT,NVDA
 | `output/screening_results.csv` | スクリーニング結果 |
 | `output/screening.log` | 実行ログ |
 | `output/backtest/trades.csv` | トレード詳細 |
+| `output/backtest/trade_log.csv` | ENTRY/EXITログ |
+| `output/backtest/ticker_stats.csv` | ティッカー別P&L統計 |
 | `output/backtest/equity_curve.png` | 資産曲線グラフ |
 | `output/backtest/drawdown.png` | ドローダウングラフ |
 | `output/backtest/monthly_returns.png` | 月次リターン表 |
+| `output/backtest/charts/top_01_*.png` | P&L上位5銘柄のチャート |
+| `output/backtest/charts/bottom_01_*.png` | P&L下位5銘柄のチャート |
+
+## Chart Generation (TradingView-like)
+
+### Generate charts after backtest (default)
+
+```bash
+python main.py --mode backtest
+```
+
+This will:
+1. Run backtest
+2. Generate trade_log.csv and ticker_stats.csv
+3. Automatically generate charts for:
+   - Top 5 profitable tickers
+   - Bottom 5 least profitable tickers
+
+Charts include:
+- Candlesticks (daily OHLC)
+- SMA 20 / 50 / 200 overlays
+- Bollinger Bands (20, 2)
+- Volume panel
+- IN / OUT trade markers (green up arrow for ENTRY, red down arrow for EXIT)
+
+### Skip chart generation
+
+```bash
+python main.py --mode backtest --no-charts
+```
+
+### Generate chart for a specific ticker
+
+```bash
+python main.py --mode chart --ticker AAPL
+```
+
+If a `trade_log.csv` exists in the output directory, IN/OUT markers will be drawn automatically.
+
+Output:
+```
+output/charts/AAPL_price_chart.png
+```
+
+### Chart with custom date range
+
+```bash
+python main.py --mode chart --ticker AAPL --start 2023-01-01 --end 2024-01-01
+```
 
 ### 設定ファイル
 
