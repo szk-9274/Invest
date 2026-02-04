@@ -120,12 +120,10 @@ class BacktestEngine:
         self.risk_per_trade = config['risk']['risk_per_trade']
 
         # Initialize TradeLogger for trade action logging (Task 2)
-        output_config = config.get('output', {})
-        output_dir = output_config.get('csv_path', 'python/output')
-        # If csv_path points to a file, use its parent directory
-        if output_dir.endswith('.csv'):
-            output_dir = str(Path(output_dir).parent)
-        self.trade_logger = TradeLogger(output_dir=output_dir)
+        # CRITICAL: Use output/backtest/ subdirectory for trade logs
+        # This ensures consistency with chart generation which expects files here
+        backtest_output_dir = Path(__file__).parent.parent / 'output' / 'backtest'
+        self.trade_logger = TradeLogger(output_dir=str(backtest_output_dir))
 
         # Diagnostics with separate Stage2 and Entry tracking
         self.diagnostics = {
