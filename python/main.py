@@ -180,12 +180,17 @@ def _generate_backtest_charts(output_dir: Path, start_date: str, end_date: str):
     trade_log_path = output_dir / "trade_log.csv"
     ticker_stats_path = output_dir / "ticker_stats.csv"
 
+    # Log resolved paths for debugging
+    logger.info(f"Chart generation - looking for files at:")
+    logger.info(f"  trade_log_path: {trade_log_path.resolve()}")
+    logger.info(f"  ticker_stats_path: {ticker_stats_path.resolve()}")
+
     if not trade_log_path.exists():
-        logger.warning(f"trade_log.csv not found at {trade_log_path}, skipping chart generation")
+        logger.warning(f"trade_log.csv not found at {trade_log_path.resolve()}, skipping chart generation")
         return
 
     if not ticker_stats_path.exists():
-        logger.warning(f"ticker_stats.csv not found at {ticker_stats_path}, skipping chart generation")
+        logger.warning(f"ticker_stats.csv not found at {ticker_stats_path.resolve()}, skipping chart generation")
         return
 
     logger.info("=" * 60)
@@ -247,8 +252,8 @@ def run_chart_mode(config: dict, ticker: str, args):
 
     logger.info(f"Period: {start_date} to {end_date}")
 
-    # Check for trade_log
-    output_dir = Path(__file__).parent / "output"
+    # Check for trade_log in backtest subdirectory (consistent with backtest output)
+    output_dir = Path(__file__).parent / "output" / "backtest"
     trade_log_path = output_dir / "trade_log.csv"
     trade_log_str = str(trade_log_path) if trade_log_path.exists() else None
 

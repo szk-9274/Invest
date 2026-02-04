@@ -165,9 +165,13 @@ def _parse_trade_log(
     if trade_log_path is None:
         return entry_dates, exit_dates
 
+    # Log the resolved path for debugging
+    abs_path = os.path.abspath(trade_log_path)
+    logger.debug(f"Looking for trade_log at: {abs_path}")
+
     # Check if file exists
     if not os.path.exists(trade_log_path):
-        logger.debug(f"Trade log not found: {trade_log_path}")
+        logger.debug(f"Trade log not found: {abs_path} (cwd: {os.getcwd()})")
         return entry_dates, exit_dates
 
     try:
