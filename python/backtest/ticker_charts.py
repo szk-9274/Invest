@@ -55,6 +55,49 @@ except ImportError:
 # Minimum data points required for SMA200
 MIN_DATA_POINTS = 50
 
+# Default timezone for financial data (US markets)
+DEFAULT_TIMEZONE = 'America/New_York'
+
+
+def normalize_timestamp(
+    ts: Union[str, datetime, pd.Timestamp],
+    target_tz: str = DEFAULT_TIMEZONE
+) -> pd.Timestamp:
+    """
+    Normalize a timestamp to the target timezone (default: America/New_York).
+
+    This function ensures consistent timezone handling across the codebase:
+    - If tz-naive: localize to target timezone
+    - If tz-aware: convert to target timezone
+    - Accepts strings, datetime objects, and pd.Timestamp
+
+    Args:
+        ts: Input timestamp (string, datetime, or pd.Timestamp)
+        target_tz: Target timezone (default: America/New_York)
+
+    Returns:
+        pd.Timestamp with target timezone
+
+    Example:
+        >>> normalize_timestamp('2024-03-15')
+        Timestamp('2024-03-15 00:00:00-0400', tz='America/New_York')
+        >>> normalize_timestamp(pd.Timestamp('2024-03-15 14:30:00', tz='UTC'))
+        Timestamp('2024-03-15 10:30:00-0400', tz='America/New_York')
+    """
+    # Convert to pd.Timestamp if needed
+    if isinstance(ts, str):
+        ts = pd.Timestamp(ts)
+    elif isinstance(ts, datetime) and not isinstance(ts, pd.Timestamp):
+        ts = pd.Timestamp(ts)
+
+    # Handle timezone
+    if ts.tzinfo is None:
+        # Timezone-naive: localize to target timezone
+        return ts.tz_localize(target_tz)
+    else:
+        # Timezone-aware: convert to target timezone
+        return ts.tz_convert(target_tz)
+
 
 def _create_tradingview_style() -> dict:
     """
@@ -186,15 +229,18 @@ def _parse_trade_log(
         if ticker_trades.empty:
             return entry_dates, exit_dates
 
-        # Convert date column to datetime
+        # Convert date column to datetime and normalize to America/New_York timezone
+        # CRITICAL: trade_log.csv dates are stored as tz-naive strings (YYYY-MM-DD)
+        # but OHLCV data from yfinance is tz-aware (America/New_York).
+        # We must normalize to avoid "Invalid comparison between tz-aware and tz-naive" errors.
         ticker_trades = ticker_trades.copy()
-        ticker_trades['date'] = pd.to_datetime(ticker_trades['date'])
+        ticker_trades['date'] = pd.to_datetime(ticker_trades['date']).apply(normalize_timestamp)
 
-        # Extract ENTRY dates
+        # Extract ENTRY dates (now timezone-aware)
         entries = ticker_trades[ticker_trades['action'] == 'ENTRY']
         entry_dates = entries['date'].tolist()
 
-        # Extract EXIT dates
+        # Extract EXIT dates (now timezone-aware)
         exits = ticker_trades[ticker_trades['action'] == 'EXIT']
         exit_dates = exits['date'].tolist()
 
@@ -212,10 +258,13 @@ def _create_trade_markers(
     """
     Create mplfinance addplot objects for trade markers.
 
+    CRITICAL: Both data.index and entry_dates/exit_dates must have matching timezone
+    awareness. This function expects timezone-aware timestamps (America/New_York).
+
     Args:
-        data: Normalized OHLCV DataFrame
-        entry_dates: List of ENTRY dates
-        exit_dates: List of EXIT dates
+        data: Normalized OHLCV DataFrame (must have DatetimeIndex, timezone-aware preferred)
+        entry_dates: List of ENTRY dates (should be timezone-aware)
+        exit_dates: List of EXIT dates (should be timezone-aware)
 
     Returns:
         List of mplfinance addplot objects for markers
@@ -225,19 +274,52 @@ def _create_trade_markers(
 
     addplots = []
 
+    # Determine if data index is timezone-aware
+    data_tz = data.index.tz
+
+    def _normalize_date_for_comparison(date):
+        """Normalize date to match data index timezone."""
+        if data_tz is not None:
+            # Data is tz-aware, normalize date to same timezone
+            return normalize_timestamp(date, str(data_tz))
+        else:
+            # Data is tz-naive, strip timezone from date if present
+            if hasattr(date, 'tzinfo') and date.tzinfo is not None:
+                return date.tz_localize(None)
+            return pd.Timestamp(date)
+
+    def _find_date_in_index(date, data_index):
+        """
+        Find a date in the data index, handling timezone-aware comparisons.
+
+        Returns: (found_date, price_column_value) or (None, None)
+        """
+        normalized_date = _normalize_date_for_comparison(date)
+
+        # Direct lookup first
+        if normalized_date in data_index:
+            return normalized_date, True
+
+        # Try to find closest date >= target
+        try:
+            mask = data_index >= normalized_date
+            if mask.any():
+                closest = data_index[mask][0]
+                return closest, True
+        except TypeError:
+            # Timezone mismatch - log warning and skip
+            logger.warning(f"Timezone mismatch when finding date {date} in index")
+            return None, False
+
+        return None, False
+
     # Create marker series for ENTRY (up arrows at low)
     if entry_dates:
         entry_markers = pd.Series(index=data.index, dtype=float)
         for date in entry_dates:
-            # Find closest date in index
-            if date in data.index:
-                entry_markers.loc[date] = data.loc[date, 'Low'] * 0.98
-            else:
-                # Try to find the closest date
-                closest_dates = data.index[data.index >= date]
-                if len(closest_dates) > 0:
-                    closest = closest_dates[0]
-                    entry_markers.loc[closest] = data.loc[closest, 'Low'] * 0.98
+            found_date, success = _find_date_in_index(date, data.index)
+            if success and found_date is not None:
+                entry_markers.loc[found_date] = data.loc[found_date, 'Low'] * 0.98
 
         if not entry_markers.dropna().empty:
             ap_entry = mpf.make_addplot(
@@ -253,15 +335,9 @@ def _create_trade_markers(
     if exit_dates:
         exit_markers = pd.Series(index=data.index, dtype=float)
         for date in exit_dates:
-            # Find closest date in index
-            if date in data.index:
-                exit_markers.loc[date] = data.loc[date, 'High'] * 1.02
-            else:
-                # Try to find the closest date
-                closest_dates = data.index[data.index >= date]
-                if len(closest_dates) > 0:
-                    closest = closest_dates[0]
-                    exit_markers.loc[closest] = data.loc[closest, 'High'] * 1.02
+            found_date, success = _find_date_in_index(date, data.index)
+            if success and found_date is not None:
+                exit_markers.loc[found_date] = data.loc[found_date, 'High'] * 1.02
 
         if not exit_markers.dropna().empty:
             ap_exit = mpf.make_addplot(
