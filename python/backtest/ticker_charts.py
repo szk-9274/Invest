@@ -55,8 +55,14 @@ except ImportError:
 # Minimum data points required for SMA200
 MIN_DATA_POINTS = 50
 
+# Threshold for auto-resampling to weekly (number of daily bars)
+AUTO_RESAMPLE_THRESHOLD = 250
+
 # Default timezone for financial data (US markets)
 DEFAULT_TIMEZONE = 'America/New_York'
+
+# Valid chart modes
+VALID_CHART_MODES = ("daily", "weekly", "auto")
 
 
 def normalize_timestamp(
@@ -619,7 +625,14 @@ class TickerCharts:
             return None
 
         if data is None or data.empty:
-            logger.warning(f"Skipping chart for {ticker}: no data available")
+            logger.warning(f"Skipping chart for {ticker}: no price data in selected period")
+            return None
+
+        if len(data) < MIN_DATA_POINTS:
+            logger.warning(
+                f"Skipping chart for {ticker}: insufficient bars "
+                f"({len(data)} < required {MIN_DATA_POINTS})"
+            )
             return None
 
         # Ensure output directory exists
@@ -806,6 +819,194 @@ class TickerCharts:
             trades_by_ticker[ticker] = self.extract_trades_for_ticker(ticker, trades)
 
         return self.create_charts_for_tickers(all_tickers, ticker_data, trades_by_ticker)
+
+
+def _resample_to_weekly(data: pd.DataFrame) -> pd.DataFrame:
+    """
+    Resample daily OHLCV data to weekly frequency.
+
+    Uses proper OHLCV aggregation:
+    - Open: first value of the week
+    - High: maximum of the week
+    - Low: minimum of the week
+    - Close: last value of the week
+    - Volume: sum of the week
+
+    Args:
+        data: Daily OHLCV DataFrame with DatetimeIndex
+
+    Returns:
+        Weekly OHLCV DataFrame
+    """
+    if data.empty:
+        return data.copy()
+
+    # Normalize column names to check
+    col_map = {c: c for c in data.columns}
+    has_title_case = 'Open' in data.columns
+
+    if has_title_case:
+        weekly = data.resample('W').agg({
+            'Open': 'first',
+            'High': 'max',
+            'Low': 'min',
+            'Close': 'last',
+            'Volume': 'sum',
+        }).dropna()
+    else:
+        weekly = data.resample('W').agg({
+            'open': 'first',
+            'high': 'max',
+            'low': 'min',
+            'close': 'last',
+            'volume': 'sum',
+        }).dropna()
+
+    return weekly
+
+
+def _render_chart(
+    ticker: str,
+    data: pd.DataFrame,
+    output_dir: str,
+    trades_df: Optional[pd.DataFrame] = None,
+    output_filename: Optional[str] = None,
+) -> Path:
+    """
+    Internal rendering function that wraps generate_price_chart_from_dataframe.
+
+    This function is the actual chart rendering step, separated for testability.
+
+    Args:
+        ticker: Stock ticker symbol
+        data: Normalized OHLCV DataFrame ready for charting
+        output_dir: Output directory
+        trades_df: Optional DataFrame with trade entries/exits
+        output_filename: Optional custom filename
+
+    Returns:
+        Path to generated chart image
+    """
+    # Convert trades_df to a temporary CSV for the existing interface
+    trade_log_path = None
+    if trades_df is not None and not trades_df.empty:
+        import tempfile
+        trade_log_path = os.path.join(tempfile.gettempdir(), f"_trades_{ticker}.csv")
+        trades_df.to_csv(trade_log_path, index=False)
+
+    try:
+        return generate_price_chart_from_dataframe(
+            ticker=ticker,
+            data=data,
+            output_dir=output_dir,
+            style="tradingview",
+            trade_log_path=trade_log_path,
+            output_filename=output_filename,
+        )
+    finally:
+        # Clean up temp file
+        if trade_log_path and os.path.exists(trade_log_path):
+            try:
+                os.remove(trade_log_path)
+            except OSError:
+                pass
+
+
+def generate_chart_unified(
+    ticker: str,
+    price_df: pd.DataFrame,
+    trades_df: Optional[pd.DataFrame] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    chart_mode: str = "auto",
+    output_dir: str = "output",
+    output_filename: Optional[str] = None,
+) -> Path:
+    """
+    Unified chart generation interface (Phase A-2).
+
+    All chart generation should go through this function. It provides:
+    - Consistent parameter interface
+    - Automatic chart_mode handling (daily/weekly/auto)
+    - Input validation
+    - Proper logging
+
+    Args:
+        ticker: Stock ticker symbol
+        price_df: OHLCV DataFrame with DatetimeIndex
+        trades_df: Optional DataFrame with IN/OUT trade information
+            Expected columns: ticker, action, date, price
+        start_date: Optional start date filter (YYYY-MM-DD)
+        end_date: Optional end date filter (YYYY-MM-DD)
+        chart_mode: One of "daily", "weekly", "auto" (default: "auto")
+            - "daily": Use daily frequency as-is
+            - "weekly": Always resample to weekly
+            - "auto": Resample to weekly when bars exceed AUTO_RESAMPLE_THRESHOLD
+        output_dir: Directory path for chart output
+        output_filename: Optional custom filename for the chart
+
+    Returns:
+        Path to saved chart image
+
+    Raises:
+        ValueError: If inputs are invalid (None data, empty data, invalid chart_mode)
+        RuntimeError: If chart rendering fails
+    """
+    # Validate chart_mode
+    if chart_mode not in VALID_CHART_MODES:
+        raise ValueError(
+            f"Invalid chart_mode '{chart_mode}'. "
+            f"Must be one of: {', '.join(VALID_CHART_MODES)}"
+        )
+
+    # Validate price_df
+    if price_df is None:
+        raise ValueError("price_df cannot be None")
+
+    if price_df.empty:
+        raise ValueError("price_df is empty; no data available for chart generation")
+
+    # Filter by date range if specified
+    chart_data = price_df.copy()
+    if start_date is not None:
+        chart_data = chart_data[chart_data.index >= pd.Timestamp(start_date)]
+    if end_date is not None:
+        chart_data = chart_data[chart_data.index <= pd.Timestamp(end_date)]
+
+    if chart_data.empty:
+        raise ValueError(
+            f"No data remaining after date filter "
+            f"(start={start_date}, end={end_date})"
+        )
+
+    # Apply chart_mode resampling
+    if chart_mode == "weekly":
+        chart_data = _resample_to_weekly(chart_data)
+        logger.debug(f"Resampled {ticker} to weekly: {len(chart_data)} bars")
+    elif chart_mode == "auto":
+        if len(chart_data) > AUTO_RESAMPLE_THRESHOLD:
+            chart_data = _resample_to_weekly(chart_data)
+            logger.debug(
+                f"Auto-resampled {ticker} to weekly "
+                f"(exceeded {AUTO_RESAMPLE_THRESHOLD} bars): {len(chart_data)} bars"
+            )
+    # chart_mode == "daily": no resampling needed
+
+    # Filter trades_df for this ticker if provided
+    filtered_trades = None
+    if trades_df is not None and not trades_df.empty:
+        if 'ticker' in trades_df.columns:
+            filtered_trades = trades_df[trades_df['ticker'] == ticker].copy()
+        else:
+            filtered_trades = trades_df.copy()
+
+    return _render_chart(
+        ticker=ticker,
+        data=chart_data,
+        output_dir=output_dir,
+        trades_df=filtered_trades,
+        output_filename=output_filename,
+    )
 
 
 def generate_top_bottom_charts(
