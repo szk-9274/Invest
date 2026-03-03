@@ -10,6 +10,16 @@ import { Chart } from './pages/Chart'
 import { BacktestDashboard } from './pages/BacktestDashboard'
 import './App.css'
 
+function ErrorFallback({ error }: { error: Error | null }) {
+  if (!error) return null
+  return (
+    <div style={{ padding: 20, color: '#800' }}>
+      <h3>Application Error</h3>
+      <pre style={{ whiteSpace: 'pre-wrap', background: '#fff', padding: 10, borderRadius: 6 }}>{String(error && error.stack)}</pre>
+    </div>
+  )
+}
+
 function AppContent() {
   return (
     <>
@@ -38,7 +48,9 @@ function AppContent() {
 function App() {
   return (
     <BrowserRouter>
-      <AppContent />
+      <React.Suspense fallback={<div>Loading...</div>}>
+        <AppContent />
+      </React.Suspense>
     </BrowserRouter>
   )
 }
