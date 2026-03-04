@@ -47,9 +47,26 @@ curl http://localhost:8000/api/backtest/results/20260303-221229
 
 ## 📊 ダッシュボード機能
 - **サイドバー**: バックテスト実行履歴の一覧表示
+- **Python Command Runner**: バックテスト / スクリーニング / チャート生成 / 銘柄更新を引数付きで実行
+- **ジョブステータス表示**: queued / running / succeeded / failed / cancelled / timeout
+- **Live Logs**: 実行ログを画面内でリアルタイム確認
 - **Summary タブ**: 統計情報（勝率、損益、シャープレシオなど）
 - **Charts タブ**: 上位5銘柄・下位5銘柄のチャート表示（クリックで拡大）
 - **Trades タブ**: 全トレード詳細テーブル（ソート・ページネーション対応）
+
+### Python Command Runner の使い方
+1. `http://localhost:3000/dashboard` を開く
+2. 左サイドバー上部の **Python Command Runner** でコマンドを選択
+3. 必要なオプションを入力して **Run Command** をクリック
+4. **Status** と **Live Logs** で進捗を確認
+5. 停止したい場合は **Cancel Running Job** をクリック
+
+実行できる主なコマンド:
+- `backtest` (`--start`, `--end`, `--tickers`, `--no-charts`)
+- `stage2` (`--with-fundamentals`)
+- `full`
+- `chart` (`--ticker`, `--start`, `--end`)
+- `update_tickers` (`--min-market-cap`, `--max-tickers`)
 
 ## 🐛 デバッグ・トラブルシューティング
 
@@ -67,6 +84,21 @@ curl http://localhost:8000/health
 
 # 特定の API エンドポイントが動作しているか確認
 curl -i http://localhost:8000/api/backtest/list
+
+# ジョブ一覧取得
+curl http://localhost:8000/api/jobs
+
+# ジョブ作成（backtest）
+curl -X POST http://localhost:8000/api/jobs -H "Content-Type: application/json" -d "{\"command\":\"backtest\",\"start_date\":\"2024-01-01\",\"end_date\":\"2024-12-31\"}"
+
+# ジョブ状態取得
+curl http://localhost:8000/api/jobs/<job_id>
+
+# ジョブログ取得
+curl http://localhost:8000/api/jobs/<job_id>/logs
+
+# ジョブキャンセル
+curl -X POST http://localhost:8000/api/jobs/<job_id>/cancel
 ```
 
 ### フロントエンドログ確認

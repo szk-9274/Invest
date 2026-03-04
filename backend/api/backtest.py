@@ -22,6 +22,7 @@ from services.result_loader import (
     list_available_backtests,
     load_backtest_summary,
 )
+from services.job_runner import job_runner
 
 router = APIRouter(prefix="/api/backtest", tags=["backtest"])
 
@@ -46,6 +47,7 @@ class BacktestResponse(BaseModel):
 
     status: str
     message: str
+    job_id: Optional[str] = None
 
 
 class BacktestResultsResponse(BaseModel):
@@ -72,9 +74,18 @@ def run_backtest_task(start_date: str, end_date: str) -> Dict:
         Dict with status and message
     """
     logger.info(f"Backtest requested: {start_date} to {end_date}")
-    # In a full implementation, this would invoke the backtest engine
-    # For now, return a placeholder response
-    return {"status": "started", "message": f"Backtest started for {start_date} to {end_date}"}
+    job = job_runner.create_job(
+        {
+            "command": "backtest",
+            "start_date": start_date,
+            "end_date": end_date,
+        }
+    )
+    return {
+        "status": "started",
+        "message": f"Backtest queued for {start_date} to {end_date}",
+        "job_id": job["job_id"],
+    }
 
 
 def load_results(output_dir: Optional[str] = None) -> Dict:

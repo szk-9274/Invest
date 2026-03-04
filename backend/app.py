@@ -15,6 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.backtest import router as backtest_router
 from api.charts import router as charts_router
+from api.jobs import router as jobs_router
 
 app = FastAPI(
     title="Invest Backtest API",
@@ -41,6 +42,7 @@ app.add_middleware(
 # Include routers
 app.include_router(backtest_router)
 app.include_router(charts_router)
+app.include_router(jobs_router)
 
 
 @app.get("/")

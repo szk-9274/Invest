@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { BacktestSummary } from '../components/BacktestSummary';
 import { ChartGallery } from '../components/ChartGallery';
 import { TradeTable } from '../components/TradeTable';
+import { RunPanel } from '../components/RunPanel';
 import {
   fetchLatestBacktest,
   fetchBacktestResults,
@@ -13,6 +14,14 @@ import {
   BacktestResults,
   BacktestMetadata,
 } from '../api/backtest';
+import {
+  createJob,
+  getJob,
+  getJobLogs,
+  cancelJob,
+  JobCreateRequest,
+  JobResponse,
+} from '../api/jobs';
 
 export const BacktestDashboard: React.FC = () => {
   const [results, setResults] = useState<BacktestResults | null>(null);
@@ -21,6 +30,9 @@ export const BacktestDashboard: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'summary' | 'charts' | 'trades'>('summary');
+  const [activeJob, setActiveJob] = useState<JobResponse | null>(null);
+  const [jobLogs, setJobLogs] = useState<string[]>([]);
+  const [runError, setRunError] = useState<string | null>(null);
 
   // Fetch list of available backtests
   useEffect(() => {
@@ -73,6 +85,55 @@ export const BacktestDashboard: React.FC = () => {
     }
   };
 
+  const refreshJobLogs = async (jobId: string) => {
+    const logs = await getJobLogs(jobId, 300);
+    setJobLogs(logs.lines);
+  };
+
+  const handleRunCommand = async (request: JobCreateRequest) => {
+    setRunError(null);
+    try {
+      const job = await createJob(request);
+      setActiveJob(job);
+      setJobLogs([]);
+      await refreshJobLogs(job.job_id);
+    } catch (err) {
+      setRunError(`Failed to start command: ${err}`);
+    }
+  };
+
+  const handleCancelCommand = async () => {
+    if (!activeJob) return;
+    try {
+      const cancelled = await cancelJob(activeJob.job_id);
+      setActiveJob(cancelled);
+      await refreshJobLogs(cancelled.job_id);
+    } catch (err) {
+      setRunError(`Failed to cancel command: ${err}`);
+    }
+  };
+
+  useEffect(() => {
+    if (!activeJob) return;
+    if (activeJob.status !== 'queued' && activeJob.status !== 'running') return;
+
+    const timer = setInterval(async () => {
+      try {
+        const latest = await getJob(activeJob.job_id);
+        setActiveJob(latest);
+        await refreshJobLogs(latest.job_id);
+
+        if (latest.status === 'succeeded') {
+          await handleLoadLatest();
+        }
+      } catch (err) {
+        setRunError(`Failed to poll job status: ${err}`);
+      }
+    }, 2000);
+
+    return () => clearInterval(timer);
+  }, [activeJob?.job_id, activeJob?.status]);
+
   return (
     <div className="backtest-dashboard">
       <header className="dashboard-header">
@@ -90,6 +151,14 @@ export const BacktestDashboard: React.FC = () => {
 
       <div className="dashboard-layout">
         <aside className="sidebar">
+          <RunPanel
+            onRun={handleRunCommand}
+            onCancel={handleCancelCommand}
+            activeJob={activeJob}
+            logs={jobLogs}
+            runError={runError}
+          />
+
           <h3>Available Tests</h3>
           <div className="backtest-list">
             {backtests.length === 0 ? (
@@ -222,11 +291,135 @@ export const BacktestDashboard: React.FC = () => {
         }
 
         .sidebar {
-          width: 280px;
+          width: 360px;
           background: white;
           border-right: 1px solid #ddd;
           padding: 20px;
           overflow-y: auto;
+        }
+
+        .run-panel {
+          margin-bottom: 20px;
+          padding: 14px;
+          border: 1px solid #dbe3f0;
+          border-radius: 10px;
+          background: #f8fbff;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .run-panel-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .run-panel-header h3 {
+          margin: 0;
+          font-size: 14px;
+          color: #1e3a5f;
+        }
+
+        .status-line {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 12px;
+          color: #334155;
+        }
+
+        .status-dot {
+          width: 10px;
+          height: 10px;
+          border-radius: 999px;
+          display: inline-block;
+        }
+
+        .run-grid {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .run-grid label {
+          font-size: 12px;
+          color: #334155;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .run-grid input,
+        .run-grid select {
+          font-size: 12px;
+          padding: 6px 8px;
+          border: 1px solid #cbd5e1;
+          border-radius: 6px;
+          background: #fff;
+        }
+
+        .checkbox-label {
+          display: flex;
+          flex-direction: row !important;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .run-actions {
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+
+        .button-secondary {
+          padding: 8px 16px;
+          background: #f5f5f5;
+          color: #333;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 13px;
+        }
+
+        .button-secondary:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        .job-meta {
+          font-size: 11px;
+          color: #334155;
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
+        }
+
+        .run-error {
+          font-size: 12px;
+          color: #b91c1c;
+          background: #fef2f2;
+          border: 1px solid #fecaca;
+          border-radius: 6px;
+          padding: 6px 8px;
+        }
+
+        .log-panel h4 {
+          margin: 0 0 6px;
+          font-size: 12px;
+          color: #1e3a5f;
+        }
+
+        .log-panel pre {
+          background: #0f172a;
+          color: #cbd5e1;
+          border-radius: 8px;
+          padding: 8px;
+          font-size: 11px;
+          max-height: 220px;
+          overflow: auto;
+          margin: 0;
         }
 
         .sidebar h3 {

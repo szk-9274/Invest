@@ -5,7 +5,7 @@
  * Uses Plotly for rendering (Phase B-2 will enhance this).
  */
 import React from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useInRouterContext } from 'react-router-dom'
 
 interface ChartProps {
   ticker?: string
@@ -14,18 +14,26 @@ interface ChartProps {
 
 export function Chart({ ticker: propTicker, onBack }: ChartProps) {
   const params = useParams<{ ticker: string }>()
-  const navigate = useNavigate()
+  const inRouterContext = useInRouterContext()
+  const navigate = inRouterContext ? useNavigate() : null
   
   const ticker = propTicker || params.ticker || 'UNKNOWN'
+  const showBackButton = Boolean(onBack || inRouterContext)
   
-  const handleBack = onBack || (() => navigate('/'))
+  const handleBack = onBack || (() => {
+    if (navigate) {
+      navigate('/')
+    }
+  })
 
   return (
     <div data-testid="chart-page">
       <header>
-        <button onClick={handleBack} data-testid="back-button">
-          Back
-        </button>
+        {showBackButton && (
+          <button onClick={handleBack} data-testid="back-button">
+            Back
+          </button>
+        )}
         <h1 data-testid="chart-title">{ticker} Chart</h1>
       </header>
 
