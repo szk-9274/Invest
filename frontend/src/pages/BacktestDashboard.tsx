@@ -5,7 +5,6 @@
  */
 import React, { useEffect, useState } from 'react';
 import { BacktestSummary } from '../components/BacktestSummary';
-import { ChartGallery } from '../components/ChartGallery';
 import { TradeTable } from '../components/TradeTable';
 import { RunPanel } from '../components/RunPanel';
 import { Notification } from '../components/Notification';
@@ -24,6 +23,12 @@ import {
   JobCreateRequest,
   JobResponse,
 } from '../api/jobs';
+
+const TopBottomPurchaseCharts = React.lazy(() =>
+  import('../components/TopBottomPurchaseCharts').then((module) => ({
+    default: module.TopBottomPurchaseCharts,
+  })),
+);
 
 export const BacktestDashboard: React.FC = () => {
   const [results, setResults] = useState<BacktestResults | null>(null);
@@ -218,7 +223,13 @@ export const BacktestDashboard: React.FC = () => {
                   <BacktestSummary data={results.summary} loading={loading} />
                 )}
                 {activeTab === 'charts' && (
-                  <ChartGallery charts={results.charts} loading={loading} />
+                  <React.Suspense fallback={<div style={{ padding: 20 }}>Loading charts...</div>}>
+                    <TopBottomPurchaseCharts
+                      trades={results.trades}
+                      tickerStats={results.ticker_stats}
+                      loading={loading}
+                    />
+                  </React.Suspense>
                 )}
                 {activeTab === 'trades' && (
                   <TradeTable trades={results.trades} loading={loading} />

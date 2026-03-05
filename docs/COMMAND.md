@@ -51,8 +51,17 @@ curl http://localhost:8000/api/backtest/results/20260303-221229
 - **ジョブステータス表示**: queued / running / succeeded / failed / cancelled / timeout
 - **Live Logs**: 実行ログを画面内でリアルタイム確認
 - **Summary タブ**: 統計情報（勝率、損益、シャープレシオなど）
-- **Charts タブ**: 上位5銘柄・下位5銘柄のチャート表示（クリックで拡大）
+- **Charts タブ**: Plotly ベースの TOP5/BOTTOM5 購入散布図（/dashboard のみ適用、点サイズは購入額連動）
 - **Trades タブ**: 全トレード詳細テーブル（ソート・ページネーション対応）
+
+### /dashboard チャート確認（Task1）
+```powershell
+cd C:\00_mycode\Invest\frontend
+# チャート関連ユニットテスト
+npm run test -- src/components/TopBottomPurchaseCharts.test.tsx
+# フロントエンドビルド確認
+npm run build
+```
 
 ### Python Command Runner の使い方
 1. `http://localhost:3000/dashboard` を開く
