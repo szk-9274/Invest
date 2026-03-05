@@ -8,7 +8,6 @@ import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom'
 import { Home } from './pages/Home'
 import { Chart } from './pages/Chart'
 import { BacktestDashboard } from './pages/BacktestDashboard'
-import './App.css'
 
 function ErrorFallback({ error }: { error: Error | null }) {
   if (!error) return null
@@ -22,18 +21,33 @@ function ErrorFallback({ error }: { error: Error | null }) {
 
 function AppContent() {
   return (
-    <>
-      <nav className="app-nav">
-        <div className="nav-brand">
-          <Link to="/">Stock Screening</Link>
-        </div>
-        <div className="nav-links">
-          <Link to="/" className="nav-link">Home</Link>
-          <Link to="/dashboard" className="nav-link">Backtest Dashboard</Link>
+    <div className="min-h-screen bg-slate-950 text-slate-100">
+      <nav className="sticky top-0 z-40 border-b border-slate-800/80 bg-slate-950/85 backdrop-blur">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-6">
+          <Link
+            to="/"
+            className="bg-gradient-to-r from-cyan-300 via-sky-400 to-indigo-400 bg-clip-text text-lg font-bold text-transparent"
+          >
+            Invest Platform
+          </Link>
+          <div className="flex items-center gap-2 md:gap-3">
+            <Link
+              to="/"
+              className="rounded-md px-3 py-2 text-sm text-slate-300 transition hover:bg-slate-800 hover:text-white"
+            >
+              Home
+            </Link>
+            <Link
+              to="/dashboard"
+              className="rounded-md bg-sky-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-sky-500"
+            >
+              Backtest Dashboard
+            </Link>
+          </div>
         </div>
       </nav>
 
-      <main className="app-main">
+      <main className="min-h-[calc(100vh-4rem)]">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/chart/:ticker" element={<Chart />} />
@@ -41,7 +55,7 @@ function AppContent() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
-    </>
+    </div>
   )
 }
 
