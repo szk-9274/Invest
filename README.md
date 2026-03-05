@@ -46,7 +46,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-注: プロジェクトで既に venv 名が使われている可能性があるため、環境名に合わせてパスを調整してください（例: venv\Scripts\Activate.ps1 など）。
+注: プロジェクトで既に venv 名が使われている可能性があるため、環境名に合わせてパスを調整してください（例: source venv/bin/activate など）。
 
 ### 2) バックエンド起動
 
@@ -93,19 +93,19 @@ python main.py --mode backtest --no-charts  # チャート生成をスキップ
 
 - Chart（個別チャート生成）:
 
-```powershell
+```bash
 python main.py --mode chart --ticker AAPL --start 2023-01-01 --end 2024-01-01
 ```
 
 - スクリプト実行例（銘柄リスト更新など）:
 
-```powershell
+```bash
 python scripts/update_tickers_extended.py --min-market-cap 5000000000 --max-tickers 2000
 ```
 
 - API 経由でジョブを作成する例（バックエンドの /api/jobs）:
 
-```powershell
+```bash
 curl -X POST http://localhost:8000/api/jobs -H "Content-Type: application/json" -d "{\"command\":\"backtest\",\"start_date\":\"2024-01-01\",\"end_date\":\"2024-12-31\"}"
 ```
 

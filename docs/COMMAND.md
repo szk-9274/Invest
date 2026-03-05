@@ -37,7 +37,7 @@ http://localhost:3000/dashboard?lang=ja
 ```
 
 ## API エンドポイントテスト
-```powershell
+```bash
 # 最新のバックテスト結果を取得
 curl http://localhost:8000/api/backtest/latest
 
@@ -90,7 +90,7 @@ http://localhost:3000/dashboard で F12 キーを押す
 ```
 
 ### API ステータス確認
-```powershell
+```bash
 # バックエンドが起動しているか確認
 curl http://localhost:8000/health
 
@@ -156,7 +156,7 @@ npm run build
 ※ `renderer-dist/` が生成される
 ## release削除
 ```bash
-cmd /c rmdir /s /q release
+rm -rf release
 ```
 ## インストーラー生成
 ```bash
@@ -181,7 +181,7 @@ source .venv/bin/activate
 
 # テスト実行
 
-```powershell
+```bash
 # 全テスト実行
 pytest
 # 特定のテスト
@@ -194,7 +194,7 @@ pytest --cov=. --cov-report=html
 # Pythonデバックコマンド
 # 銘柄リスト更新
 
-```powershell
+```bash
 python scripts/update_tickers_extended.py
 # オプション指定
 python scripts/update_tickers_extended.py --min-market-cap 5000000000
@@ -202,7 +202,7 @@ python scripts/update_tickers_extended.py --min-market-cap 5000000000 --max-tick
 ```
 
 # Stage2 スクリーニング
-```powershell
+```bash
 python main.py --mode stage2
 python main.py --mode stage2 --with-fundamentals
 
@@ -213,7 +213,7 @@ python main.py --mode stage2 --with-fundamentals
 ```
 
 #　Backtest　+ 自動チャート生成
-```powershell
+```bash
 # デフォルト期間
 python main.py --mode backtest
 # 期間指定
