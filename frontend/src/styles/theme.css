@@ -1,0 +1,61 @@
+/**
+ * Global Theme Variables
+ * Inspired by Metaplanet Analytics UI
+ * Primary: #3b82f6 (blue), Dark bg: #0f172a, Card bg: #1e293b
+ */
+:root {
+  /* Primary Colors */
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --primary-light: #dbeafe;
+
+  /* Background */
+  --bg-nav: #0f172a;
+  --bg-page: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-sidebar: #ffffff;
+  --bg-hover: #f1f5f9;
+
+  /* Text */
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --text-on-dark: #f1f5f9;
+
+  /* Border */
+  --border: #e2e8f0;
+  --border-focus: #3b82f6;
+
+  /* Status Colors */
+  --success: #22c55e;
+  --success-bg: #dcfce7;
+  --success-border: #86efac;
+  --warning: #f59e0b;
+  --warning-bg: #fef9c3;
+  --warning-border: #fde047;
+  --danger: #ef4444;
+  --danger-bg: #fee2e2;
+  --danger-border: #fca5a5;
+  --info: #3b82f6;
+  --info-bg: #dbeafe;
+  --info-border: #93c5fd;
+
+  /* Shadow */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.10);
+  --shadow-lg: 0 10px 24px rgba(0, 0, 0, 0.12);
+
+  /* Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* Fonts */
+  --font-sans: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --font-mono: 'Monaco', 'Courier New', monospace;
+
+  /* Layout */
+  --page-max-width: 1200px;
+  --nav-height: 60px;
+  --sidebar-width: 360px;
+}

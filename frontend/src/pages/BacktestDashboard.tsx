@@ -1,12 +1,14 @@
 /**
  * Backtest Dashboard Page
- * Main page displaying backtest results with multiple views
+ * Main page displaying backtest results with multiple views.
+ * UI inspired by Metaplanet Analytics dashboard.
  */
 import React, { useEffect, useState } from 'react';
 import { BacktestSummary } from '../components/BacktestSummary';
 import { ChartGallery } from '../components/ChartGallery';
 import { TradeTable } from '../components/TradeTable';
 import { RunPanel } from '../components/RunPanel';
+import { Notification } from '../components/Notification';
 import {
   fetchLatestBacktest,
   fetchBacktestResults,
@@ -144,8 +146,8 @@ export const BacktestDashboard: React.FC = () => {
       </header>
 
       {error && (
-        <div className="error-message">
-          <strong>Error:</strong> {error}
+        <div className="dashboard-notification">
+          <Notification type="error" message={error} onDismiss={() => setError(null)} />
         </div>
       )}
 
@@ -236,77 +238,113 @@ export const BacktestDashboard: React.FC = () => {
           min-height: 100vh;
           display: flex;
           flex-direction: column;
-          background: #fafafa;
+          background: var(--bg-page, #f8fafc);
+          font-family: var(--font-sans, 'Segoe UI', sans-serif);
         }
 
+        /* ---- Dashboard Header ---- */
         .dashboard-header {
-          background: white;
-          border-bottom: 1px solid #ddd;
-          padding: 20px 30px;
+          background: var(--bg-nav, #0f172a);
+          border-bottom: 1px solid rgba(255,255,255,0.08);
+          padding: 16px 28px;
           display: flex;
           justify-content: space-between;
           align-items: center;
+          box-shadow: 0 1px 8px rgba(0,0,0,0.3);
         }
 
         .dashboard-header h1 {
           margin: 0;
-          font-size: 24px;
-          color: #333;
+          font-size: 20px;
+          font-weight: 700;
+          color: #ffffff;
+          letter-spacing: 0.2px;
         }
 
+        .dashboard-notification {
+          padding: 12px 20px 0;
+        }
+
+        /* ---- Buttons ---- */
         .button-primary {
-          padding: 8px 16px;
-          background: #0066cc;
+          padding: 8px 18px;
+          background: var(--primary, #3b82f6);
           color: white;
           border: none;
-          border-radius: 4px;
+          border-radius: var(--radius-sm, 4px);
           cursor: pointer;
           font-size: 13px;
-          transition: background 0.2s;
+          font-weight: 600;
+          transition: background 0.15s, transform 0.1s;
         }
 
         .button-primary:hover:not(:disabled) {
-          background: #0052a3;
+          background: var(--primary-hover, #2563eb);
+          transform: translateY(-1px);
         }
 
         .button-primary:disabled {
-          opacity: 0.6;
+          opacity: 0.5;
           cursor: not-allowed;
         }
 
-        .error-message {
-          background: #fee;
-          border: 1px solid #fcc;
-          border-radius: 4px;
-          padding: 12px;
-          margin: 15px;
-          color: #c33;
+        .button-secondary {
+          padding: 8px 16px;
+          background: rgba(255,255,255,0.08);
+          color: var(--text-on-dark, #f1f5f9);
+          border: 1px solid rgba(255,255,255,0.15);
+          border-radius: var(--radius-sm, 4px);
+          cursor: pointer;
           font-size: 13px;
+          font-weight: 500;
+          transition: background 0.15s;
         }
 
+        .button-secondary:disabled {
+          opacity: 0.4;
+          cursor: not-allowed;
+        }
+
+        .button-secondary:hover:not(:disabled) {
+          background: rgba(255,255,255,0.14);
+        }
+
+        /* ---- Layout ---- */
         .dashboard-layout {
           display: flex;
           flex: 1;
           overflow: hidden;
         }
 
+        /* ---- Sidebar ---- */
         .sidebar {
-          width: 360px;
-          background: white;
-          border-right: 1px solid #ddd;
+          width: var(--sidebar-width, 360px);
+          background: var(--bg-sidebar, #ffffff);
+          border-right: 1px solid var(--border, #e2e8f0);
           padding: 20px;
           overflow-y: auto;
+          flex-shrink: 0;
         }
 
+        .sidebar h3 {
+          margin: 0 0 12px;
+          font-size: 13px;
+          font-weight: 700;
+          color: var(--text-secondary, #475569);
+          text-transform: uppercase;
+          letter-spacing: 0.6px;
+        }
+
+        /* ---- Run Panel ---- */
         .run-panel {
-          margin-bottom: 20px;
-          padding: 14px;
-          border: 1px solid #dbe3f0;
-          border-radius: 10px;
+          margin-bottom: 24px;
+          padding: 16px;
+          border: 1px solid var(--border, #e2e8f0);
+          border-radius: var(--radius-md, 8px);
           background: #f8fbff;
           display: flex;
           flex-direction: column;
-          gap: 10px;
+          gap: 12px;
         }
 
         .run-panel-header {
@@ -318,8 +356,10 @@ export const BacktestDashboard: React.FC = () => {
 
         .run-panel-header h3 {
           margin: 0;
-          font-size: 14px;
-          color: #1e3a5f;
+          font-size: 13px;
+          color: var(--bg-nav, #0f172a);
+          text-transform: none;
+          letter-spacing: 0;
         }
 
         .status-line {
@@ -327,25 +367,26 @@ export const BacktestDashboard: React.FC = () => {
           align-items: center;
           gap: 6px;
           font-size: 12px;
-          color: #334155;
+          color: var(--text-secondary, #475569);
         }
 
         .status-dot {
-          width: 10px;
-          height: 10px;
-          border-radius: 999px;
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
           display: inline-block;
         }
 
         .run-grid {
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: 10px;
         }
 
         .run-grid label {
           font-size: 12px;
-          color: #334155;
+          color: var(--text-secondary, #475569);
+          font-weight: 500;
           display: flex;
           flex-direction: column;
           gap: 4px;
@@ -353,11 +394,20 @@ export const BacktestDashboard: React.FC = () => {
 
         .run-grid input,
         .run-grid select {
-          font-size: 12px;
-          padding: 6px 8px;
-          border: 1px solid #cbd5e1;
-          border-radius: 6px;
+          font-size: 13px;
+          padding: 7px 10px;
+          border: 1px solid var(--border, #e2e8f0);
+          border-radius: var(--radius-sm, 4px);
           background: #fff;
+          color: var(--text-primary, #0f172a);
+          transition: border-color 0.15s;
+        }
+
+        .run-grid input:focus,
+        .run-grid select:focus {
+          outline: none;
+          border-color: var(--primary, #3b82f6);
+          box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
         }
 
         .checkbox-label {
@@ -373,24 +423,9 @@ export const BacktestDashboard: React.FC = () => {
           flex-wrap: wrap;
         }
 
-        .button-secondary {
-          padding: 8px 16px;
-          background: #f5f5f5;
-          color: #333;
-          border: 1px solid #ddd;
-          border-radius: 4px;
-          cursor: pointer;
-          font-size: 13px;
-        }
-
-        .button-secondary:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
-
         .job-meta {
           font-size: 11px;
-          color: #334155;
+          color: var(--text-secondary, #475569);
           display: flex;
           flex-direction: column;
           gap: 3px;
@@ -398,138 +433,145 @@ export const BacktestDashboard: React.FC = () => {
 
         .run-error {
           font-size: 12px;
-          color: #b91c1c;
-          background: #fef2f2;
-          border: 1px solid #fecaca;
-          border-radius: 6px;
-          padding: 6px 8px;
+          color: #991b1b;
+          background: var(--danger-bg, #fee2e2);
+          border: 1px solid var(--danger-border, #fca5a5);
+          border-radius: var(--radius-sm, 4px);
+          padding: 8px 10px;
         }
 
         .log-panel h4 {
-          margin: 0 0 6px;
+          margin: 0 0 8px;
           font-size: 12px;
-          color: #1e3a5f;
+          font-weight: 700;
+          color: var(--text-secondary, #475569);
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
         }
 
         .log-panel pre {
-          background: #0f172a;
+          background: var(--bg-nav, #0f172a);
           color: #cbd5e1;
-          border-radius: 8px;
-          padding: 8px;
+          border-radius: var(--radius-md, 8px);
+          padding: 10px 12px;
           font-size: 11px;
+          font-family: var(--font-mono, monospace);
           max-height: 220px;
           overflow: auto;
           margin: 0;
         }
 
-        .sidebar h3 {
-          margin: 0 0 15px 0;
-          font-size: 14px;
-          color: #333;
-        }
-
+        /* ---- Backtest List ---- */
         .backtest-list {
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: 6px;
         }
 
         .backtest-item {
-          padding: 10px;
-          background: #f5f5f5;
-          border: 1px solid #ddd;
-          border-radius: 4px;
+          padding: 12px;
+          background: var(--bg-hover, #f1f5f9);
+          border: 1px solid var(--border, #e2e8f0);
+          border-radius: var(--radius-md, 8px);
           cursor: pointer;
-          transition: all 0.2s;
+          transition: all 0.15s;
         }
 
         .backtest-item:hover {
-          background: #efefef;
-          border-color: #999;
+          background: #e8f0fe;
+          border-color: #93c5fd;
         }
 
         .backtest-item.active {
-          background: #e3f2fd;
-          border-color: #0066cc;
+          background: var(--info-bg, #dbeafe);
+          border-color: var(--primary, #3b82f6);
+          border-left-width: 3px;
         }
 
         .item-period {
           font-size: 12px;
-          font-weight: 600;
-          color: #333;
+          font-weight: 700;
+          color: var(--text-primary, #0f172a);
         }
 
         .item-details {
           font-size: 11px;
-          color: #666;
+          color: var(--text-muted, #94a3b8);
           margin-top: 4px;
         }
 
         .item-timestamp {
           font-size: 10px;
-          color: #999;
+          color: var(--text-muted, #94a3b8);
           margin-top: 4px;
-          font-family: 'Monaco', monospace;
+          font-family: var(--font-mono, monospace);
         }
 
         .empty-list {
-          color: #999;
-          font-size: 12px;
+          color: var(--text-muted, #94a3b8);
+          font-size: 13px;
           text-align: center;
-          padding: 20px 0;
+          padding: 24px 0;
         }
 
+        /* ---- Main Content ---- */
         .main-content {
           flex: 1;
           display: flex;
           flex-direction: column;
           overflow: hidden;
+          background: var(--bg-page, #f8fafc);
         }
 
         .results-header {
-          background: white;
-          border-bottom: 1px solid #ddd;
-          padding: 15px 30px;
+          background: var(--bg-card, #ffffff);
+          border-bottom: 1px solid var(--border, #e2e8f0);
+          padding: 14px 28px;
         }
 
         .results-header h2 {
           margin: 0;
-          font-size: 16px;
-          color: #666;
+          font-size: 14px;
+          font-weight: 600;
+          color: var(--text-secondary, #475569);
+          font-family: var(--font-mono, monospace);
         }
 
+        /* ---- Tabs ---- */
         .tabs {
-          background: white;
-          border-bottom: 1px solid #ddd;
-          padding: 0 30px;
+          background: var(--bg-card, #ffffff);
+          border-bottom: 1px solid var(--border, #e2e8f0);
+          padding: 0 28px;
           display: flex;
           gap: 0;
         }
 
         .tab-button {
-          padding: 12px 20px;
+          padding: 14px 20px;
           background: none;
           border: none;
           border-bottom: 2px solid transparent;
           cursor: pointer;
           font-size: 13px;
-          color: #666;
-          transition: all 0.2s;
+          font-weight: 600;
+          color: var(--text-muted, #94a3b8);
+          transition: color 0.15s, border-color 0.15s;
+          letter-spacing: 0.2px;
         }
 
         .tab-button:hover {
-          color: #333;
+          color: var(--text-primary, #0f172a);
         }
 
         .tab-button.active {
-          color: #0066cc;
-          border-bottom-color: #0066cc;
+          color: var(--primary, #3b82f6);
+          border-bottom-color: var(--primary, #3b82f6);
         }
 
         .tab-content {
           flex: 1;
           overflow-y: auto;
-          background: white;
+          background: var(--bg-page, #f8fafc);
         }
 
         .no-results {
@@ -537,10 +579,12 @@ export const BacktestDashboard: React.FC = () => {
           align-items: center;
           justify-content: center;
           height: 100%;
-          color: #999;
-          font-size: 14px;
+          color: var(--text-muted, #94a3b8);
+          font-size: 15px;
+          gap: 10px;
         }
 
+        /* ---- Responsive ---- */
         @media (max-width: 768px) {
           .dashboard-layout {
             flex-direction: column;
@@ -549,13 +593,19 @@ export const BacktestDashboard: React.FC = () => {
           .sidebar {
             width: 100%;
             border-right: none;
-            border-bottom: 1px solid #ddd;
-            max-height: 200px;
+            border-bottom: 1px solid var(--border, #e2e8f0);
+            max-height: 220px;
           }
 
           .dashboard-header {
             flex-direction: column;
+            align-items: flex-start;
             gap: 10px;
+            padding: 14px 16px;
+          }
+
+          .tabs {
+            padding: 0 16px;
           }
         }
       `}</style>

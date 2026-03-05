@@ -1,9 +1,11 @@
 /**
  * Backtest Summary Component
- * Displays key metrics from backtest results
+ * Displays key metrics from backtest results using MetricCard.
+ * Metaplanet Analytics-inspired grid layout.
  */
 import React from 'react';
 import { BacktestSummary as BacktestSummaryData } from '../api/backtest';
+import { MetricCard } from './MetricCard';
 
 interface BacktestSummaryProps {
   data: BacktestSummaryData | null;
@@ -12,126 +14,128 @@ interface BacktestSummaryProps {
 
 export const BacktestSummary: React.FC<BacktestSummaryProps> = ({ data, loading = false }) => {
   if (loading) {
-    return <div className="backtest-summary loading">Loading...</div>;
+    return (
+      <div className="summary-state">
+        <div className="summary-spinner" />
+        <span>Loading metrics...</span>
+      </div>
+    );
   }
 
   if (!data) {
-    return <div className="backtest-summary empty">No data available</div>;
+    return (
+      <div className="summary-state">
+        <span className="summary-empty-text">No data available</span>
+      </div>
+    );
   }
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 2,
     }).format(value);
-  };
 
-  const formatPercent = (value: number) => {
-    return (value * 100).toFixed(2) + '%';
-  };
+  const formatPercent = (value: number) => (value * 100).toFixed(2) + '%';
+
+  const profitFactor =
+    data.avg_win !== 0 && data.avg_loss !== 0
+      ? (Math.abs(data.avg_win) / Math.abs(data.avg_loss)).toFixed(2)
+      : 'N/A';
 
   return (
     <div className="backtest-summary">
-      <div className="summary-grid">
-        <div className="summary-card">
-          <div className="card-label">Total P&L</div>
-          <div className={`card-value ${data.total_pnl >= 0 ? 'positive' : 'negative'}`}>
-            {formatCurrency(data.total_pnl)}
-          </div>
-        </div>
-
-        <div className="summary-card">
-          <div className="card-label">Total Trades</div>
-          <div className="card-value">{data.total_trades}</div>
-        </div>
-
-        <div className="summary-card">
-          <div className="card-label">Win Rate</div>
-          <div className="card-value">{formatPercent(data.win_rate)}</div>
-          <div className="card-subtext">
-            {data.winning_trades}W / {data.losing_trades}L
-          </div>
-        </div>
-
-        <div className="summary-card">
-          <div className="card-label">Avg Win</div>
-          <div className={`card-value ${data.avg_win >= 0 ? 'positive' : 'negative'}`}>
-            {formatCurrency(data.avg_win)}
-          </div>
-        </div>
-
-        <div className="summary-card">
-          <div className="card-label">Avg Loss</div>
-          <div className={`card-value ${data.avg_loss >= 0 ? 'positive' : 'negative'}`}>
-            {formatCurrency(data.avg_loss)}
-          </div>
-        </div>
-
-        <div className="summary-card">
-          <div className="card-label">Profit Factor</div>
-          <div className="card-value">
-            {data.avg_win !== 0 && data.avg_loss !== 0
-              ? (Math.abs(data.avg_win) / Math.abs(data.avg_loss)).toFixed(2)
-              : 'N/A'}
-          </div>
-        </div>
+      <div className="metrics-grid">
+        <MetricCard
+          label="Total P&L"
+          value={formatCurrency(data.total_pnl)}
+          trend={data.total_pnl >= 0 ? 'positive' : 'negative'}
+        />
+        <MetricCard
+          label="Total Trades"
+          value={String(data.total_trades)}
+          trend="neutral"
+        />
+        <MetricCard
+          label="Win Rate"
+          value={formatPercent(data.win_rate)}
+          subText={`${data.winning_trades}W / ${data.losing_trades}L`}
+          trend={data.win_rate >= 0.5 ? 'positive' : 'negative'}
+        />
+        <MetricCard
+          label="Avg Win"
+          value={formatCurrency(data.avg_win)}
+          trend={data.avg_win >= 0 ? 'positive' : 'negative'}
+        />
+        <MetricCard
+          label="Avg Loss"
+          value={formatCurrency(data.avg_loss)}
+          trend={data.avg_loss >= 0 ? 'positive' : 'negative'}
+        />
+        <MetricCard
+          label="Profit Factor"
+          value={profitFactor}
+          trend={
+            profitFactor === 'N/A'
+              ? 'neutral'
+              : parseFloat(profitFactor) >= 1.5
+              ? 'positive'
+              : parseFloat(profitFactor) < 1
+              ? 'negative'
+              : 'neutral'
+          }
+        />
       </div>
 
       <style>{`
         .backtest-summary {
-          padding: 20px;
+          padding: 24px;
         }
 
-        .backtest-summary.loading,
-        .backtest-summary.empty {
+        .summary-state {
           display: flex;
+          flex-direction: column;
           align-items: center;
           justify-content: center;
+          gap: 12px;
           min-height: 200px;
-          color: #666;
+          color: var(--text-muted, #94a3b8);
+          font-size: 14px;
         }
 
-        .summary-grid {
+        .summary-spinner {
+          width: 28px;
+          height: 28px;
+          border: 3px solid var(--border, #e2e8f0);
+          border-top-color: var(--primary, #3b82f6);
+          border-radius: 50%;
+          animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+
+        .summary-empty-text {
+          color: var(--text-muted, #94a3b8);
+        }
+
+        .metrics-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-          gap: 15px;
+          grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+          gap: 16px;
         }
 
-        .summary-card {
-          background: #f5f5f5;
-          border: 1px solid #ddd;
-          border-radius: 8px;
-          padding: 15px;
-          text-align: center;
-        }
+        @media (max-width: 768px) {
+          .metrics-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+          }
 
-        .card-label {
-          font-size: 12px;
-          color: #666;
-          text-transform: uppercase;
-          margin-bottom: 8px;
-          letter-spacing: 0.5px;
-        }
-
-        .card-value {
-          font-size: 20px;
-          font-weight: bold;
-          color: #333;
-        }
-
-        .card-value.positive {
-          color: #22c55e;
-        }
-
-        .card-value.negative {
-          color: #ef4444;
-        }
-
-        .card-subtext {
-          font-size: 12px;
-          color: #999;
-          margin-top: 5px;
+          .backtest-summary {
+            padding: 16px;
+          }
         }
       `}</style>
     </div>
