@@ -1,41 +1,33 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
-const FEATURES = [
-  {
-    title: 'Bitcoin Treasury Insights',
-    description: 'Track strategy signals and treasury metrics in one place.',
-  },
-  {
-    title: 'Screening and Backtest',
-    description: 'Run reproducible pipeline outputs from Stage2 to Backtest.',
-  },
-  {
-    title: 'Actionable Dashboard',
-    description: 'Inspect top and bottom performance with interactive charts.',
-  },
-]
-
-const LOGO_PLACEHOLDERS = ['METAPLANET', 'BITCOIN.JP', 'BM JAPAN', 'PLANET GEAR']
+interface FeatureItem {
+  title: string
+  description: string
+}
 
 export function HomeLanding() {
+  const { t } = useTranslation()
+  const features = t('homeLanding.features', { returnObjects: true }) as FeatureItem[]
+  const logoPlaceholders = t('homeLanding.logos', { returnObjects: true }) as string[]
+
   return (
     <div className="home-landing" data-testid="home-landing-page">
       <section className="landing-hero">
-        <p className="hero-kicker">METAPLANET STYLE / HOME</p>
-        <h1>Build a Bitcoin-first analytics home for long-term conviction.</h1>
+        <p className="hero-kicker">{t('homeLanding.kicker')}</p>
+        <h1>{t('homeLanding.title')}</h1>
         <p className="hero-description">
-          This page reproduces the visual structure of metaplanet.jp/en with project-safe assets and minimal-diff
-          integration.
+          {t('homeLanding.description')}
         </p>
         <div className="hero-actions">
-          <button type="button" className="primary">Subscribe Updates</button>
-          <Link to="/dashboard" className="secondary">Open Dashboard</Link>
+          <button type="button" className="primary">{t('homeLanding.subscribe')}</button>
+          <Link to="/dashboard" className="secondary">{t('homeLanding.openDashboard')}</Link>
         </div>
       </section>
 
       <section className="landing-features" aria-label="Feature cards">
-        {FEATURES.map((feature) => (
+        {features.map((feature) => (
           <article key={feature.title} className="feature-card">
             <h2>{feature.title}</h2>
             <p>{feature.description}</p>
@@ -44,17 +36,17 @@ export function HomeLanding() {
       </section>
 
       <section className="landing-logos" aria-label="Partner logos">
-        <h2>As seen with partners</h2>
+        <h2>{t('homeLanding.partnersTitle')}</h2>
         <div className="logo-grid">
-          {LOGO_PLACEHOLDERS.map((logo) => (
+          {logoPlaceholders.map((logo) => (
             <div key={logo} className="logo-placeholder">{logo}</div>
           ))}
         </div>
       </section>
 
       <section className="landing-cta">
-        <h2>Start from /dashboard and validate with reproducible outputs.</h2>
-        <Link to="/dashboard" className="primary cta-link">Go to Dashboard</Link>
+        <h2>{t('homeLanding.ctaTitle')}</h2>
+        <Link to="/dashboard" className="primary cta-link">{t('homeLanding.ctaButton')}</Link>
       </section>
 
       <style>{`

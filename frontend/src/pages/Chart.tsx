@@ -6,6 +6,7 @@
  */
 import React from 'react'
 import { useParams, useNavigate, useInRouterContext } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 interface ChartProps {
   ticker?: string
@@ -13,6 +14,7 @@ interface ChartProps {
 }
 
 export function Chart({ ticker: propTicker, onBack }: ChartProps) {
+  const { t } = useTranslation()
   const params = useParams<{ ticker: string }>()
   const inRouterContext = useInRouterContext()
   const navigate = inRouterContext ? useNavigate() : null
@@ -31,15 +33,15 @@ export function Chart({ ticker: propTicker, onBack }: ChartProps) {
       <header>
         {showBackButton && (
           <button onClick={handleBack} data-testid="back-button">
-            Back
+            {t('chart.back')}
           </button>
         )}
-        <h1 data-testid="chart-title">{ticker} Chart</h1>
+        <h1 data-testid="chart-title">{t('chart.title', { ticker })}</h1>
       </header>
 
       <div data-testid="chart-container">
         {/* Plotly chart will be rendered here in Phase B-2 */}
-        <p>Chart for {ticker} will be displayed here</p>
+        <p>{t('chart.placeholder', { ticker })}</p>
       </div>
     </div>
   )

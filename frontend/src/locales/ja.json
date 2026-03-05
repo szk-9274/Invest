@@ -1,0 +1,142 @@
+{
+  "nav": {
+    "brand": "株式スクリーニング",
+    "home": "ホーム",
+    "backtest": "バックテスト",
+    "dashboard": "バックテストダッシュボード",
+    "langEn": "EN",
+    "langJa": "JA"
+  },
+  "common": {
+    "loading": "読み込み中..."
+  },
+  "home": {
+    "title": "Invest バックテスト",
+    "runBacktest": "バックテスト実行",
+    "topWinners": "上位5銘柄",
+    "bottomLosers": "下位5銘柄",
+    "backtestFailed": "バックテストに失敗しました。もう一度お試しください。"
+  },
+  "homeLanding": {
+    "kicker": "METAPLANET スタイル / HOME",
+    "title": "長期視点の確信を支える、ビットコイン中心の分析ホーム。",
+    "description": "metaplanet.jp/en の構成を参考に、プロジェクトで安全に使えるアセットで最小差分実装しています。",
+    "subscribe": "アップデート購読",
+    "openDashboard": "ダッシュボードを開く",
+    "partnersTitle": "パートナー掲載",
+    "ctaTitle": "/dashboard から再現可能な出力で検証を始めましょう。",
+    "ctaButton": "ダッシュボードへ",
+    "features": [
+      {
+        "title": "Bitcoin Treasury インサイト",
+        "description": "戦略シグナルとトレジャリ指標を1画面で追跡。"
+      },
+      {
+        "title": "スクリーニングとバックテスト",
+        "description": "Stage2 から Backtest まで再現可能なパイプラインを実行。"
+      },
+      {
+        "title": "実践的なダッシュボード",
+        "description": "上位・下位のパフォーマンスをインタラクティブに確認。"
+      }
+    ],
+    "logos": ["METAPLANET", "BITCOIN.JP", "BM JAPAN", "PLANET GEAR"]
+  },
+  "chart": {
+    "back": "戻る",
+    "title": "{{ticker}} チャート",
+    "placeholder": "{{ticker}} のチャートをここに表示します"
+  },
+  "dashboard": {
+    "title": "バックテストダッシュボード",
+    "loadLatest": "最新を読み込む",
+    "availableTests": "利用可能なテスト",
+    "noBacktests": "バックテスト結果がありません",
+    "tradesCount": "{{count}} 件のトレード",
+    "summaryTab": "サマリー",
+    "chartsTab": "チャート",
+    "tradesTab": "トレード",
+    "selectBacktest": "バックテストを選択してください",
+    "loadBacktestListError": "バックテスト一覧の取得に失敗: {{error}}",
+    "loadBacktestResultsError": "バックテスト結果の取得に失敗: {{error}}",
+    "loadLatestError": "最新バックテストの取得に失敗: {{error}}",
+    "startCommandError": "コマンド開始に失敗: {{error}}",
+    "cancelCommandError": "コマンド停止に失敗: {{error}}",
+    "pollJobStatusError": "ジョブ状態監視に失敗: {{error}}"
+  },
+  "runPanel": {
+    "title": "Python コマンドランナー",
+    "status": "状態",
+    "idle": "待機中",
+    "command": "コマンド",
+    "startDate": "開始日",
+    "endDate": "終了日",
+    "tickersOptional": "銘柄（カンマ区切り、任意）",
+    "skipCharts": "チャート生成をスキップ (--no-charts)",
+    "includeFundamentals": "ファンダメンタルを含める (--with-fundamentals)",
+    "ticker": "銘柄",
+    "minMarketCap": "最小時価総額",
+    "maxTickersOptional": "最大銘柄数（任意）",
+    "timeoutSeconds": "タイムアウト（秒）",
+    "starting": "開始中...",
+    "runCommand": "コマンド実行",
+    "cancelRunningJob": "実行中ジョブを停止",
+    "jobId": "ジョブID",
+    "commandLine": "コマンド",
+    "error": "エラー",
+    "runError": "実行エラー",
+    "liveLogs": "ライブログ",
+    "noLogsYet": "まだログはありません。",
+    "options": {
+      "backtest": "バックテスト",
+      "stage2": "Stage2 スクリーニング",
+      "full": "フルスクリーニング + VCP",
+      "chart": "チャート生成",
+      "updateTickers": "銘柄リスト更新"
+    }
+  },
+  "summary": {
+    "loadingMetrics": "指標を読み込み中...",
+    "noData": "データがありません",
+    "totalPnl": "合計損益",
+    "totalTrades": "総トレード数",
+    "winRate": "勝率",
+    "avgWin": "平均利益",
+    "avgLoss": "平均損失",
+    "profitFactor": "プロフィットファクター",
+    "winLossCompact": "{{wins}}勝 / {{losses}}敗"
+  },
+  "tradeTable": {
+    "loadingTrades": "トレードを読み込み中...",
+    "noTrades": "トレードがありません",
+    "showing": "{{start}}件目〜{{end}}件目 / 全{{total}}件",
+    "ticker": "銘柄",
+    "entryDate": "エントリー日",
+    "entryPrice": "エントリー価格",
+    "exitDate": "エグジット日",
+    "exitPrice": "エグジット価格",
+    "shares": "株数",
+    "pnl": "損益",
+    "returnPct": "収益率 %",
+    "exitReason": "終了理由",
+    "previous": "← 前へ",
+    "next": "次へ →",
+    "pageOf": "{{page}} / {{total}} ページ"
+  },
+  "chartGallery": {
+    "loadingCharts": "チャートを読み込み中...",
+    "noCharts": "チャートがありません",
+    "topWinners": "上位銘柄",
+    "bottomLosers": "下位銘柄",
+    "otherCharts": "その他チャート"
+  },
+  "tickerList": {
+    "noData": "データがありません"
+  },
+  "backtestForm": {
+    "startDate": "開始日",
+    "endDate": "終了日",
+    "runBacktest": "バックテスト実行",
+    "running": "実行中..."
+  }
+}

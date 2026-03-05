@@ -4,6 +4,7 @@
  * Metaplanet Analytics-inspired grid layout.
  */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { BacktestSummary as BacktestSummaryData } from '../api/backtest';
 import { MetricCard } from './MetricCard';
 
@@ -13,11 +14,13 @@ interface BacktestSummaryProps {
 }
 
 export const BacktestSummary: React.FC<BacktestSummaryProps> = ({ data, loading = false }) => {
+  const { t } = useTranslation();
+
   if (loading) {
     return (
       <div className="summary-state">
         <div className="summary-spinner" />
-        <span>Loading metrics...</span>
+        <span>{t('summary.loadingMetrics')}</span>
       </div>
     );
   }
@@ -25,7 +28,7 @@ export const BacktestSummary: React.FC<BacktestSummaryProps> = ({ data, loading 
   if (!data) {
     return (
       <div className="summary-state">
-        <span className="summary-empty-text">No data available</span>
+        <span className="summary-empty-text">{t('summary.noData')}</span>
       </div>
     );
   }
@@ -48,33 +51,33 @@ export const BacktestSummary: React.FC<BacktestSummaryProps> = ({ data, loading 
     <div className="backtest-summary">
       <div className="metrics-grid">
         <MetricCard
-          label="Total P&L"
+          label={t('summary.totalPnl')}
           value={formatCurrency(data.total_pnl)}
           trend={data.total_pnl >= 0 ? 'positive' : 'negative'}
         />
         <MetricCard
-          label="Total Trades"
+          label={t('summary.totalTrades')}
           value={String(data.total_trades)}
           trend="neutral"
         />
         <MetricCard
-          label="Win Rate"
+          label={t('summary.winRate')}
           value={formatPercent(data.win_rate)}
-          subText={`${data.winning_trades}W / ${data.losing_trades}L`}
+          subText={t('summary.winLossCompact', { wins: data.winning_trades, losses: data.losing_trades })}
           trend={data.win_rate >= 0.5 ? 'positive' : 'negative'}
         />
         <MetricCard
-          label="Avg Win"
+          label={t('summary.avgWin')}
           value={formatCurrency(data.avg_win)}
           trend={data.avg_win >= 0 ? 'positive' : 'negative'}
         />
         <MetricCard
-          label="Avg Loss"
+          label={t('summary.avgLoss')}
           value={formatCurrency(data.avg_loss)}
           trend={data.avg_loss >= 0 ? 'positive' : 'negative'}
         />
         <MetricCard
-          label="Profit Factor"
+          label={t('summary.profitFactor')}
           value={profitFactor}
           trend={
             profitFactor === 'N/A'

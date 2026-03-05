@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { JobCreateRequest, JobResponse } from '../api/jobs';
 
 type RunPanelProps = {
@@ -10,11 +11,11 @@ type RunPanelProps = {
 };
 
 const COMMAND_OPTIONS = [
-  { value: 'backtest', label: 'Backtest' },
-  { value: 'stage2', label: 'Stage2 Screening' },
-  { value: 'full', label: 'Full Screening + VCP' },
-  { value: 'chart', label: 'Chart Generation' },
-  { value: 'update_tickers', label: 'Ticker List Update' },
+  { value: 'backtest', labelKey: 'runPanel.options.backtest' },
+  { value: 'stage2', labelKey: 'runPanel.options.stage2' },
+  { value: 'full', labelKey: 'runPanel.options.full' },
+  { value: 'chart', labelKey: 'runPanel.options.chart' },
+  { value: 'update_tickers', labelKey: 'runPanel.options.updateTickers' },
 ] as const;
 
 export const RunPanel: React.FC<RunPanelProps> = ({
@@ -24,6 +25,7 @@ export const RunPanel: React.FC<RunPanelProps> = ({
   logs,
   runError,
 }) => {
+  const { t } = useTranslation();
   const [command, setCommand] = useState<JobCreateRequest['command']>('backtest');
   const [startDate, setStartDate] = useState('2024-01-01');
   const [endDate, setEndDate] = useState('2024-12-31');
@@ -107,18 +109,20 @@ export const RunPanel: React.FC<RunPanelProps> = ({
   return (
     <section className="run-panel">
       <div className="run-panel-header">
-        <h3>Python Command Runner</h3>
+        <h3>{t('runPanel.title')}</h3>
         <div className="status-line">
           <span className="status-dot" style={{ background: statusColor }} />
           <span>
-            {activeJob ? `Status: ${activeJob.status}` : 'Status: idle'}
+            {activeJob
+              ? `${t('runPanel.status')}: ${activeJob.status}`
+              : `${t('runPanel.status')}: ${t('runPanel.idle')}`}
           </span>
         </div>
       </div>
 
       <div className="run-grid">
         <label>
-          Command
+          {t('runPanel.command')}
           <select
             value={command}
             onChange={(e) => setCommand(e.target.value as JobCreateRequest['command'])}
@@ -126,7 +130,7 @@ export const RunPanel: React.FC<RunPanelProps> = ({
           >
             {COMMAND_OPTIONS.map((item) => (
               <option key={item.value} value={item.value}>
-                {item.label}
+                {t(item.labelKey)}
               </option>
             ))}
           </select>
@@ -135,7 +139,7 @@ export const RunPanel: React.FC<RunPanelProps> = ({
         {(command === 'backtest' || command === 'chart') && (
           <>
             <label>
-              Start Date
+              {t('runPanel.startDate')}
               <input
                 type="date"
                 value={startDate}
@@ -144,7 +148,7 @@ export const RunPanel: React.FC<RunPanelProps> = ({
               />
             </label>
             <label>
-              End Date
+              {t('runPanel.endDate')}
               <input
                 type="date"
                 value={endDate}
@@ -158,7 +162,7 @@ export const RunPanel: React.FC<RunPanelProps> = ({
         {command === 'backtest' && (
           <>
             <label>
-              Tickers (comma-separated, optional)
+              {t('runPanel.tickersOptional')}
               <input
                 type="text"
                 value={tickers}
@@ -174,7 +178,7 @@ export const RunPanel: React.FC<RunPanelProps> = ({
                 onChange={(e) => setNoCharts(e.target.checked)}
                 disabled={isRunning || submitting}
               />
-              Skip chart generation (--no-charts)
+              {t('runPanel.skipCharts')}
             </label>
           </>
         )}
@@ -187,13 +191,13 @@ export const RunPanel: React.FC<RunPanelProps> = ({
               onChange={(e) => setWithFundamentals(e.target.checked)}
               disabled={isRunning || submitting}
             />
-            Include fundamentals (--with-fundamentals)
+            {t('runPanel.includeFundamentals')}
           </label>
         )}
 
         {command === 'chart' && (
           <label>
-            Ticker
+            {t('runPanel.ticker')}
             <input
               type="text"
               value={singleTicker}
@@ -207,7 +211,7 @@ export const RunPanel: React.FC<RunPanelProps> = ({
         {command === 'update_tickers' && (
           <>
             <label>
-              Min Market Cap
+              {t('runPanel.minMarketCap')}
               <input
                 type="number"
                 value={minMarketCap}
@@ -216,7 +220,7 @@ export const RunPanel: React.FC<RunPanelProps> = ({
               />
             </label>
             <label>
-              Max Tickers (optional)
+              {t('runPanel.maxTickersOptional')}
               <input
                 type="number"
                 value={maxTickers}
@@ -228,7 +232,7 @@ export const RunPanel: React.FC<RunPanelProps> = ({
         )}
 
         <label>
-          Timeout (seconds)
+          {t('runPanel.timeoutSeconds')}
           <input
             type="number"
             min={30}
@@ -242,26 +246,26 @@ export const RunPanel: React.FC<RunPanelProps> = ({
 
       <div className="run-actions">
         <button className="button-primary" onClick={handleRun} disabled={isRunning || submitting}>
-          {submitting ? 'Starting...' : 'Run Command'}
+          {submitting ? t('runPanel.starting') : t('runPanel.runCommand')}
         </button>
         <button className="button-secondary" onClick={onCancel} disabled={!isRunning || submitting}>
-          Cancel Running Job
+          {t('runPanel.cancelRunningJob')}
         </button>
       </div>
 
       {activeJob && (
         <div className="job-meta">
-          <div><strong>Job ID:</strong> {activeJob.job_id}</div>
-          <div><strong>Command:</strong> {activeJob.command_line}</div>
-          {activeJob.error && <div className="run-error"><strong>Error:</strong> {activeJob.error}</div>}
+          <div><strong>{t('runPanel.jobId')}:</strong> {activeJob.job_id}</div>
+          <div><strong>{t('runPanel.commandLine')}:</strong> {activeJob.command_line}</div>
+          {activeJob.error && <div className="run-error"><strong>{t('runPanel.error')}:</strong> {activeJob.error}</div>}
         </div>
       )}
 
-      {runError && <div className="run-error"><strong>Run Error:</strong> {runError}</div>}
+      {runError && <div className="run-error"><strong>{t('runPanel.runError')}:</strong> {runError}</div>}
 
       <div className="log-panel">
-        <h4>Live Logs</h4>
-        <pre>{logs.length ? logs.join('\n') : 'No logs yet.'}</pre>
+        <h4>{t('runPanel.liveLogs')}</h4>
+        <pre>{logs.length ? logs.join('\n') : t('runPanel.noLogsYet')}</pre>
       </div>
     </section>
   );

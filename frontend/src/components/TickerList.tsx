@@ -5,6 +5,7 @@
  * with clickable items that navigate to chart view.
  */
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 
 export interface TickerItem {
   ticker: string
@@ -26,11 +27,13 @@ export function TickerList({
   onTickerClick,
   variant = 'winners',
 }: TickerListProps) {
+  const { t } = useTranslation()
+
   if (tickers.length === 0) {
     return (
       <div data-testid="ticker-list">
         <h3>{title}</h3>
-        <p>No data available</p>
+        <p>{t('tickerList.noData')}</p>
       </div>
     )
   }

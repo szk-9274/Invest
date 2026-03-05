@@ -5,10 +5,12 @@
  */
 import React from 'react'
 import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Home } from './pages/Home'
 import { HomeLanding } from './pages/HomeLanding'
 import { Chart } from './pages/Chart'
 import { BacktestDashboard } from './pages/BacktestDashboard'
+import { AppLanguage, setAppLanguage } from './i18n'
 import './App.css'
 
 function ErrorFallback({ error }: { error: Error | null }) {
@@ -22,16 +24,39 @@ function ErrorFallback({ error }: { error: Error | null }) {
 }
 
 function AppContent() {
+  const { t, i18n } = useTranslation()
+  const currentLanguage: AppLanguage = i18n.resolvedLanguage === 'ja' ? 'ja' : 'en'
+  const handleLanguageChange = (language: AppLanguage) => {
+    if (currentLanguage === language) return
+    setAppLanguage(language)
+  }
+
   return (
     <>
       <nav className="app-nav">
         <div className="nav-brand">
-          <Link to="/">Stock Screening</Link>
+          <Link to="/">{t('nav.brand')}</Link>
         </div>
         <div className="nav-links">
-          <Link to="/home" className="nav-link">Home</Link>
-          <Link to="/" className="nav-link">Backtest</Link>
-          <Link to="/dashboard" className="nav-link">Backtest Dashboard</Link>
+          <Link to="/home" className="nav-link">{t('nav.home')}</Link>
+          <Link to="/" className="nav-link">{t('nav.backtest')}</Link>
+          <Link to="/dashboard" className="nav-link">{t('nav.dashboard')}</Link>
+          <div className="lang-toggle" aria-label="language toggle">
+            <button
+              type="button"
+              className={`lang-btn ${currentLanguage === 'en' ? 'active' : ''}`}
+              onClick={() => handleLanguageChange('en')}
+            >
+              {t('nav.langEn')}
+            </button>
+            <button
+              type="button"
+              className={`lang-btn ${currentLanguage === 'ja' ? 'active' : ''}`}
+              onClick={() => handleLanguageChange('ja')}
+            >
+              {t('nav.langJa')}
+            </button>
+          </div>
         </div>
       </nav>
 
@@ -49,9 +74,10 @@ function AppContent() {
 }
 
 function App() {
+  const { t } = useTranslation()
   return (
     <BrowserRouter>
-      <React.Suspense fallback={<div>Loading...</div>}>
+      <React.Suspense fallback={<div>{t('common.loading')}</div>}>
         <AppContent />
       </React.Suspense>
     </BrowserRouter>
