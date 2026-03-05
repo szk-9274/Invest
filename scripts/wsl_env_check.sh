@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
-out=./wsl_env_report.txt
+
+out="./wsl_env_report.txt"
+
 echo "Collecting WSL environment info" > "$out"
 
 echo "--- uname -a ---" >> "$out"
@@ -31,4 +33,4 @@ done
 echo "--- pip check (package conflicts) ---" >> "$out"
 python3 -m pip check >> "$out" 2>&1 || true
 
-echo "WSL env report written to: $out"
+echo "WSL env report written to: $out" >> "$out"
