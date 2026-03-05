@@ -17,8 +17,17 @@ python3 --version >> "$out" 2>&1 || python --version >> "$out" 2>&1 || true
 echo "--- pip freeze ---" >> "$out"
 python3 -m pip freeze >> "$out" 2>&1 || python -m pip freeze >> "$out" 2>&1 || true
 
+# Prefer nvm-managed Node if available so report matches interactive dev shells.
+if [ -s "$HOME/.nvm/nvm.sh" ]; then
+  # shellcheck source=/dev/null
+  . "$HOME/.nvm/nvm.sh"
+  nvm use --silent 24 >/dev/null 2>&1 || nvm use --silent default >/dev/null 2>&1 || true
+fi
+
 echo "--- node / npm versions ---" >> "$out"
+command -v node >> "$out" 2>&1 || true
 node --version >> "$out" 2>&1 || true
+command -v npm >> "$out" 2>&1 || true
 npm --version >> "$out" 2>&1 || true
 
 echo "--- npm top-level packages ---" >> "$out"

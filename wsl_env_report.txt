@@ -10,736 +10,110 @@ Codename:	jammy
 --- python version ---
 Python 3.10.12
 --- pip freeze ---
-blinker==1.4
-command-not-found==0.3
-cryptography==3.4.8
-dbus-python==1.2.18
-distro==1.7.0
-distro-info==1.1+ubuntu0.1
-gyp==0.1
-httplib2==0.20.2
-importlib-metadata==4.6.4
-jeepney==0.7.1
-keyring==23.5.0
-launchpadlib==1.10.16
-lazr.restfulclient==0.14.4
-lazr.uri==1.0.6
-more-itertools==8.10.0
-netifaces==0.11.0
-oauthlib==3.2.0
-PyGObject==3.42.1
-PyJWT==2.3.0
-pyparsing==2.4.7
-python-apt==2.4.0+ubuntu2
-PyYAML==5.4.1
-SecretStorage==3.3.1
-six==1.16.0
-systemd-python==234
-ubuntu-advantage-tools==8001
-ufw==0.36.1
-unattended-upgrades==0.1
-wadllib==1.3.6
-zipp==1.0.0
+annotated-doc==0.0.4
+annotated-types==0.7.0
+anyio==4.12.1
+beautifulsoup4==4.14.3
+certifi==2026.2.25
+cffi==2.0.0
+charset-normalizer==3.4.4
+click==8.3.1
+contourpy==1.3.2
+coverage==7.13.4
+curl_cffi==0.13.0
+cycler==0.12.1
+exceptiongroup==1.3.1
+fastapi==0.135.1
+fonttools==4.61.1
+frozendict==2.4.7
+h11==0.16.0
+httptools==0.7.1
+idna==3.11
+iniconfig==2.3.0
+kiwisolver==1.4.9
+loguru==0.7.3
+lxml==6.0.2
+matplotlib==3.10.8
+mplfinance==0.12.10b0
+multitasking==0.0.12
+numpy==1.26.4
+packaging==26.0
+pandas==2.3.3
+peewee==4.0.1
+pillow==12.1.1
+platformdirs==4.9.2
+pluggy==1.6.0
+protobuf==7.34.0
+pycparser==3.0
+pydantic==2.12.5
+pydantic_core==2.41.5
+Pygments==2.19.2
+pyparsing==3.3.2
+pytest==9.0.2
+pytest-cov==7.0.0
+python-dateutil==2.9.0.post0
+python-dotenv==1.2.2
+pytz==2026.1.post1
+PyYAML==6.0.3
+requests==2.32.5
+six==1.17.0
+soupsieve==2.8.3
+starlette==0.52.1
+tenacity==9.1.4
+tomli==2.4.0
+tqdm==4.67.3
+typing-inspection==0.4.2
+typing_extensions==4.15.0
+tzdata==2025.3
+urllib3==2.6.3
+uvicorn==0.41.0
+uvloop==0.22.1
+watchfiles==1.1.1
+websockets==16.0
+yfinance==1.2.0
 --- node / npm versions ---
-v12.22.9
-8.5.1
+/home/fpxszk/.nvm/versions/node/v24.14.0/bin/node
+v24.14.0
+/home/fpxszk/.nvm/versions/node/v24.14.0/bin/npm
+11.9.0
 --- npm top-level packages ---
 demoelectron@1.0.0 /mnt/c/00_mycode/Invest
-├── @babel/code-frame@7.28.6 extraneous
-├── @babel/compat-data@7.28.6 extraneous
-├── @babel/generator@ extraneous
-├── @babel/helper-compilation-targets@7.28.6 extraneous
-├── @babel/helper-globals@7.28.0 extraneous
-├── @babel/helper-module-imports@7.28.6 extraneous
-├── @babel/helper-module-transforms@7.28.6 extraneous
-├── @babel/helper-string-parser@7.27.1 extraneous
-├── @babel/helper-validator-identifier@7.28.5 extraneous
-├── @babel/helper-validator-option@7.27.1 extraneous
-├── @babel/helpers@ extraneous
-├── @babel/runtime@ extraneous
-├── @babel/template@7.28.6 extraneous
-├── @babel/traverse@ extraneous
-├── @develar/schema-utils@2.6.5 extraneous
-├── @electron/asar@3.4.1 extraneous
-├── @electron/fuses@1.8.0 extraneous
-├── @electron/notarize@2.5.0 extraneous
-├── @electron/osx-sign@ extraneous
-├── @electron/rebuild@ extraneous
-├── @electron/universal@2.0.3 extraneous
-├── @electron/windows-sign@ extraneous
-├── @esbuild/win32-x64@ extraneous
-├── @hapi/hoek@ extraneous
-├── @hapi/topo@5.1.0 extraneous
-├── @isaacs/balanced-match@4.0.1 extraneous
-├── @isaacs/brace-expansion@5.0.0 extraneous
-├── @isaacs/cliui@8.0.2 extraneous
-├── @isaacs/fs-minipass@4.0.1 extraneous
-├── @malept/cross-spawn-promise@2.0.0 extraneous
-├── @malept/flatpak-bundler@0.4.0 extraneous
-├── @nodelib/fs.scandir@2.1.5 extraneous
-├── @nodelib/fs.stat@2.0.5 extraneous
-├── @nodelib/fs.walk@1.2.8 extraneous
-├── @npmcli/agent@3.0.0 extraneous
-├── @npmcli/fs@4.0.0 extraneous
-├── @pkgjs/parseargs@0.11.0 extraneous
-├── @rollup/rollup-win32-x64-gnu@4.55.3 extraneous
-├── @rollup/rollup-win32-x64-msvc@4.55.3 extraneous
-├── @sec-ant/readable-stream@0.4.1 extraneous
-├── @sideway/address@4.1.5 extraneous
-├── @sideway/formula@3.0.1 extraneous
-├── @sideway/pinpoint@2.0.0 extraneous
-├── @sindresorhus/is@4.6.0 extraneous
-├── @sindresorhus/merge-streams@4.0.0 extraneous
-├── @szmarczak/http-timer@4.0.6 extraneous
 ├── @tailwindcss/postcss@4.1.18
-├── @types/cacheable-request@6.0.3 extraneous
-├── @types/estree@1.0.8 extraneous
-├── @types/fs-extra@9.0.13 extraneous
-├── @types/http-cache-semantics@4.0.4 extraneous
-├── @types/keyv@3.1.4 extraneous
-├── @types/node@ invalid: "^22.19.6" from the root project
+├── @types/node@22.19.7
 ├── @types/react-dom@18.3.7
 ├── @types/react@18.3.27
-├── @types/responselike@1.0.3 extraneous
 ├── @vitejs/plugin-react@4.7.0
-├── @xmldom/xmldom@0.8.11 extraneous
-├── abbrev@3.0.1 extraneous
-├── ajv-keywords@3.5.2 extraneous
-├── ajv@ extraneous
-├── ansi-regex@5.0.1 extraneous
-├── any-promise@1.3.0 extraneous
-├── anymatch@3.1.3 extraneous
-├── arg@5.0.2 extraneous
-├── argparse@2.0.1 extraneous
-├── async@ extraneous
-├── asynckit@0.4.0 extraneous
-├── at-least-node@1.0.0 extraneous
-├── autoprefixer@ invalid: "^10.4.23" from the root project
-├── balanced-match@1.0.2 extraneous
-├── base64-js@1.5.1 extraneous
-├── baseline-browser-mapping@2.9.17 extraneous
-├── binary-extensions@2.3.0 extraneous
-├── bl@4.1.0 extraneous
-├── boolean@3.2.0 extraneous
-├── brace-expansion@1.1.12 extraneous
-├── braces@3.0.3 extraneous
-├── browserslist@4.28.1 extraneous
-├── buffer@5.7.1 extraneous
-├── cacache@19.0.1 extraneous
-├── cacheable-lookup@5.0.4 extraneous
-├── cacheable-request@7.0.4 extraneous
-├── call-bind-apply-helpers@1.0.2 extraneous
-├── camelcase-css@2.0.1 extraneous
-├── caniuse-lite@ extraneous
-├── chokidar@3.6.0 extraneous
-├── chownr@2.0.0 extraneous
-├── chromium-pickle-js@0.2.0 extraneous
-├── cli-cursor@3.1.0 extraneous
-├── cli-spinners@2.9.2 extraneous
-├── cliui@8.0.1 extraneous
-├── clone-response@1.0.3 extraneous
-├── clone@1.0.4 extraneous
-├── combined-stream@1.0.8 extraneous
-├── commander@5.1.0 extraneous
-├── compare-version@0.1.2 extraneous
-├── concat-map@0.0.1 extraneous
-├── concurrently@ invalid: "^8.2.2" from the root project
-├── convert-source-map@2.0.0 extraneous
-├── cross-dirname@0.1.0 extraneous
+├── autoprefixer@10.4.23
+├── concurrently@8.2.2
 ├── cross-env@10.1.0
-├── cssesc@3.0.0 extraneous
-├── date-fns@ extraneous
-├── decompress-response@6.0.0 extraneous
-├── defaults@1.0.4 extraneous
-├── defer-to-connect@2.0.1 extraneous
-├── define-data-property@1.1.4 extraneous
-├── define-properties@1.2.1 extraneous
-├── delayed-stream@1.0.0 extraneous
-├── detect-node@2.1.0 extraneous
-├── didyoumean@1.2.2 extraneous
-├── dir-compare@ extraneous
-├── dlv@1.1.3 extraneous
-├── dotenv-expand@11.0.7 extraneous
-├── dotenv@16.6.1 extraneous
-├── dunder-proto@1.0.1 extraneous
-├── eastasianwidth@0.2.0 extraneous
-├── ejs@3.1.10 extraneous
-├── electron-builder-squirrel-windows@26.4.0 extraneous
 ├── electron-builder@26.4.0
-├── electron-publish@26.3.4 extraneous
-├── electron-to-chromium@1.5.267 extraneous
-├── electron-winstaller@ extraneous
 ├── electron@31.7.7
-├── emoji-regex@8.0.0 extraneous
-├── encoding@0.1.13 extraneous
-├── env-paths@2.2.1 extraneous
-├── err-code@2.0.3 extraneous
-├── es-define-property@1.0.1 extraneous
-├── es-errors@1.3.0 extraneous
-├── es-object-atoms@1.1.1 extraneous
-├── es-set-tostringtag@2.1.0 extraneous
-├── es6-error@4.1.1 extraneous
-├── esbuild@0.21.5 extraneous
-├── escalade@3.2.0 extraneous
-├── escape-string-regexp@4.0.0 extraneous
-├── execa@ invalid: "^9.6.1" from the root project
-├── exponential-backoff@3.1.3 extraneous
-├── fast-deep-equal@3.1.3 extraneous
-├── fast-glob@ extraneous
-├── fast-json-stable-stringify@2.1.0 extraneous
-├── fastq@1.20.1 extraneous
-├── figures@6.1.0 extraneous
-├── filelist@1.0.4 extraneous
-├── fill-range@7.1.1 extraneous
-├── follow-redirects@1.15.11 extraneous
-├── foreground-child@3.3.1 extraneous
-├── form-data@4.0.5 extraneous
-├── fraction.js@5.3.4 extraneous
-├── fs-extra@8.1.0 extraneous
-├── fs-minipass@3.0.3 extraneous
-├── fs.realpath@1.0.0 extraneous
-├── function-bind@1.1.2 extraneous
-├── gensync@1.0.0-beta.2 extraneous
-├── get-caller-file@2.0.5 extraneous
-├── get-intrinsic@1.3.0 extraneous
-├── get-proto@1.0.1 extraneous
-├── get-stream@9.0.1 extraneous
-├── glob-parent@5.1.2 extraneous
-├── glob@7.2.3 extraneous
-├── global-agent@ extraneous
-├── globalthis@1.0.4 extraneous
-├── gopd@1.2.0 extraneous
-├── got@ extraneous
-├── graceful-fs@4.2.11 extraneous
-├── has-property-descriptors@1.0.2 extraneous
-├── has-symbols@1.1.0 extraneous
-├── has-tostringtag@1.0.2 extraneous
-├── hasown@2.0.2 extraneous
-├── hosted-git-info@4.1.0 extraneous
-├── http-cache-semantics@4.2.0 extraneous
-├── http2-wrapper@1.0.3 extraneous
-├── human-signals@8.0.1 extraneous
-├── ieee754@1.2.1 extraneous
-├── ignore-by-default@1.0.1 extraneous
-├── imurmurhash@0.1.4 extraneous
-├── inflight@1.0.6 extraneous
-├── inherits@2.0.4 extraneous
-├── ip-address@10.1.0 extraneous
-├── is-binary-path@2.1.0 extraneous
-├── is-core-module@2.16.1 extraneous
-├── is-extglob@2.1.1 extraneous
-├── is-fullwidth-code-point@3.0.0 extraneous
-├── is-glob@4.0.3 extraneous
-├── is-interactive@1.0.0 extraneous
-├── is-number@7.0.0 extraneous
-├── is-plain-obj@4.1.0 extraneous
-├── is-stream@4.0.1 extraneous
-├── is-unicode-supported@2.1.0 extraneous
-├── isbinaryfile@5.0.7 extraneous
-├── jackspeak@3.4.3 extraneous
-├── jake@10.9.4 extraneous
-├── jsesc@3.1.0 extraneous
-├── json-buffer@3.0.1 extraneous
-├── json-schema-traverse@0.4.1 extraneous
-├── json-stringify-safe@5.0.1 extraneous
-├── json5@2.2.3 extraneous
-├── jsonfile@4.0.0 extraneous
-├── keyv@4.5.4 extraneous
-├── lilconfig@3.1.3 extraneous
-├── lines-and-columns@1.2.4 extraneous
-├── log-symbols@4.1.0 extraneous
-├── lowercase-keys@2.0.0 extraneous
-├── lru-cache@5.1.1 extraneous
-├── make-fetch-happen@14.0.3 extraneous
-├── matcher@3.0.0 extraneous
-├── math-intrinsics@1.1.0 extraneous
-├── merge2@1.4.1 extraneous
-├── micromatch@4.0.8 extraneous
-├── mime-db@1.52.0 extraneous
-├── mime-types@2.1.35 extraneous
-├── mime@2.6.0 extraneous
-├── mimic-fn@2.1.0 extraneous
-├── mimic-response@1.0.1 extraneous
-├── minimatch@10.1.1 extraneous
-├── minipass-collect@2.0.1 extraneous
-├── minipass-fetch@4.0.1 extraneous
-├── minipass-flush@1.0.5 extraneous
-├── minipass-pipeline@1.2.4 extraneous
-├── minipass-sized@1.0.3 extraneous
-├── minipass@7.1.2 extraneous
-├── minizlib@3.1.0 extraneous
-├── mkdirp@1.0.4 extraneous
-├── mz@2.7.0 extraneous
-├── negotiator@1.0.0 extraneous
-├── node-abi@4.26.0 extraneous
-├── node-api-version@0.2.1 extraneous
-├── node-gyp@11.5.0 extraneous
-├── node-releases@2.0.27 extraneous
-├── nodemon@ invalid: "^3.1.11" from the root project
-├── nopt@8.1.0 extraneous
-├── normalize-path@3.0.0 extraneous
-├── normalize-url@6.1.0 extraneous
-├── npm-run-path@6.0.0 extraneous
-├── object-assign@4.1.1 extraneous
-├── object-hash@3.0.0 extraneous
-├── object-keys@1.1.1 extraneous
-├── onetime@5.1.2 extraneous
-├── ora@5.4.1 extraneous
-├── p-cancelable@2.1.1 extraneous
-├── p-limit@3.1.0 extraneous
-├── p-map@7.0.4 extraneous
-├── package-json-from-dist@1.0.1 extraneous
-├── parse-ms@4.0.0 extraneous
-├── path-is-absolute@1.0.1 extraneous
-├── path-parse@1.0.7 extraneous
-├── path-scurry@1.11.1 extraneous
-├── pe-library@ extraneous
-├── picomatch@2.3.1 extraneous
-├── pify@2.3.0 extraneous
-├── pirates@4.0.7 extraneous
-├── plist@3.1.0 extraneous
-├── postcss-import@15.1.0 extraneous
-├── postcss-js@4.1.0 extraneous
-├── postcss-load-config@6.0.1 extraneous
-├── postcss-nested@6.2.0 extraneous
-├── postcss-selector-parser@ extraneous
-├── postcss-value-parser@4.2.0 extraneous
+├── execa@9.6.1
+├── nodemon@3.1.11
 ├── postcss@8.5.6
-├── postject@ extraneous
-├── pretty-ms@9.3.0 extraneous
-├── proc-log@5.0.0 extraneous
-├── progress@2.0.3 extraneous
-├── promise-retry@2.0.1 extraneous
-├── proxy-from-env@1.1.0 extraneous
-├── pstree.remy@1.1.8 extraneous
-├── punycode@2.3.1 extraneous
-├── queue-microtask@1.2.3 extraneous
-├── quick-lru@5.1.1 extraneous
-├── react-dom@ invalid: "^18.3.1" from the root project
+├── react-dom@18.3.1
 ├── react@18.3.1
-├── read-binary-file-arch@1.0.6 extraneous
-├── read-cache@1.0.0 extraneous
-├── readable-stream@3.6.2 extraneous
-├── readdirp@3.6.0 extraneous
-├── require-directory@2.1.1 extraneous
-├── resedit@ extraneous
-├── resolve-alpn@1.2.1 extraneous
-├── resolve@ extraneous
-├── responselike@2.0.1 extraneous
-├── restore-cursor@3.1.0 extraneous
-├── retry@0.12.0 extraneous
-├── reusify@1.1.0 extraneous
-├── rimraf@2.6.3 extraneous
-├── roarr@2.15.4 extraneous
-├── rollup@ extraneous
-├── run-parallel@1.2.0 extraneous
-├── safe-buffer@5.2.1 extraneous
-├── scheduler@0.23.2 extraneous
-├── semver-compare@1.0.0 extraneous
-├── semver@6.3.1 extraneous
-├── serialize-error@7.0.1 extraneous
-├── shell-quote@1.8.3 extraneous
-├── signal-exit@4.1.0 extraneous
-├── smart-buffer@4.2.0 extraneous
-├── socks-proxy-agent@8.0.5 extraneous
-├── socks@2.8.7 extraneous
-├── spawn-command@0.0.2 extraneous
-├── sprintf-js@1.1.3 extraneous
-├── ssri@12.0.0 extraneous
-├── string_decoder@1.3.0 extraneous
-├── string-width-cjs@npm:string-width@4.2.3 extraneous
-├── string-width@4.2.3 extraneous
-├── strip-ansi-cjs@npm:strip-ansi@6.0.1 extraneous
-├── strip-ansi@6.0.1 extraneous
-├── strip-final-newline@4.0.0 extraneous
-├── sucrase@ extraneous
-├── sumchecker@3.0.1 extraneous
-├── supports-color@8.1.1 extraneous
-├── supports-preserve-symlinks-flag@1.0.0 extraneous
 ├── systeminformation@5.30.5
-├── tailwindcss@ invalid: "^3.4.19" from the root project
-├── tapable@2.3.0 extraneous
-├── tar@6.2.1 extraneous
-├── temp@0.9.4 extraneous
-├── thenify-all@1.6.0 extraneous
-├── thenify@3.3.1 extraneous
-├── tinyglobby@0.2.15 extraneous
-├── tmp-promise@3.0.3 extraneous
-├── tmp@0.2.5 extraneous
-├── to-regex-range@5.0.1 extraneous
-├── touch@3.1.1 extraneous
-├── tree-kill@1.2.2 extraneous
-├── ts-interface-checker@0.1.13 extraneous
-├── tslib@2.8.1 extraneous
-├── type-fest@0.13.1 extraneous
-├── typescript@ invalid: "^5.9.3" from the root project
-├── undefsafe@2.0.5 extraneous
-├── unicorn-magic@0.3.0 extraneous
-├── unique-filename@4.0.0 extraneous
-├── unique-slug@5.0.0 extraneous
-├── universalify@0.1.2 extraneous
-├── update-browserslist-db@1.2.3 extraneous
-├── uri-js@4.4.1 extraneous
-├── util-deprecate@1.0.2 extraneous
-├── vite@ invalid: "^5.4.8" from the root project
-├── wait-on@7.2.0
-├── wcwidth@1.0.1 extraneous
-├── wrap-ansi-cjs@npm:wrap-ansi@7.0.0 extraneous
-├── wrap-ansi@7.0.0 extraneous
-├── xmlbuilder@ extraneous
-├── y18n@5.0.8 extraneous
-├── yallist@3.1.1 extraneous
-├── yargs-parser@21.1.1 extraneous
-├── yocto-queue@0.1.0 extraneous
-└── yoctocolors@2.1.2 extraneous
+├── tailwindcss@3.4.19
+├── typescript@5.9.3
+├── vite@5.4.21
+└── wait-on@7.2.0
 
-npm ERR! code ELSPROBLEMS
-npm ERR! extraneous: @babel/code-frame@7.28.6 /mnt/c/00_mycode/Invest/node_modules/@babel/code-frame
-npm ERR! extraneous: @babel/compat-data@7.28.6 /mnt/c/00_mycode/Invest/node_modules/@babel/compat-data
-npm ERR! extraneous: @babel/generator@ /mnt/c/00_mycode/Invest/node_modules/@babel/generator
-npm ERR! extraneous: @babel/helper-compilation-targets@7.28.6 /mnt/c/00_mycode/Invest/node_modules/@babel/helper-compilation-targets
-npm ERR! extraneous: @babel/helper-globals@7.28.0 /mnt/c/00_mycode/Invest/node_modules/@babel/helper-globals
-npm ERR! extraneous: @babel/helper-module-imports@7.28.6 /mnt/c/00_mycode/Invest/node_modules/@babel/helper-module-imports
-npm ERR! extraneous: @babel/helper-module-transforms@7.28.6 /mnt/c/00_mycode/Invest/node_modules/@babel/helper-module-transforms
-npm ERR! extraneous: @babel/helper-string-parser@7.27.1 /mnt/c/00_mycode/Invest/node_modules/@babel/helper-string-parser
-npm ERR! extraneous: @babel/helper-validator-identifier@7.28.5 /mnt/c/00_mycode/Invest/node_modules/@babel/helper-validator-identifier
-npm ERR! extraneous: @babel/helper-validator-option@7.27.1 /mnt/c/00_mycode/Invest/node_modules/@babel/helper-validator-option
-npm ERR! extraneous: @babel/helpers@ /mnt/c/00_mycode/Invest/node_modules/@babel/helpers
-npm ERR! extraneous: @babel/runtime@ /mnt/c/00_mycode/Invest/node_modules/@babel/runtime
-npm ERR! extraneous: @babel/template@7.28.6 /mnt/c/00_mycode/Invest/node_modules/@babel/template
-npm ERR! extraneous: @babel/traverse@ /mnt/c/00_mycode/Invest/node_modules/@babel/traverse
-npm ERR! extraneous: @develar/schema-utils@2.6.5 /mnt/c/00_mycode/Invest/node_modules/@develar/schema-utils
-npm ERR! extraneous: @electron/asar@3.4.1 /mnt/c/00_mycode/Invest/node_modules/@electron/asar
-npm ERR! extraneous: @electron/fuses@1.8.0 /mnt/c/00_mycode/Invest/node_modules/@electron/fuses
-npm ERR! extraneous: @electron/notarize@2.5.0 /mnt/c/00_mycode/Invest/node_modules/@electron/notarize
-npm ERR! extraneous: @electron/osx-sign@ /mnt/c/00_mycode/Invest/node_modules/@electron/osx-sign
-npm ERR! extraneous: @electron/rebuild@ /mnt/c/00_mycode/Invest/node_modules/@electron/rebuild
-npm ERR! extraneous: @electron/universal@2.0.3 /mnt/c/00_mycode/Invest/node_modules/@electron/universal
-npm ERR! extraneous: @electron/windows-sign@ /mnt/c/00_mycode/Invest/node_modules/@electron/windows-sign
-npm ERR! extraneous: @esbuild/win32-x64@ /mnt/c/00_mycode/Invest/node_modules/@esbuild/win32-x64
-npm ERR! extraneous: @hapi/hoek@ /mnt/c/00_mycode/Invest/node_modules/@hapi/hoek
-npm ERR! extraneous: @hapi/topo@5.1.0 /mnt/c/00_mycode/Invest/node_modules/@hapi/topo
-npm ERR! extraneous: @isaacs/balanced-match@4.0.1 /mnt/c/00_mycode/Invest/node_modules/@isaacs/balanced-match
-npm ERR! extraneous: @isaacs/brace-expansion@5.0.0 /mnt/c/00_mycode/Invest/node_modules/@isaacs/brace-expansion
-npm ERR! extraneous: @isaacs/cliui@8.0.2 /mnt/c/00_mycode/Invest/node_modules/@isaacs/cliui
-npm ERR! extraneous: @isaacs/fs-minipass@4.0.1 /mnt/c/00_mycode/Invest/node_modules/@isaacs/fs-minipass
-npm ERR! extraneous: @malept/cross-spawn-promise@2.0.0 /mnt/c/00_mycode/Invest/node_modules/@malept/cross-spawn-promise
-npm ERR! extraneous: @malept/flatpak-bundler@0.4.0 /mnt/c/00_mycode/Invest/node_modules/@malept/flatpak-bundler
-npm ERR! extraneous: @nodelib/fs.scandir@2.1.5 /mnt/c/00_mycode/Invest/node_modules/@nodelib/fs.scandir
-npm ERR! extraneous: @nodelib/fs.stat@2.0.5 /mnt/c/00_mycode/Invest/node_modules/@nodelib/fs.stat
-npm ERR! extraneous: @nodelib/fs.walk@1.2.8 /mnt/c/00_mycode/Invest/node_modules/@nodelib/fs.walk
-npm ERR! extraneous: @npmcli/agent@3.0.0 /mnt/c/00_mycode/Invest/node_modules/@npmcli/agent
-npm ERR! extraneous: @npmcli/fs@4.0.0 /mnt/c/00_mycode/Invest/node_modules/@npmcli/fs
-npm ERR! extraneous: @pkgjs/parseargs@0.11.0 /mnt/c/00_mycode/Invest/node_modules/@pkgjs/parseargs
-npm ERR! extraneous: @rollup/rollup-win32-x64-gnu@4.55.3 /mnt/c/00_mycode/Invest/node_modules/@rollup/rollup-win32-x64-gnu
-npm ERR! extraneous: @rollup/rollup-win32-x64-msvc@4.55.3 /mnt/c/00_mycode/Invest/node_modules/@rollup/rollup-win32-x64-msvc
-npm ERR! extraneous: @sec-ant/readable-stream@0.4.1 /mnt/c/00_mycode/Invest/node_modules/@sec-ant/readable-stream
-npm ERR! extraneous: @sideway/address@4.1.5 /mnt/c/00_mycode/Invest/node_modules/@sideway/address
-npm ERR! extraneous: @sideway/formula@3.0.1 /mnt/c/00_mycode/Invest/node_modules/@sideway/formula
-npm ERR! extraneous: @sideway/pinpoint@2.0.0 /mnt/c/00_mycode/Invest/node_modules/@sideway/pinpoint
-npm ERR! extraneous: @sindresorhus/is@4.6.0 /mnt/c/00_mycode/Invest/node_modules/@sindresorhus/is
-npm ERR! extraneous: @sindresorhus/merge-streams@4.0.0 /mnt/c/00_mycode/Invest/node_modules/@sindresorhus/merge-streams
-npm ERR! extraneous: @szmarczak/http-timer@4.0.6 /mnt/c/00_mycode/Invest/node_modules/@szmarczak/http-timer
-npm ERR! extraneous: @types/cacheable-request@6.0.3 /mnt/c/00_mycode/Invest/node_modules/@types/cacheable-request
-npm ERR! extraneous: @types/estree@1.0.8 /mnt/c/00_mycode/Invest/node_modules/@types/estree
-npm ERR! extraneous: @types/fs-extra@9.0.13 /mnt/c/00_mycode/Invest/node_modules/@types/fs-extra
-npm ERR! extraneous: @types/http-cache-semantics@4.0.4 /mnt/c/00_mycode/Invest/node_modules/@types/http-cache-semantics
-npm ERR! extraneous: @types/keyv@3.1.4 /mnt/c/00_mycode/Invest/node_modules/@types/keyv
-npm ERR! invalid: @types/node@ /mnt/c/00_mycode/Invest/node_modules/@types/node
-npm ERR! extraneous: @types/responselike@1.0.3 /mnt/c/00_mycode/Invest/node_modules/@types/responselike
-npm ERR! extraneous: @xmldom/xmldom@0.8.11 /mnt/c/00_mycode/Invest/node_modules/@xmldom/xmldom
-npm ERR! extraneous: abbrev@3.0.1 /mnt/c/00_mycode/Invest/node_modules/abbrev
-npm ERR! extraneous: ajv-keywords@3.5.2 /mnt/c/00_mycode/Invest/node_modules/ajv-keywords
-npm ERR! extraneous: ajv@ /mnt/c/00_mycode/Invest/node_modules/ajv
-npm ERR! extraneous: ansi-regex@5.0.1 /mnt/c/00_mycode/Invest/node_modules/ansi-regex
-npm ERR! extraneous: any-promise@1.3.0 /mnt/c/00_mycode/Invest/node_modules/any-promise
-npm ERR! extraneous: anymatch@3.1.3 /mnt/c/00_mycode/Invest/node_modules/anymatch
-npm ERR! extraneous: arg@5.0.2 /mnt/c/00_mycode/Invest/node_modules/arg
-npm ERR! extraneous: argparse@2.0.1 /mnt/c/00_mycode/Invest/node_modules/argparse
-npm ERR! extraneous: async@ /mnt/c/00_mycode/Invest/node_modules/async
-npm ERR! extraneous: asynckit@0.4.0 /mnt/c/00_mycode/Invest/node_modules/asynckit
-npm ERR! extraneous: at-least-node@1.0.0 /mnt/c/00_mycode/Invest/node_modules/at-least-node
-npm ERR! invalid: autoprefixer@ /mnt/c/00_mycode/Invest/node_modules/autoprefixer
-npm ERR! extraneous: balanced-match@1.0.2 /mnt/c/00_mycode/Invest/node_modules/balanced-match
-npm ERR! extraneous: base64-js@1.5.1 /mnt/c/00_mycode/Invest/node_modules/base64-js
-npm ERR! extraneous: baseline-browser-mapping@2.9.17 /mnt/c/00_mycode/Invest/node_modules/baseline-browser-mapping
-npm ERR! extraneous: binary-extensions@2.3.0 /mnt/c/00_mycode/Invest/node_modules/binary-extensions
-npm ERR! extraneous: bl@4.1.0 /mnt/c/00_mycode/Invest/node_modules/bl
-npm ERR! extraneous: boolean@3.2.0 /mnt/c/00_mycode/Invest/node_modules/boolean
-npm ERR! extraneous: brace-expansion@1.1.12 /mnt/c/00_mycode/Invest/node_modules/brace-expansion
-npm ERR! extraneous: braces@3.0.3 /mnt/c/00_mycode/Invest/node_modules/braces
-npm ERR! extraneous: browserslist@4.28.1 /mnt/c/00_mycode/Invest/node_modules/browserslist
-npm ERR! extraneous: buffer@5.7.1 /mnt/c/00_mycode/Invest/node_modules/buffer
-npm ERR! extraneous: cacache@19.0.1 /mnt/c/00_mycode/Invest/node_modules/cacache
-npm ERR! extraneous: cacheable-lookup@5.0.4 /mnt/c/00_mycode/Invest/node_modules/cacheable-lookup
-npm ERR! extraneous: cacheable-request@7.0.4 /mnt/c/00_mycode/Invest/node_modules/cacheable-request
-npm ERR! extraneous: call-bind-apply-helpers@1.0.2 /mnt/c/00_mycode/Invest/node_modules/call-bind-apply-helpers
-npm ERR! extraneous: camelcase-css@2.0.1 /mnt/c/00_mycode/Invest/node_modules/camelcase-css
-npm ERR! extraneous: caniuse-lite@ /mnt/c/00_mycode/Invest/node_modules/caniuse-lite
-npm ERR! extraneous: chokidar@3.6.0 /mnt/c/00_mycode/Invest/node_modules/chokidar
-npm ERR! extraneous: chownr@2.0.0 /mnt/c/00_mycode/Invest/node_modules/chownr
-npm ERR! extraneous: chromium-pickle-js@0.2.0 /mnt/c/00_mycode/Invest/node_modules/chromium-pickle-js
-npm ERR! extraneous: cli-cursor@3.1.0 /mnt/c/00_mycode/Invest/node_modules/cli-cursor
-npm ERR! extraneous: cli-spinners@2.9.2 /mnt/c/00_mycode/Invest/node_modules/cli-spinners
-npm ERR! extraneous: cliui@8.0.1 /mnt/c/00_mycode/Invest/node_modules/cliui
-npm ERR! extraneous: clone-response@1.0.3 /mnt/c/00_mycode/Invest/node_modules/clone-response
-npm ERR! extraneous: clone@1.0.4 /mnt/c/00_mycode/Invest/node_modules/clone
-npm ERR! extraneous: combined-stream@1.0.8 /mnt/c/00_mycode/Invest/node_modules/combined-stream
-npm ERR! extraneous: commander@5.1.0 /mnt/c/00_mycode/Invest/node_modules/commander
-npm ERR! extraneous: compare-version@0.1.2 /mnt/c/00_mycode/Invest/node_modules/compare-version
-npm ERR! extraneous: concat-map@0.0.1 /mnt/c/00_mycode/Invest/node_modules/concat-map
-npm ERR! invalid: concurrently@ /mnt/c/00_mycode/Invest/node_modules/concurrently
-npm ERR! extraneous: convert-source-map@2.0.0 /mnt/c/00_mycode/Invest/node_modules/convert-source-map
-npm ERR! extraneous: cross-dirname@0.1.0 /mnt/c/00_mycode/Invest/node_modules/cross-dirname
-npm ERR! extraneous: cssesc@3.0.0 /mnt/c/00_mycode/Invest/node_modules/cssesc
-npm ERR! extraneous: date-fns@ /mnt/c/00_mycode/Invest/node_modules/date-fns
-npm ERR! extraneous: decompress-response@6.0.0 /mnt/c/00_mycode/Invest/node_modules/decompress-response
-npm ERR! extraneous: defaults@1.0.4 /mnt/c/00_mycode/Invest/node_modules/defaults
-npm ERR! extraneous: defer-to-connect@2.0.1 /mnt/c/00_mycode/Invest/node_modules/defer-to-connect
-npm ERR! extraneous: define-data-property@1.1.4 /mnt/c/00_mycode/Invest/node_modules/define-data-property
-npm ERR! extraneous: define-properties@1.2.1 /mnt/c/00_mycode/Invest/node_modules/define-properties
-npm ERR! extraneous: delayed-stream@1.0.0 /mnt/c/00_mycode/Invest/node_modules/delayed-stream
-npm ERR! extraneous: detect-node@2.1.0 /mnt/c/00_mycode/Invest/node_modules/detect-node
-npm ERR! extraneous: didyoumean@1.2.2 /mnt/c/00_mycode/Invest/node_modules/didyoumean
-npm ERR! extraneous: dir-compare@ /mnt/c/00_mycode/Invest/node_modules/dir-compare
-npm ERR! extraneous: dlv@1.1.3 /mnt/c/00_mycode/Invest/node_modules/dlv
-npm ERR! extraneous: dotenv-expand@11.0.7 /mnt/c/00_mycode/Invest/node_modules/dotenv-expand
-npm ERR! extraneous: dotenv@16.6.1 /mnt/c/00_mycode/Invest/node_modules/dotenv
-npm ERR! extraneous: dunder-proto@1.0.1 /mnt/c/00_mycode/Invest/node_modules/dunder-proto
-npm ERR! extraneous: eastasianwidth@0.2.0 /mnt/c/00_mycode/Invest/node_modules/eastasianwidth
-npm ERR! extraneous: ejs@3.1.10 /mnt/c/00_mycode/Invest/node_modules/ejs
-npm ERR! extraneous: electron-builder-squirrel-windows@26.4.0 /mnt/c/00_mycode/Invest/node_modules/electron-builder-squirrel-windows
-npm ERR! extraneous: electron-publish@26.3.4 /mnt/c/00_mycode/Invest/node_modules/electron-publish
-npm ERR! extraneous: electron-to-chromium@1.5.267 /mnt/c/00_mycode/Invest/node_modules/electron-to-chromium
-npm ERR! extraneous: electron-winstaller@ /mnt/c/00_mycode/Invest/node_modules/electron-winstaller
-npm ERR! extraneous: emoji-regex@8.0.0 /mnt/c/00_mycode/Invest/node_modules/emoji-regex
-npm ERR! extraneous: encoding@0.1.13 /mnt/c/00_mycode/Invest/node_modules/encoding
-npm ERR! extraneous: env-paths@2.2.1 /mnt/c/00_mycode/Invest/node_modules/env-paths
-npm ERR! extraneous: err-code@2.0.3 /mnt/c/00_mycode/Invest/node_modules/err-code
-npm ERR! extraneous: es-define-property@1.0.1 /mnt/c/00_mycode/Invest/node_modules/es-define-property
-npm ERR! extraneous: es-errors@1.3.0 /mnt/c/00_mycode/Invest/node_modules/es-errors
-npm ERR! extraneous: es-object-atoms@1.1.1 /mnt/c/00_mycode/Invest/node_modules/es-object-atoms
-npm ERR! extraneous: es-set-tostringtag@2.1.0 /mnt/c/00_mycode/Invest/node_modules/es-set-tostringtag
-npm ERR! extraneous: es6-error@4.1.1 /mnt/c/00_mycode/Invest/node_modules/es6-error
-npm ERR! extraneous: esbuild@0.21.5 /mnt/c/00_mycode/Invest/node_modules/esbuild
-npm ERR! extraneous: escalade@3.2.0 /mnt/c/00_mycode/Invest/node_modules/escalade
-npm ERR! extraneous: escape-string-regexp@4.0.0 /mnt/c/00_mycode/Invest/node_modules/escape-string-regexp
-npm ERR! invalid: execa@ /mnt/c/00_mycode/Invest/node_modules/execa
-npm ERR! extraneous: exponential-backoff@3.1.3 /mnt/c/00_mycode/Invest/node_modules/exponential-backoff
-npm ERR! extraneous: fast-deep-equal@3.1.3 /mnt/c/00_mycode/Invest/node_modules/fast-deep-equal
-npm ERR! extraneous: fast-glob@ /mnt/c/00_mycode/Invest/node_modules/fast-glob
-npm ERR! extraneous: fast-json-stable-stringify@2.1.0 /mnt/c/00_mycode/Invest/node_modules/fast-json-stable-stringify
-npm ERR! extraneous: fastq@1.20.1 /mnt/c/00_mycode/Invest/node_modules/fastq
-npm ERR! extraneous: figures@6.1.0 /mnt/c/00_mycode/Invest/node_modules/figures
-npm ERR! extraneous: filelist@1.0.4 /mnt/c/00_mycode/Invest/node_modules/filelist
-npm ERR! extraneous: fill-range@7.1.1 /mnt/c/00_mycode/Invest/node_modules/fill-range
-npm ERR! extraneous: follow-redirects@1.15.11 /mnt/c/00_mycode/Invest/node_modules/follow-redirects
-npm ERR! extraneous: foreground-child@3.3.1 /mnt/c/00_mycode/Invest/node_modules/foreground-child
-npm ERR! extraneous: form-data@4.0.5 /mnt/c/00_mycode/Invest/node_modules/form-data
-npm ERR! extraneous: fraction.js@5.3.4 /mnt/c/00_mycode/Invest/node_modules/fraction.js
-npm ERR! extraneous: fs-extra@8.1.0 /mnt/c/00_mycode/Invest/node_modules/fs-extra
-npm ERR! extraneous: fs-minipass@3.0.3 /mnt/c/00_mycode/Invest/node_modules/fs-minipass
-npm ERR! extraneous: fs.realpath@1.0.0 /mnt/c/00_mycode/Invest/node_modules/fs.realpath
-npm ERR! extraneous: function-bind@1.1.2 /mnt/c/00_mycode/Invest/node_modules/function-bind
-npm ERR! extraneous: gensync@1.0.0-beta.2 /mnt/c/00_mycode/Invest/node_modules/gensync
-npm ERR! extraneous: get-caller-file@2.0.5 /mnt/c/00_mycode/Invest/node_modules/get-caller-file
-npm ERR! extraneous: get-intrinsic@1.3.0 /mnt/c/00_mycode/Invest/node_modules/get-intrinsic
-npm ERR! extraneous: get-proto@1.0.1 /mnt/c/00_mycode/Invest/node_modules/get-proto
-npm ERR! extraneous: get-stream@9.0.1 /mnt/c/00_mycode/Invest/node_modules/get-stream
-npm ERR! extraneous: glob-parent@5.1.2 /mnt/c/00_mycode/Invest/node_modules/glob-parent
-npm ERR! extraneous: glob@7.2.3 /mnt/c/00_mycode/Invest/node_modules/glob
-npm ERR! extraneous: global-agent@ /mnt/c/00_mycode/Invest/node_modules/global-agent
-npm ERR! extraneous: globalthis@1.0.4 /mnt/c/00_mycode/Invest/node_modules/globalthis
-npm ERR! extraneous: gopd@1.2.0 /mnt/c/00_mycode/Invest/node_modules/gopd
-npm ERR! extraneous: got@ /mnt/c/00_mycode/Invest/node_modules/got
-npm ERR! extraneous: graceful-fs@4.2.11 /mnt/c/00_mycode/Invest/node_modules/graceful-fs
-npm ERR! extraneous: has-property-descriptors@1.0.2 /mnt/c/00_mycode/Invest/node_modules/has-property-descriptors
-npm ERR! extraneous: has-symbols@1.1.0 /mnt/c/00_mycode/Invest/node_modules/has-symbols
-npm ERR! extraneous: has-tostringtag@1.0.2 /mnt/c/00_mycode/Invest/node_modules/has-tostringtag
-npm ERR! extraneous: hasown@2.0.2 /mnt/c/00_mycode/Invest/node_modules/hasown
-npm ERR! extraneous: hosted-git-info@4.1.0 /mnt/c/00_mycode/Invest/node_modules/hosted-git-info
-npm ERR! extraneous: http-cache-semantics@4.2.0 /mnt/c/00_mycode/Invest/node_modules/http-cache-semantics
-npm ERR! extraneous: http2-wrapper@1.0.3 /mnt/c/00_mycode/Invest/node_modules/http2-wrapper
-npm ERR! extraneous: human-signals@8.0.1 /mnt/c/00_mycode/Invest/node_modules/human-signals
-npm ERR! extraneous: ieee754@1.2.1 /mnt/c/00_mycode/Invest/node_modules/ieee754
-npm ERR! extraneous: ignore-by-default@1.0.1 /mnt/c/00_mycode/Invest/node_modules/ignore-by-default
-npm ERR! extraneous: imurmurhash@0.1.4 /mnt/c/00_mycode/Invest/node_modules/imurmurhash
-npm ERR! extraneous: inflight@1.0.6 /mnt/c/00_mycode/Invest/node_modules/inflight
-npm ERR! extraneous: inherits@2.0.4 /mnt/c/00_mycode/Invest/node_modules/inherits
-npm ERR! extraneous: ip-address@10.1.0 /mnt/c/00_mycode/Invest/node_modules/ip-address
-npm ERR! extraneous: is-binary-path@2.1.0 /mnt/c/00_mycode/Invest/node_modules/is-binary-path
-npm ERR! extraneous: is-core-module@2.16.1 /mnt/c/00_mycode/Invest/node_modules/is-core-module
-npm ERR! extraneous: is-extglob@2.1.1 /mnt/c/00_mycode/Invest/node_modules/is-extglob
-npm ERR! extraneous: is-fullwidth-code-point@3.0.0 /mnt/c/00_mycode/Invest/node_modules/is-fullwidth-code-point
-npm ERR! extraneous: is-glob@4.0.3 /mnt/c/00_mycode/Invest/node_modules/is-glob
-npm ERR! extraneous: is-interactive@1.0.0 /mnt/c/00_mycode/Invest/node_modules/is-interactive
-npm ERR! extraneous: is-number@7.0.0 /mnt/c/00_mycode/Invest/node_modules/is-number
-npm ERR! extraneous: is-plain-obj@4.1.0 /mnt/c/00_mycode/Invest/node_modules/is-plain-obj
-npm ERR! extraneous: is-stream@4.0.1 /mnt/c/00_mycode/Invest/node_modules/is-stream
-npm ERR! extraneous: is-unicode-supported@2.1.0 /mnt/c/00_mycode/Invest/node_modules/is-unicode-supported
-npm ERR! extraneous: isbinaryfile@5.0.7 /mnt/c/00_mycode/Invest/node_modules/isbinaryfile
-npm ERR! extraneous: jackspeak@3.4.3 /mnt/c/00_mycode/Invest/node_modules/jackspeak
-npm ERR! extraneous: jake@10.9.4 /mnt/c/00_mycode/Invest/node_modules/jake
-npm ERR! extraneous: jsesc@3.1.0 /mnt/c/00_mycode/Invest/node_modules/jsesc
-npm ERR! extraneous: json-buffer@3.0.1 /mnt/c/00_mycode/Invest/node_modules/json-buffer
-npm ERR! extraneous: json-schema-traverse@0.4.1 /mnt/c/00_mycode/Invest/node_modules/json-schema-traverse
-npm ERR! extraneous: json-stringify-safe@5.0.1 /mnt/c/00_mycode/Invest/node_modules/json-stringify-safe
-npm ERR! extraneous: json5@2.2.3 /mnt/c/00_mycode/Invest/node_modules/json5
-npm ERR! extraneous: jsonfile@4.0.0 /mnt/c/00_mycode/Invest/node_modules/jsonfile
-npm ERR! extraneous: keyv@4.5.4 /mnt/c/00_mycode/Invest/node_modules/keyv
-npm ERR! extraneous: lilconfig@3.1.3 /mnt/c/00_mycode/Invest/node_modules/lilconfig
-npm ERR! extraneous: lines-and-columns@1.2.4 /mnt/c/00_mycode/Invest/node_modules/lines-and-columns
-npm ERR! extraneous: log-symbols@4.1.0 /mnt/c/00_mycode/Invest/node_modules/log-symbols
-npm ERR! extraneous: lowercase-keys@2.0.0 /mnt/c/00_mycode/Invest/node_modules/lowercase-keys
-npm ERR! extraneous: lru-cache@5.1.1 /mnt/c/00_mycode/Invest/node_modules/lru-cache
-npm ERR! extraneous: make-fetch-happen@14.0.3 /mnt/c/00_mycode/Invest/node_modules/make-fetch-happen
-npm ERR! extraneous: matcher@3.0.0 /mnt/c/00_mycode/Invest/node_modules/matcher
-npm ERR! extraneous: math-intrinsics@1.1.0 /mnt/c/00_mycode/Invest/node_modules/math-intrinsics
-npm ERR! extraneous: merge2@1.4.1 /mnt/c/00_mycode/Invest/node_modules/merge2
-npm ERR! extraneous: micromatch@4.0.8 /mnt/c/00_mycode/Invest/node_modules/micromatch
-npm ERR! extraneous: mime-db@1.52.0 /mnt/c/00_mycode/Invest/node_modules/mime-db
-npm ERR! extraneous: mime-types@2.1.35 /mnt/c/00_mycode/Invest/node_modules/mime-types
-npm ERR! extraneous: mime@2.6.0 /mnt/c/00_mycode/Invest/node_modules/mime
-npm ERR! extraneous: mimic-fn@2.1.0 /mnt/c/00_mycode/Invest/node_modules/mimic-fn
-npm ERR! extraneous: mimic-response@1.0.1 /mnt/c/00_mycode/Invest/node_modules/mimic-response
-npm ERR! extraneous: minimatch@10.1.1 /mnt/c/00_mycode/Invest/node_modules/minimatch
-npm ERR! extraneous: minipass-collect@2.0.1 /mnt/c/00_mycode/Invest/node_modules/minipass-collect
-npm ERR! extraneous: minipass-fetch@4.0.1 /mnt/c/00_mycode/Invest/node_modules/minipass-fetch
-npm ERR! extraneous: minipass-flush@1.0.5 /mnt/c/00_mycode/Invest/node_modules/minipass-flush
-npm ERR! extraneous: minipass-pipeline@1.2.4 /mnt/c/00_mycode/Invest/node_modules/minipass-pipeline
-npm ERR! extraneous: minipass-sized@1.0.3 /mnt/c/00_mycode/Invest/node_modules/minipass-sized
-npm ERR! extraneous: minipass@7.1.2 /mnt/c/00_mycode/Invest/node_modules/minipass
-npm ERR! extraneous: minizlib@3.1.0 /mnt/c/00_mycode/Invest/node_modules/minizlib
-npm ERR! extraneous: mkdirp@1.0.4 /mnt/c/00_mycode/Invest/node_modules/mkdirp
-npm ERR! extraneous: mz@2.7.0 /mnt/c/00_mycode/Invest/node_modules/mz
-npm ERR! extraneous: negotiator@1.0.0 /mnt/c/00_mycode/Invest/node_modules/negotiator
-npm ERR! extraneous: node-abi@4.26.0 /mnt/c/00_mycode/Invest/node_modules/node-abi
-npm ERR! extraneous: node-api-version@0.2.1 /mnt/c/00_mycode/Invest/node_modules/node-api-version
-npm ERR! extraneous: node-gyp@11.5.0 /mnt/c/00_mycode/Invest/node_modules/node-gyp
-npm ERR! extraneous: node-releases@2.0.27 /mnt/c/00_mycode/Invest/node_modules/node-releases
-npm ERR! invalid: nodemon@ /mnt/c/00_mycode/Invest/node_modules/nodemon
-npm ERR! extraneous: nopt@8.1.0 /mnt/c/00_mycode/Invest/node_modules/nopt
-npm ERR! extraneous: normalize-path@3.0.0 /mnt/c/00_mycode/Invest/node_modules/normalize-path
-npm ERR! extraneous: normalize-url@6.1.0 /mnt/c/00_mycode/Invest/node_modules/normalize-url
-npm ERR! extraneous: npm-run-path@6.0.0 /mnt/c/00_mycode/Invest/node_modules/npm-run-path
-npm ERR! extraneous: object-assign@4.1.1 /mnt/c/00_mycode/Invest/node_modules/object-assign
-npm ERR! extraneous: object-hash@3.0.0 /mnt/c/00_mycode/Invest/node_modules/object-hash
-npm ERR! extraneous: object-keys@1.1.1 /mnt/c/00_mycode/Invest/node_modules/object-keys
-npm ERR! extraneous: onetime@5.1.2 /mnt/c/00_mycode/Invest/node_modules/onetime
-npm ERR! extraneous: ora@5.4.1 /mnt/c/00_mycode/Invest/node_modules/ora
-npm ERR! extraneous: p-cancelable@2.1.1 /mnt/c/00_mycode/Invest/node_modules/p-cancelable
-npm ERR! extraneous: p-limit@3.1.0 /mnt/c/00_mycode/Invest/node_modules/p-limit
-npm ERR! extraneous: p-map@7.0.4 /mnt/c/00_mycode/Invest/node_modules/p-map
-npm ERR! extraneous: package-json-from-dist@1.0.1 /mnt/c/00_mycode/Invest/node_modules/package-json-from-dist
-npm ERR! extraneous: parse-ms@4.0.0 /mnt/c/00_mycode/Invest/node_modules/parse-ms
-npm ERR! extraneous: path-is-absolute@1.0.1 /mnt/c/00_mycode/Invest/node_modules/path-is-absolute
-npm ERR! extraneous: path-parse@1.0.7 /mnt/c/00_mycode/Invest/node_modules/path-parse
-npm ERR! extraneous: path-scurry@1.11.1 /mnt/c/00_mycode/Invest/node_modules/path-scurry
-npm ERR! extraneous: pe-library@ /mnt/c/00_mycode/Invest/node_modules/pe-library
-npm ERR! extraneous: picomatch@2.3.1 /mnt/c/00_mycode/Invest/node_modules/picomatch
-npm ERR! extraneous: pify@2.3.0 /mnt/c/00_mycode/Invest/node_modules/pify
-npm ERR! extraneous: pirates@4.0.7 /mnt/c/00_mycode/Invest/node_modules/pirates
-npm ERR! extraneous: plist@3.1.0 /mnt/c/00_mycode/Invest/node_modules/plist
-npm ERR! extraneous: postcss-import@15.1.0 /mnt/c/00_mycode/Invest/node_modules/postcss-import
-npm ERR! extraneous: postcss-js@4.1.0 /mnt/c/00_mycode/Invest/node_modules/postcss-js
-npm ERR! extraneous: postcss-load-config@6.0.1 /mnt/c/00_mycode/Invest/node_modules/postcss-load-config
-npm ERR! extraneous: postcss-nested@6.2.0 /mnt/c/00_mycode/Invest/node_modules/postcss-nested
-npm ERR! extraneous: postcss-selector-parser@ /mnt/c/00_mycode/Invest/node_modules/postcss-selector-parser
-npm ERR! extraneous: postcss-value-parser@4.2.0 /mnt/c/00_mycode/Invest/node_modules/postcss-value-parser
-npm ERR! extraneous: postject@ /mnt/c/00_mycode/Invest/node_modules/postject
-npm ERR! extraneous: pretty-ms@9.3.0 /mnt/c/00_mycode/Invest/node_modules/pretty-ms
-npm ERR! extraneous: proc-log@5.0.0 /mnt/c/00_mycode/Invest/node_modules/proc-log
-npm ERR! extraneous: progress@2.0.3 /mnt/c/00_mycode/Invest/node_modules/progress
-npm ERR! extraneous: promise-retry@2.0.1 /mnt/c/00_mycode/Invest/node_modules/promise-retry
-npm ERR! extraneous: proxy-from-env@1.1.0 /mnt/c/00_mycode/Invest/node_modules/proxy-from-env
-npm ERR! extraneous: pstree.remy@1.1.8 /mnt/c/00_mycode/Invest/node_modules/pstree.remy
-npm ERR! extraneous: punycode@2.3.1 /mnt/c/00_mycode/Invest/node_modules/punycode
-npm ERR! extraneous: queue-microtask@1.2.3 /mnt/c/00_mycode/Invest/node_modules/queue-microtask
-npm ERR! extraneous: quick-lru@5.1.1 /mnt/c/00_mycode/Invest/node_modules/quick-lru
-npm ERR! invalid: react-dom@ /mnt/c/00_mycode/Invest/node_modules/react-dom
-npm ERR! extraneous: read-binary-file-arch@1.0.6 /mnt/c/00_mycode/Invest/node_modules/read-binary-file-arch
-npm ERR! extraneous: read-cache@1.0.0 /mnt/c/00_mycode/Invest/node_modules/read-cache
-npm ERR! extraneous: readable-stream@3.6.2 /mnt/c/00_mycode/Invest/node_modules/readable-stream
-npm ERR! extraneous: readdirp@3.6.0 /mnt/c/00_mycode/Invest/node_modules/readdirp
-npm ERR! extraneous: require-directory@2.1.1 /mnt/c/00_mycode/Invest/node_modules/require-directory
-npm ERR! extraneous: resedit@ /mnt/c/00_mycode/Invest/node_modules/resedit
-npm ERR! extraneous: resolve-alpn@1.2.1 /mnt/c/00_mycode/Invest/node_modules/resolve-alpn
-npm ERR! extraneous: resolve@ /mnt/c/00_mycode/Invest/node_modules/resolve
-npm ERR! extraneous: responselike@2.0.1 /mnt/c/00_mycode/Invest/node_modules/responselike
-npm ERR! extraneous: restore-cursor@3.1.0 /mnt/c/00_mycode/Invest/node_modules/restore-cursor
-npm ERR! extraneous: retry@0.12.0 /mnt/c/00_mycode/Invest/node_modules/retry
-npm ERR! extraneous: reusify@1.1.0 /mnt/c/00_mycode/Invest/node_modules/reusify
-npm ERR! extraneous: rimraf@2.6.3 /mnt/c/00_mycode/Invest/node_modules/rimraf
-npm ERR! extraneous: roarr@2.15.4 /mnt/c/00_mycode/Invest/node_modules/roarr
-npm ERR! extraneous: rollup@ /mnt/c/00_mycode/Invest/node_modules/rollup
-npm ERR! extraneous: run-parallel@1.2.0 /mnt/c/00_mycode/Invest/node_modules/run-parallel
-npm ERR! extraneous: safe-buffer@5.2.1 /mnt/c/00_mycode/Invest/node_modules/safe-buffer
-npm ERR! extraneous: scheduler@0.23.2 /mnt/c/00_mycode/Invest/node_modules/scheduler
-npm ERR! extraneous: semver-compare@1.0.0 /mnt/c/00_mycode/Invest/node_modules/semver-compare
-npm ERR! extraneous: semver@6.3.1 /mnt/c/00_mycode/Invest/node_modules/semver
-npm ERR! extraneous: serialize-error@7.0.1 /mnt/c/00_mycode/Invest/node_modules/serialize-error
-npm ERR! extraneous: shell-quote@1.8.3 /mnt/c/00_mycode/Invest/node_modules/shell-quote
-npm ERR! extraneous: signal-exit@4.1.0 /mnt/c/00_mycode/Invest/node_modules/signal-exit
-npm ERR! extraneous: smart-buffer@4.2.0 /mnt/c/00_mycode/Invest/node_modules/smart-buffer
-npm ERR! extraneous: socks-proxy-agent@8.0.5 /mnt/c/00_mycode/Invest/node_modules/socks-proxy-agent
-npm ERR! extraneous: socks@2.8.7 /mnt/c/00_mycode/Invest/node_modules/socks
-npm ERR! extraneous: spawn-command@0.0.2 /mnt/c/00_mycode/Invest/node_modules/spawn-command
-npm ERR! extraneous: sprintf-js@1.1.3 /mnt/c/00_mycode/Invest/node_modules/sprintf-js
-npm ERR! extraneous: ssri@12.0.0 /mnt/c/00_mycode/Invest/node_modules/ssri
-npm ERR! extraneous: string_decoder@1.3.0 /mnt/c/00_mycode/Invest/node_modules/string_decoder
-npm ERR! extraneous: string-width-cjs@npm:string-width@4.2.3 /mnt/c/00_mycode/Invest/node_modules/string-width-cjs
-npm ERR! extraneous: string-width@4.2.3 /mnt/c/00_mycode/Invest/node_modules/string-width
-npm ERR! extraneous: strip-ansi-cjs@npm:strip-ansi@6.0.1 /mnt/c/00_mycode/Invest/node_modules/strip-ansi-cjs
-npm ERR! extraneous: strip-ansi@6.0.1 /mnt/c/00_mycode/Invest/node_modules/strip-ansi
-npm ERR! extraneous: strip-final-newline@4.0.0 /mnt/c/00_mycode/Invest/node_modules/strip-final-newline
-npm ERR! extraneous: sucrase@ /mnt/c/00_mycode/Invest/node_modules/sucrase
-npm ERR! extraneous: sumchecker@3.0.1 /mnt/c/00_mycode/Invest/node_modules/sumchecker
-npm ERR! extraneous: supports-color@8.1.1 /mnt/c/00_mycode/Invest/node_modules/supports-color
-npm ERR! extraneous: supports-preserve-symlinks-flag@1.0.0 /mnt/c/00_mycode/Invest/node_modules/supports-preserve-symlinks-flag
-npm ERR! invalid: tailwindcss@ /mnt/c/00_mycode/Invest/node_modules/tailwindcss
-npm ERR! extraneous: tapable@2.3.0 /mnt/c/00_mycode/Invest/node_modules/tapable
-npm ERR! extraneous: tar@6.2.1 /mnt/c/00_mycode/Invest/node_modules/tar
-npm ERR! extraneous: temp@0.9.4 /mnt/c/00_mycode/Invest/node_modules/temp
-npm ERR! extraneous: thenify-all@1.6.0 /mnt/c/00_mycode/Invest/node_modules/thenify-all
-npm ERR! extraneous: thenify@3.3.1 /mnt/c/00_mycode/Invest/node_modules/thenify
-npm ERR! extraneous: tinyglobby@0.2.15 /mnt/c/00_mycode/Invest/node_modules/tinyglobby
-npm ERR! extraneous: tmp-promise@3.0.3 /mnt/c/00_mycode/Invest/node_modules/tmp-promise
-npm ERR! extraneous: tmp@0.2.5 /mnt/c/00_mycode/Invest/node_modules/tmp
-npm ERR! extraneous: to-regex-range@5.0.1 /mnt/c/00_mycode/Invest/node_modules/to-regex-range
-npm ERR! extraneous: touch@3.1.1 /mnt/c/00_mycode/Invest/node_modules/touch
-npm ERR! extraneous: tree-kill@1.2.2 /mnt/c/00_mycode/Invest/node_modules/tree-kill
-npm ERR! extraneous: ts-interface-checker@0.1.13 /mnt/c/00_mycode/Invest/node_modules/ts-interface-checker
-npm ERR! extraneous: tslib@2.8.1 /mnt/c/00_mycode/Invest/node_modules/tslib
-npm ERR! extraneous: type-fest@0.13.1 /mnt/c/00_mycode/Invest/node_modules/type-fest
-npm ERR! invalid: typescript@ /mnt/c/00_mycode/Invest/node_modules/typescript
-npm ERR! extraneous: undefsafe@2.0.5 /mnt/c/00_mycode/Invest/node_modules/undefsafe
-npm ERR! extraneous: unicorn-magic@0.3.0 /mnt/c/00_mycode/Invest/node_modules/unicorn-magic
-npm ERR! extraneous: unique-filename@4.0.0 /mnt/c/00_mycode/Invest/node_modules/unique-filename
-npm ERR! extraneous: unique-slug@5.0.0 /mnt/c/00_mycode/Invest/node_modules/unique-slug
-npm ERR! extraneous: universalify@0.1.2 /mnt/c/00_mycode/Invest/node_modules/universalify
-npm ERR! extraneous: update-browserslist-db@1.2.3 /mnt/c/00_mycode/Invest/node_modules/update-browserslist-db
-npm ERR! extraneous: uri-js@4.4.1 /mnt/c/00_mycode/Invest/node_modules/uri-js
-npm ERR! extraneous: util-deprecate@1.0.2 /mnt/c/00_mycode/Invest/node_modules/util-deprecate
-npm ERR! invalid: vite@ /mnt/c/00_mycode/Invest/node_modules/vite
-npm ERR! extraneous: wcwidth@1.0.1 /mnt/c/00_mycode/Invest/node_modules/wcwidth
-npm ERR! extraneous: wrap-ansi-cjs@npm:wrap-ansi@7.0.0 /mnt/c/00_mycode/Invest/node_modules/wrap-ansi-cjs
-npm ERR! extraneous: wrap-ansi@7.0.0 /mnt/c/00_mycode/Invest/node_modules/wrap-ansi
-npm ERR! extraneous: xmlbuilder@ /mnt/c/00_mycode/Invest/node_modules/xmlbuilder
-npm ERR! extraneous: y18n@5.0.8 /mnt/c/00_mycode/Invest/node_modules/y18n
-npm ERR! extraneous: yallist@3.1.1 /mnt/c/00_mycode/Invest/node_modules/yallist
-npm ERR! extraneous: yargs-parser@21.1.1 /mnt/c/00_mycode/Invest/node_modules/yargs-parser
-npm ERR! extraneous: yocto-queue@0.1.0 /mnt/c/00_mycode/Invest/node_modules/yocto-queue
-npm ERR! extraneous: yoctocolors@2.1.2 /mnt/c/00_mycode/Invest/node_modules/yoctocolors
-
-npm ERR! A complete log of this run can be found in:
-npm ERR!     /home/fpxszk/.npm/_logs/2026-03-05T16_23_43_503Z-debug-0.log
 --- dpkg: system packages that may be needed ---
 Checking libxml2-dev
-dpkg-query: no packages found matching libxml2-dev
-libxml2-dev: not installed
+Desired=Unknown/Install/Remove/Purge/Hold
+| Status=Not/Inst/Conf-files/Unpacked/halF-conf/Half-inst/trig-aWait/Trig-pend
+|/ Err?=(none)/Reinst-required (Status,Err: uppercase=bad)
+||/ Name              Version                 Architecture Description
++++-=================-=======================-============-=====================================
+ii  libxml2-dev:amd64 2.9.13+dfsg-1ubuntu0.11 amd64        GNOME XML library - development files
 Checking libxslt1-dev
-dpkg-query: no packages found matching libxslt1-dev
-libxslt1-dev: not installed
+Desired=Unknown/Install/Remove/Purge/Hold
+| Status=Not/Inst/Conf-files/Unpacked/halF-conf/Half-inst/trig-aWait/Trig-pend
+|/ Err?=(none)/Reinst-required (Status,Err: uppercase=bad)
+||/ Name               Version                 Architecture Description
++++-==================-=======================-============-=============================================
+ii  libxslt1-dev:amd64 1.1.34-4ubuntu0.22.04.5 amd64        XSLT 1.0 processing library - development kit
 Checking python3-dev
 Desired=Unknown/Install/Remove/Purge/Hold
 | Status=Not/Inst/Conf-files/Unpacked/halF-conf/Half-inst/trig-aWait/Trig-pend
@@ -762,14 +136,26 @@ Desired=Unknown/Install/Remove/Purge/Hold
 +++-================-=================-============-================================================
 ii  libssl-dev:amd64 3.0.2-0ubuntu1.21 amd64        Secure Sockets Layer toolkit - development files
 Checking pkg-config
-dpkg-query: no packages found matching pkg-config
-pkg-config: not installed
+Desired=Unknown/Install/Remove/Purge/Hold
+| Status=Not/Inst/Conf-files/Unpacked/halF-conf/Half-inst/trig-aWait/Trig-pend
+|/ Err?=(none)/Reinst-required (Status,Err: uppercase=bad)
+||/ Name           Version         Architecture Description
++++-==============-===============-============-===========================================
+ii  pkg-config     0.29.2-1ubuntu3 amd64        manage compile and link flags for libraries
 Checking libfreetype6-dev
-dpkg-query: no packages found matching libfreetype6-dev
-libfreetype6-dev: not installed
+Desired=Unknown/Install/Remove/Purge/Hold
+| Status=Not/Inst/Conf-files/Unpacked/halF-conf/Half-inst/trig-aWait/Trig-pend
+|/ Err?=(none)/Reinst-required (Status,Err: uppercase=bad)
+||/ Name                   Version                Architecture Description
++++-======================-======================-============-================================================================
+ii  libfreetype6-dev:amd64 2.11.1+dfsg-1ubuntu0.3 amd64        FreeType 2 font engine, development files (transitional package)
 Checking libpng-dev
-dpkg-query: no packages found matching libpng-dev
-libpng-dev: not installed
+Desired=Unknown/Install/Remove/Purge/Hold
+| Status=Not/Inst/Conf-files/Unpacked/halF-conf/Half-inst/trig-aWait/Trig-pend
+|/ Err?=(none)/Reinst-required (Status,Err: uppercase=bad)
+||/ Name             Version           Architecture Description
++++-================-=================-============-=======================================
+ii  libpng-dev:amd64 1.6.37-3ubuntu0.4 amd64        PNG library - development (version 1.6)
 --- pip check (package conflicts) ---
-pygobject 3.42.1 requires pycairo, which is not installed.
+No broken requirements found.
 WSL env report written to: ./wsl_env_report.txt

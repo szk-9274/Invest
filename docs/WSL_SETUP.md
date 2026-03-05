@@ -30,14 +30,45 @@ npm ls --depth=0
 
 ### apt で入れておくと良いもの（Ubuntu系）
 ```bash
-sudo apt update && sudo apt install -y build-essential python3-dev python3-venv libxml2-dev libxslt1-dev pkg-config libfreetype6-dev libpng-dev libssl-dev
+sudo apt update && sudo apt install -y \
+  build-essential python3-dev python3-venv libxml2-dev libxslt1-dev pkg-config libfreetype6-dev libpng-dev libssl-dev \
+  dos2unix jq ripgrep fd-find tree tmux htop ncdu unzip zip
 ```
 
 ## Node / npm 側の注意点
 - Electron を WSL 上で動かす場合は X11/Wayland 環境やディスプレイ転送が必要になるため別途検討が必要。
 - Node の推奨バージョンはプロジェクトに明示されていませんが、devDependencies の一部は最新の Node を想定するため v18 以上を推奨します。
+- 非対話シェル（`bash -lc`）でも nvm の Node を使えるように、`~/.profile` 側で nvm を読み込んでおくことを推奨します。
 
-## 次のアクション
-1. `bash ./scripts/wsl_env_check.sh` を実行して生成された `wsl_env_report.txt` を確認してもらえれば、こちらで差分を解析して互換性問題を洗い出します。
-2. 必要であれば、報告に基づいて `requirements.txt` の固定や `package.json` の engines 指定、あるいは Docker 化の提案を行います。
+## 差分解消の実行コマンド（WSL）
+```bash
+cd /mnt/c/00_mycode/Invest
+
+# Node 依存をクリーン再構築（ルート + frontend）
+rm -rf node_modules frontend/node_modules
+npm ci
+cd frontend && npm ci && cd ..
+
+# Python 依存を再構築
+cd python
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip setuptools wheel
+pip install -r requirements.txt
+cd ..
+
+# 最終レポート再生成
+source python/.venv/bin/activate
+bash ./scripts/wsl_env_check.sh
+```
+
+## 最終チェック
+```bash
+python3 --version
+node --version
+npm --version
+python3 -m pip check
+npm ls --depth=0
+cd frontend && npm ls --depth=0 && cd ..
+```
 
