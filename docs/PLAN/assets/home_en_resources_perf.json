@@ -1,0 +1,272 @@
+[
+  {
+    "name": "https://metaplanet.jp/_next/static/media/24f6ebe2756575bd-s.p.woff2",
+    "initiatorType": "link",
+    "transferSize": 25296
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/media/36966cca54120369-s.p.woff2",
+    "initiatorType": "link",
+    "transferSize": 22620
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/media/9a4ee768fed045da-s.p.woff2",
+    "initiatorType": "link",
+    "transferSize": 12068
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/media/b7bd7951037de757-s.p.woff2",
+    "initiatorType": "link",
+    "transferSize": 7492
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/media/d3ebbfd689654d3a-s.p.woff2",
+    "initiatorType": "link",
+    "transferSize": 10352
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/css/a8d12fb7c765706d.css?dpl=dpl_3hZGErFawtqiZoNyiGWTUyjk57is",
+    "initiatorType": "link",
+    "transferSize": 1313
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/css/cf2af83f588f3be0.css?dpl=dpl_3hZGErFawtqiZoNyiGWTUyjk57is",
+    "initiatorType": "link",
+    "transferSize": 17838
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/css/fd9ae5657ac7550b.css?dpl=dpl_3hZGErFawtqiZoNyiGWTUyjk57is",
+    "initiatorType": "link",
+    "transferSize": 31568
+  },
+  {
+    "name": "https://metaplanet.jp/images/logos/light/_012.svg",
+    "initiatorType": "link",
+    "transferSize": 1195
+  },
+  {
+    "name": "https://metaplanet.jp/images/logos/dark/_012.svg",
+    "initiatorType": "link",
+    "transferSize": 1201
+  },
+  {
+    "name": "https://metaplanet.jp/images/logos/dark/_015.svg",
+    "initiatorType": "link",
+    "transferSize": 2987
+  },
+  {
+    "name": "https://metaplanet.jp/images/logos/light/_015.svg",
+    "initiatorType": "link",
+    "transferSize": 2982
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/chunks/webpack-3efb39b3364073eb.js?dpl=dpl_3hZGErFawtqiZoNyiGWTUyjk57is",
+    "initiatorType": "link",
+    "transferSize": 2394
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/chunks/4bd1b696-0a113843410a3ba7.js?dpl=dpl_3hZGErFawtqiZoNyiGWTUyjk57is",
+    "initiatorType": "script",
+    "transferSize": 54790
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/chunks/1684-513641929782bd50.js?dpl=dpl_3hZGErFawtqiZoNyiGWTUyjk57is",
+    "initiatorType": "script",
+    "transferSize": 46968
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/chunks/ad2866b8-a4659a388c5e0680.js?dpl=dpl_3hZGErFawtqiZoNyiGWTUyjk57is",
+    "initiatorType": "script",
+    "transferSize": 47492
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/chunks/main-app-d41d56f775a954bb.js?dpl=dpl_3hZGErFawtqiZoNyiGWTUyjk57is",
+    "initiatorType": "script",
+    "transferSize": 834
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/chunks/9673-54ce0a17606c5575.js?dpl=dpl_3hZGErFawtqiZoNyiGWTUyjk57is",
+    "initiatorType": "script",
+    "transferSize": 11105
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/chunks/e37a0b60-86dcf540460bd9a6.js?dpl=dpl_3hZGErFawtqiZoNyiGWTUyjk57is",
+    "initiatorType": "script",
+    "transferSize": 26400
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/chunks/6874-e2e534252e753eda.js?dpl=dpl_3hZGErFawtqiZoNyiGWTUyjk57is",
+    "initiatorType": "script",
+    "transferSize": 3793
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/chunks/7968-86cb261da2a23a40.js?dpl=dpl_3hZGErFawtqiZoNyiGWTUyjk57is",
+    "initiatorType": "script",
+    "transferSize": 2906
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/chunks/9233-9992bf466d357d3c.js?dpl=dpl_3hZGErFawtqiZoNyiGWTUyjk57is",
+    "initiatorType": "script",
+    "transferSize": 7635
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/chunks/8176-e4f66c4e8b2552eb.js?dpl=dpl_3hZGErFawtqiZoNyiGWTUyjk57is",
+    "initiatorType": "script",
+    "transferSize": 11997
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/chunks/170-d38c337c3cd9c0a1.js?dpl=dpl_3hZGErFawtqiZoNyiGWTUyjk57is",
+    "initiatorType": "script",
+    "transferSize": 2305
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/chunks/5821-fc21eabbefabb42a.js?dpl=dpl_3hZGErFawtqiZoNyiGWTUyjk57is",
+    "initiatorType": "script",
+    "transferSize": 3771
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/chunks/3063-e5e4d23ee02f320f.js?dpl=dpl_3hZGErFawtqiZoNyiGWTUyjk57is",
+    "initiatorType": "script",
+    "transferSize": 5890
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/chunks/2797-a2330a17a36c5f48.js?dpl=dpl_3hZGErFawtqiZoNyiGWTUyjk57is",
+    "initiatorType": "script",
+    "transferSize": 14981
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/chunks/3846-6404c5ef1257f38e.js?dpl=dpl_3hZGErFawtqiZoNyiGWTUyjk57is",
+    "initiatorType": "script",
+    "transferSize": 7942
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/chunks/9994-2279e78a0d23e615.js?dpl=dpl_3hZGErFawtqiZoNyiGWTUyjk57is",
+    "initiatorType": "script",
+    "transferSize": 11479
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/chunks/9741-276af934cbc27fb2.js?dpl=dpl_3hZGErFawtqiZoNyiGWTUyjk57is",
+    "initiatorType": "script",
+    "transferSize": 3574
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/chunks/6671-ccf234aa5b73660d.js?dpl=dpl_3hZGErFawtqiZoNyiGWTUyjk57is",
+    "initiatorType": "script",
+    "transferSize": 10115
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/chunks/421-a376caee36e74c6b.js?dpl=dpl_3hZGErFawtqiZoNyiGWTUyjk57is",
+    "initiatorType": "script",
+    "transferSize": 20764
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/chunks/9371-7dc85d87cfb52342.js?dpl=dpl_3hZGErFawtqiZoNyiGWTUyjk57is",
+    "initiatorType": "script",
+    "transferSize": 3524
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/chunks/8486-5b3889fe041db85b.js?dpl=dpl_3hZGErFawtqiZoNyiGWTUyjk57is",
+    "initiatorType": "script",
+    "transferSize": 3971
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/chunks/7174-d5586f6ba1e048f2.js?dpl=dpl_3hZGErFawtqiZoNyiGWTUyjk57is",
+    "initiatorType": "script",
+    "transferSize": 108400
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/chunks/4471-11e9a4a4fada6d77.js?dpl=dpl_3hZGErFawtqiZoNyiGWTUyjk57is",
+    "initiatorType": "script",
+    "transferSize": 8941
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/chunks/3563-dbe65eaa18db68ee.js?dpl=dpl_3hZGErFawtqiZoNyiGWTUyjk57is",
+    "initiatorType": "script",
+    "transferSize": 7733
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/chunks/1040-e31ed5c44831a208.js?dpl=dpl_3hZGErFawtqiZoNyiGWTUyjk57is",
+    "initiatorType": "script",
+    "transferSize": 10725
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/chunks/app/%5Blocale%5D/page-50954ae69c811773.js?dpl=dpl_3hZGErFawtqiZoNyiGWTUyjk57is",
+    "initiatorType": "script",
+    "transferSize": 1982
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/chunks/app/%5Blocale%5D/layout-a64c62e81442538f.js?dpl=dpl_3hZGErFawtqiZoNyiGWTUyjk57is",
+    "initiatorType": "script",
+    "transferSize": 3264
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/chunks/app/(static)/%5Blocale%5D/layout-ac4fa944d031aff8.js?dpl=dpl_3hZGErFawtqiZoNyiGWTUyjk57is",
+    "initiatorType": "script",
+    "transferSize": 848
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/chunks/9381-f50de2dd79fe7ff9.js?dpl=dpl_3hZGErFawtqiZoNyiGWTUyjk57is",
+    "initiatorType": "script",
+    "transferSize": 6263
+  },
+  {
+    "name": "https://metaplanet.jp//images/planets-hero.jpeg",
+    "initiatorType": "css",
+    "transferSize": 215567
+  },
+  {
+    "name": "https://metaplanet.jp/_next/static/media/92eeb95d069020cc-s.woff2",
+    "initiatorType": "css",
+    "transferSize": 9160
+  },
+  {
+    "name": "https://metaplanet.jp/images/partners/bitcoin.jp-white.svg",
+    "initiatorType": "img",
+    "transferSize": 2808
+  },
+  {
+    "name": "https://metaplanet.jp/_next/image?url=%2Fimages%2Fpartners%2Fbitcoin-japan-white.png&w=256&q=75",
+    "initiatorType": "img",
+    "transferSize": 7072
+  },
+  {
+    "name": "https://metaplanet.jp/images/partners/bm-japan-white.svg",
+    "initiatorType": "img",
+    "transferSize": 58203
+  },
+  {
+    "name": "https://metaplanet.jp/images/partners/planetgear-white.svg",
+    "initiatorType": "img",
+    "transferSize": 1504
+  },
+  {
+    "name": "https://metaplanet.jp/images/companies/linkedin-icon.svg",
+    "initiatorType": "img",
+    "transferSize": 816
+  },
+  {
+    "name": "https://metaplanet.jp/images/companies/youtube-icon.svg",
+    "initiatorType": "img",
+    "transferSize": 759
+  },
+  {
+    "name": "https://admin.metaplanet.jp/api/events/promoted?domain=metaplanet.jp",
+    "initiatorType": "fetch",
+    "transferSize": 0
+  },
+  {
+    "name": "https://metaplanet.jp/_vercel/insights/script.js",
+    "initiatorType": "script",
+    "transferSize": 1600
+  },
+  {
+    "name": "https://metaplanet.jp/_vercel/speed-insights/script.js",
+    "initiatorType": "script",
+    "transferSize": 5042
+  },
+  {
+    "name": "https://metaplanet.jp/?_rsc=8rrgv",
+    "initiatorType": "fetch",
+    "transferSize": 442
+  }
+]

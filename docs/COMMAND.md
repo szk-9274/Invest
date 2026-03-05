@@ -31,6 +31,7 @@ npm run dev
 ## ブラウザでアクセス
 ```
 http://localhost:3000/dashboard
+http://localhost:3000/home
 ```
 
 ## API エンドポイントテスト
