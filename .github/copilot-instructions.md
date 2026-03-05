@@ -1,6 +1,7 @@
 # .github/copilot-instructions.md — Copilot 用指示（日本語）
 
-このファイルは GitHub Copilot / 自動化エージェントがこのリポジトリで安全かつ効果的に動作するための要点をまとめたものです。主にビルド／テスト実行コマンド、アーキテクチャの要点、リポジトリ固有の規約を短く示します。
+このファイルは GitHub Copilot / 自動化エージェントがこのリポジトリで安全かつ効果的に動作するための要点をまとめたものです。
+主にビルド／テスト実行コマンド、アーキテクチャの要点、リポジトリ固有の規約を短く示します。
 
 ---
 
@@ -115,10 +116,6 @@
 - COMMAND.md
 - CONTRIBUTING.md
 - STRATEGY.md
-- IMPLEMENTATION_REVIEW.md
 - python/、backend/、frontend/ ディレクトリ
-- 古い補助ルール: `_old/calude code/CLAUDE.md`（運用ルールの参照）
 
 ---
-
-作成者メモ: このファイルはリポジトリに合わせて簡潔に作成しています。必要なら追加項目（例: ESLint 設定、Playwright 用の E2E 設定手順）を追記します。
