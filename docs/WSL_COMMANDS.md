@@ -7,7 +7,8 @@
 # 新しい tmux セッションを作る
 tmux new -s ai
 # 作業ディレクトリに移動
-cd /mnt/c/00_mycode/Invest
+cd /mnt/c/00_mycode/Invest/Python
+source .venv/bin/activate
 ```
 
 ## Copilot CLI（対話例）
@@ -15,9 +16,19 @@ cd /mnt/c/00_mycode/Invest
 # 単発実行
 copilot --model gpt-5.3-codex --yolo
 
+
 # 複数オプションで起動（autopilot など）
+cd /mnt/c/00_mycode/Invest
+
 copilot \
   --model gpt-5.3-codex \
+  --yolo \
+  --autopilot \
+  --add-dir /mnt/c/00_mycode/Invest
+
+
+copilot \
+  --model gpt-5 mini \
   --yolo \
   --autopilot \
   --add-dir /mnt/c/00_mycode/Invest
