@@ -1,4 +1,4 @@
-# 📘 COMMAND.md
+# COMMAND.md
 Invest プロジェクト コマンド一覧
 
 ---
@@ -28,12 +28,12 @@ npm run dev
 - React アプリは http://localhost:3000 で起動します
 - ホットリロード対応
 
-## 🌐 ブラウザでアクセス
+## ブラウザでアクセス
 ```
 http://localhost:3000/dashboard
 ```
 
-## 🧪 API エンドポイントテスト
+## API エンドポイントテスト
 ```powershell
 # 最新のバックテスト結果を取得
 curl http://localhost:8000/api/backtest/latest

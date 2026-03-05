@@ -1,10 +1,8 @@
-Invest プロジェクト
-
-1. プロジェクト概要
+## 1. Invest プロジェクト概要
 
 このリポジトリは、ルールベースの株式スクリーニングおよびバックテストを行うためのツール群を収めたプロジェクトです。コアのバックテスト・スクリーニングは python/ に実装され、実行結果（CSV やチャート画像）を backend の API（FastAPI）が読み取り、frontend の React + TypeScript アプリで可視化します。設計方針としてはデータパイプライン（Stage1 / Stage2 / Backtest）を採用し、再現性・決定性を最優先にしています。
 
-2. このプロジェクトでできること
+## 2. このプロジェクトでできること
 
 - 大量銘柄に対するテクニカルスクリーニング（Stage2）
 - ルールベースのバックテスト（エントリー・エグジットのシミュレーション）
@@ -13,7 +11,7 @@ Invest プロジェクト
 - React ダッシュボードでの結果表示・ログ確認・コマンド実行（Python Command Runner）
 - スクリプトによる銘柄リスト更新や各種ユーティリティ実行
 
-3. システム構成
+## 3. システム構成
 
 - python/: バックテストやスクリーニング本体、スクリプト類（CLI 実行）
   - エントリポイント: main.py（--mode で stage2 / backtest / chart 等を指定）
@@ -32,11 +30,11 @@ Invest プロジェクト
 
 データフロー: python バックテスト実行 -> output ディレクトリへ CSV/PNG 出力 -> backend が読み込み JSON で配信 -> frontend が表示
 
-4. クイックスタート
+## 4. クイックスタート
 
 前提: Python と Node.js / npm がインストールされていること。
 
-1) Python 環境の準備（Windows PowerShell の例）
+### 1) Python 環境の準備（Windows PowerShell の例）
 
 ```powershell
 cd C:\00_mycode\Invest\python
@@ -50,7 +48,7 @@ pip install -r requirements.txt
 
 注: プロジェクトで既に venv 名が使われている可能性があるため、環境名に合わせてパスを調整してください（例: venv\Scripts\Activate.ps1 など）。
 
-2) バックエンド起動
+### 2) バックエンド起動
 
 ```powershell
 cd C:\00_mycode\Invest\backend
@@ -59,7 +57,7 @@ python -m uvicorn app:app --reload --port 8000
 
 バックエンドは http://localhost:8000 で起動します。
 
-3) フロントエンド起動
+### 3) フロントエンド起動
 
 ```powershell
 cd C:\00_mycode\Invest\frontend
@@ -69,11 +67,11 @@ npm run dev
 
 フロントエンドは開発サーバで http://localhost:3000 に表示される想定です（環境によりポートや設定が異なる場合があります）。
 
-4) ブラウザでダッシュボードを開く
+### 4) ブラウザでダッシュボードを開く
 
 http://localhost:3000/dashboard
 
-5. CLI の使い方 (主要コマンド例)
+### 5. CLI の使い方 (主要コマンド例)
 
 - Stage2（スクリーニング）:
 
@@ -111,7 +109,7 @@ python scripts/update_tickers_extended.py --min-market-cap 5000000000 --max-tick
 curl -X POST http://localhost:8000/api/jobs -H "Content-Type: application/json" -d "{\"command\":\"backtest\",\"start_date\":\"2024-01-01\",\"end_date\":\"2024-12-31\"}"
 ```
 
-6. ディレクトリ構成（概要）
+### 6. ディレクトリ構成（概要）
 
 - .github/                     : CI / Copilot 指示など
 - backend/                     : FastAPI の API 層（app 起動）
@@ -123,10 +121,8 @@ curl -X POST http://localhost:8000/api/jobs -H "Content-Type: application/json" 
 - electron-launcher.js         : Electron 起動補助
 - vite.config.ts / tailwind.config.js : フロントエンド設定
 
-7. ドキュメント一覧
+### 7. ドキュメント一覧
 
 - README.md       : 本ファイル（プロジェクト概要・導線）
 - STRATEGY.md     : 売買ロジック、フィルタ条件、エントリー/エグジットの仕様（ロジック変更時は必ず参照/更新）
 - COMMAND.md      : 開発時の起動コマンド、デバッグ手順、環境構築メモ
-- CONTRIBUTING.md : 開発ポリシー（TDD、テスト方針、禁止事項など）
-- IMPLEMENTATION_REVIEW.md : 実装レビューや機能実装の詳細レポート
