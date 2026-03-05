@@ -5,6 +5,7 @@
  */
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { BacktestForm } from '../components/BacktestForm'
 import { TickerList, TickerItem } from '../components/TickerList'
 import { runBacktest, getTopBottomTickers } from '../api/client'
@@ -14,6 +15,7 @@ interface HomeProps {
 }
 
 export function Home({ onNavigateToChart }: HomeProps) {
+  const { t } = useTranslation()
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [topTickers, setTopTickers] = useState<TickerItem[]>([])
@@ -41,7 +43,7 @@ export function Home({ onNavigateToChart }: HomeProps) {
       setMessage(result.message)
       await loadTickers()
     } catch (error) {
-      setMessage('Backtest failed. Please try again.')
+      setMessage(t('home.backtestFailed'))
     } finally {
       setIsLoading(false)
     }
@@ -56,23 +58,23 @@ export function Home({ onNavigateToChart }: HomeProps) {
 
   return (
     <div data-testid="home-page">
-      <h1>Invest Backtest</h1>
+      <h1>{t('home.title')}</h1>
 
       <section>
-        <h2>Run Backtest</h2>
+        <h2>{t('home.runBacktest')}</h2>
         <BacktestForm onSubmit={handleBacktest} isLoading={isLoading} />
         {message && <p data-testid="status-message">{message}</p>}
       </section>
 
       <section>
         <TickerList
-          title="Top 5 Winners"
+          title={t('home.topWinners')}
           tickers={topTickers}
           onTickerClick={onNavigateToChart}
           variant="winners"
         />
         <TickerList
-          title="Bottom 5 Losers"
+          title={t('home.bottomLosers')}
           tickers={bottomTickers}
           onTickerClick={onNavigateToChart}
           variant="losers"

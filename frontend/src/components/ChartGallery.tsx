@@ -3,6 +3,7 @@
  * Displays backtest chart images in a grid
  */
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface ChartGalleryProps {
   charts: Record<string, string | null>;
@@ -10,16 +11,17 @@ interface ChartGalleryProps {
 }
 
 export const ChartGallery: React.FC<ChartGalleryProps> = ({ charts, loading = false }) => {
+  const { t } = useTranslation();
   const [selectedChart, setSelectedChart] = useState<string | null>(null);
 
   if (loading) {
-    return <div className="chart-gallery loading">Loading charts...</div>;
+    return <div className="chart-gallery loading">{t('chartGallery.loadingCharts')}</div>;
   }
 
   const chartEntries = Object.entries(charts).filter(([_, image]) => image !== null);
 
   if (chartEntries.length === 0) {
-    return <div className="chart-gallery empty">No charts available</div>;
+    return <div className="chart-gallery empty">{t('chartGallery.noCharts')}</div>;
   }
 
   const topCharts = chartEntries.filter(([key]) => key.startsWith('top_'));
@@ -32,7 +34,7 @@ export const ChartGallery: React.FC<ChartGalleryProps> = ({ charts, loading = fa
     <div className="chart-gallery">
       {topCharts.length > 0 && (
         <div className="chart-section">
-          <h3>Top Winners</h3>
+          <h3>{t('chartGallery.topWinners')}</h3>
           <div className="chart-grid">
             {topCharts.map(([key, image]) => (
               <div
@@ -51,7 +53,7 @@ export const ChartGallery: React.FC<ChartGalleryProps> = ({ charts, loading = fa
 
       {bottomCharts.length > 0 && (
         <div className="chart-section">
-          <h3>Bottom Losers</h3>
+          <h3>{t('chartGallery.bottomLosers')}</h3>
           <div className="chart-grid">
             {bottomCharts.map(([key, image]) => (
               <div
@@ -70,7 +72,7 @@ export const ChartGallery: React.FC<ChartGalleryProps> = ({ charts, loading = fa
 
       {otherCharts.length > 0 && (
         <div className="chart-section">
-          <h3>Other Charts</h3>
+          <h3>{t('chartGallery.otherCharts')}</h3>
           <div className="chart-grid">
             {otherCharts.map(([key, image]) => (
               <div

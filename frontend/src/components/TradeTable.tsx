@@ -3,6 +3,7 @@
  * Displays detailed trade records with sorting and pagination
  */
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { TradeRecord } from '../api/backtest';
 
 interface TradeTableProps {
@@ -14,6 +15,7 @@ type SortField = keyof TradeRecord;
 type SortDirection = 'asc' | 'desc';
 
 export const TradeTable: React.FC<TradeTableProps> = ({ trades, loading = false }) => {
+  const { t } = useTranslation();
   const [page, setPage] = useState(0);
   const [sortField, setSortField] = useState<SortField>('exit_date');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
@@ -66,11 +68,11 @@ export const TradeTable: React.FC<TradeTableProps> = ({ trades, loading = false 
   };
 
   if (loading) {
-    return <div className="trade-table loading">Loading trades...</div>;
+    return <div className="trade-table loading">{t('tradeTable.loadingTrades')}</div>;
   }
 
   if (trades.length === 0) {
-    return <div className="trade-table empty">No trades found</div>;
+    return <div className="trade-table empty">{t('tradeTable.noTrades')}</div>;
   }
 
   const SortableHeader = ({ field, label }: { field: SortField; label: string }) => (
@@ -86,8 +88,11 @@ export const TradeTable: React.FC<TradeTableProps> = ({ trades, loading = false 
     <div className="trade-table">
       <div className="table-info">
         <span>
-          Showing {page * itemsPerPage + 1} to {Math.min((page + 1) * itemsPerPage, sortedTrades.length)} of{' '}
-          {sortedTrades.length} trades
+          {t('tradeTable.showing', {
+            start: page * itemsPerPage + 1,
+            end: Math.min((page + 1) * itemsPerPage, sortedTrades.length),
+            total: sortedTrades.length,
+          })}
         </span>
       </div>
 
@@ -95,15 +100,15 @@ export const TradeTable: React.FC<TradeTableProps> = ({ trades, loading = false 
         <table>
           <thead>
             <tr>
-              <SortableHeader field="ticker" label="Ticker" />
-              <SortableHeader field="entry_date" label="Entry Date" />
-              <SortableHeader field="entry_price" label="Entry Price" />
-              <SortableHeader field="exit_date" label="Exit Date" />
-              <SortableHeader field="exit_price" label="Exit Price" />
-              <SortableHeader field="shares" label="Shares" />
-              <SortableHeader field="pnl" label="P&L" />
-              <SortableHeader field="pnl_pct" label="Return %" />
-              <SortableHeader field="exit_reason" label="Exit Reason" />
+              <SortableHeader field="ticker" label={t('tradeTable.ticker')} />
+              <SortableHeader field="entry_date" label={t('tradeTable.entryDate')} />
+              <SortableHeader field="entry_price" label={t('tradeTable.entryPrice')} />
+              <SortableHeader field="exit_date" label={t('tradeTable.exitDate')} />
+              <SortableHeader field="exit_price" label={t('tradeTable.exitPrice')} />
+              <SortableHeader field="shares" label={t('tradeTable.shares')} />
+              <SortableHeader field="pnl" label={t('tradeTable.pnl')} />
+              <SortableHeader field="pnl_pct" label={t('tradeTable.returnPct')} />
+              <SortableHeader field="exit_reason" label={t('tradeTable.exitReason')} />
             </tr>
           </thead>
           <tbody>
@@ -134,11 +139,11 @@ export const TradeTable: React.FC<TradeTableProps> = ({ trades, loading = false 
           disabled={page === 0}
           className="pagination-button"
         >
-          ← Previous
+          {t('tradeTable.previous')}
         </button>
 
         <div className="page-info">
-          Page {page + 1} of {totalPages}
+          {t('tradeTable.pageOf', { page: page + 1, total: totalPages })}
         </div>
 
         <button
@@ -146,7 +151,7 @@ export const TradeTable: React.FC<TradeTableProps> = ({ trades, loading = false 
           disabled={page >= totalPages - 1}
           className="pagination-button"
         >
-          Next →
+          {t('tradeTable.next')}
         </button>
       </div>
 

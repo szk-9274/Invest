@@ -4,6 +4,7 @@
  * UI inspired by Metaplanet Analytics dashboard.
  */
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { BacktestSummary } from '../components/BacktestSummary';
 import { TradeTable } from '../components/TradeTable';
 import { RunPanel } from '../components/RunPanel';
@@ -31,6 +32,7 @@ const TopBottomPurchaseCharts = React.lazy(() =>
 );
 
 export const BacktestDashboard: React.FC = () => {
+  const { t } = useTranslation();
   const [results, setResults] = useState<BacktestResults | null>(null);
   const [backtests, setBacktests] = useState<BacktestMetadata[]>([]);
   const [selectedTimestamp, setSelectedTimestamp] = useState<string | null>(null);
@@ -51,7 +53,7 @@ export const BacktestDashboard: React.FC = () => {
           setSelectedTimestamp(data[0].timestamp);
         }
       } catch (err) {
-        setError(`Failed to load backtest list: ${err}`);
+        setError(t('dashboard.loadBacktestListError', { error: String(err) }));
       }
     };
 
@@ -69,7 +71,7 @@ export const BacktestDashboard: React.FC = () => {
         const data = await fetchBacktestResults(selectedTimestamp);
         setResults(data);
       } catch (err) {
-        setError(`Failed to load backtest results: ${err}`);
+        setError(t('dashboard.loadBacktestResultsError', { error: String(err) }));
       } finally {
         setLoading(false);
       }
@@ -86,7 +88,7 @@ export const BacktestDashboard: React.FC = () => {
       setResults(data);
       setSelectedTimestamp(data.timestamp);
     } catch (err) {
-      setError(`Failed to load latest backtest: ${err}`);
+      setError(t('dashboard.loadLatestError', { error: String(err) }));
     } finally {
       setLoading(false);
     }
@@ -105,7 +107,7 @@ export const BacktestDashboard: React.FC = () => {
       setJobLogs([]);
       await refreshJobLogs(job.job_id);
     } catch (err) {
-      setRunError(`Failed to start command: ${err}`);
+      setRunError(t('dashboard.startCommandError', { error: String(err) }));
     }
   };
 
@@ -116,7 +118,7 @@ export const BacktestDashboard: React.FC = () => {
       setActiveJob(cancelled);
       await refreshJobLogs(cancelled.job_id);
     } catch (err) {
-      setRunError(`Failed to cancel command: ${err}`);
+      setRunError(t('dashboard.cancelCommandError', { error: String(err) }));
     }
   };
 
@@ -134,7 +136,7 @@ export const BacktestDashboard: React.FC = () => {
           await handleLoadLatest();
         }
       } catch (err) {
-        setRunError(`Failed to poll job status: ${err}`);
+        setRunError(t('dashboard.pollJobStatusError', { error: String(err) }));
       }
     }, 2000);
 
@@ -144,9 +146,9 @@ export const BacktestDashboard: React.FC = () => {
   return (
     <div className="backtest-dashboard">
       <header className="dashboard-header">
-        <h1>Backtest Dashboard</h1>
+        <h1>{t('dashboard.title')}</h1>
         <button onClick={handleLoadLatest} className="button-primary" disabled={loading}>
-          {loading ? 'Loading...' : 'Load Latest'}
+          {loading ? t('common.loading') : t('dashboard.loadLatest')}
         </button>
       </header>
 
@@ -166,10 +168,10 @@ export const BacktestDashboard: React.FC = () => {
             runError={runError}
           />
 
-          <h3>Available Tests</h3>
+          <h3>{t('dashboard.availableTests')}</h3>
           <div className="backtest-list">
             {backtests.length === 0 ? (
-              <p className="empty-list">No backtests found</p>
+              <p className="empty-list">{t('dashboard.noBacktests')}</p>
             ) : (
               backtests.map((backtest) => (
                 <div
@@ -179,7 +181,7 @@ export const BacktestDashboard: React.FC = () => {
                 >
                   <div className="item-period">{backtest.period}</div>
                   <div className="item-details">
-                    <span>{backtest.trade_count} trades</span>
+                    <span>{t('dashboard.tradesCount', { count: backtest.trade_count })}</span>
                   </div>
                   <div className="item-timestamp">{backtest.timestamp}</div>
                 </div>
@@ -202,19 +204,19 @@ export const BacktestDashboard: React.FC = () => {
                   className={`tab-button ${activeTab === 'summary' ? 'active' : ''}`}
                   onClick={() => setActiveTab('summary')}
                 >
-                  Summary
+                  {t('dashboard.summaryTab')}
                 </button>
                 <button
                   className={`tab-button ${activeTab === 'charts' ? 'active' : ''}`}
                   onClick={() => setActiveTab('charts')}
                 >
-                  Charts
+                  {t('dashboard.chartsTab')}
                 </button>
                 <button
                   className={`tab-button ${activeTab === 'trades' ? 'active' : ''}`}
                   onClick={() => setActiveTab('trades')}
                 >
-                  Trades
+                  {t('dashboard.tradesTab')}
                 </button>
               </div>
 
@@ -238,7 +240,7 @@ export const BacktestDashboard: React.FC = () => {
             </>
           ) : (
             <div className="no-results">
-              {loading ? 'Loading...' : 'Select a backtest to view results'}
+              {loading ? t('common.loading') : t('dashboard.selectBacktest')}
             </div>
           )}
         </main>

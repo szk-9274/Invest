@@ -1,0 +1,142 @@
+{
+  "nav": {
+    "brand": "Stock Screening",
+    "home": "Home",
+    "backtest": "Backtest",
+    "dashboard": "Backtest Dashboard",
+    "langEn": "EN",
+    "langJa": "JA"
+  },
+  "common": {
+    "loading": "Loading..."
+  },
+  "home": {
+    "title": "Invest Backtest",
+    "runBacktest": "Run Backtest",
+    "topWinners": "Top 5 Winners",
+    "bottomLosers": "Bottom 5 Losers",
+    "backtestFailed": "Backtest failed. Please try again."
+  },
+  "homeLanding": {
+    "kicker": "METAPLANET STYLE / HOME",
+    "title": "Build a Bitcoin-first analytics home for long-term conviction.",
+    "description": "This page reproduces the visual structure of metaplanet.jp/en with project-safe assets and minimal-diff integration.",
+    "subscribe": "Subscribe Updates",
+    "openDashboard": "Open Dashboard",
+    "partnersTitle": "As seen with partners",
+    "ctaTitle": "Start from /dashboard and validate with reproducible outputs.",
+    "ctaButton": "Go to Dashboard",
+    "features": [
+      {
+        "title": "Bitcoin Treasury Insights",
+        "description": "Track strategy signals and treasury metrics in one place."
+      },
+      {
+        "title": "Screening and Backtest",
+        "description": "Run reproducible pipeline outputs from Stage2 to Backtest."
+      },
+      {
+        "title": "Actionable Dashboard",
+        "description": "Inspect top and bottom performance with interactive charts."
+      }
+    ],
+    "logos": ["METAPLANET", "BITCOIN.JP", "BM JAPAN", "PLANET GEAR"]
+  },
+  "chart": {
+    "back": "Back",
+    "title": "{{ticker}} Chart",
+    "placeholder": "Chart for {{ticker}} will be displayed here"
+  },
+  "dashboard": {
+    "title": "Backtest Dashboard",
+    "loadLatest": "Load Latest",
+    "availableTests": "Available Tests",
+    "noBacktests": "No backtests found",
+    "tradesCount": "{{count}} trades",
+    "summaryTab": "Summary",
+    "chartsTab": "Charts",
+    "tradesTab": "Trades",
+    "selectBacktest": "Select a backtest to view results",
+    "loadBacktestListError": "Failed to load backtest list: {{error}}",
+    "loadBacktestResultsError": "Failed to load backtest results: {{error}}",
+    "loadLatestError": "Failed to load latest backtest: {{error}}",
+    "startCommandError": "Failed to start command: {{error}}",
+    "cancelCommandError": "Failed to cancel command: {{error}}",
+    "pollJobStatusError": "Failed to poll job status: {{error}}"
+  },
+  "runPanel": {
+    "title": "Python Command Runner",
+    "status": "Status",
+    "idle": "idle",
+    "command": "Command",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "tickersOptional": "Tickers (comma-separated, optional)",
+    "skipCharts": "Skip chart generation (--no-charts)",
+    "includeFundamentals": "Include fundamentals (--with-fundamentals)",
+    "ticker": "Ticker",
+    "minMarketCap": "Min Market Cap",
+    "maxTickersOptional": "Max Tickers (optional)",
+    "timeoutSeconds": "Timeout (seconds)",
+    "starting": "Starting...",
+    "runCommand": "Run Command",
+    "cancelRunningJob": "Cancel Running Job",
+    "jobId": "Job ID",
+    "commandLine": "Command",
+    "error": "Error",
+    "runError": "Run Error",
+    "liveLogs": "Live Logs",
+    "noLogsYet": "No logs yet.",
+    "options": {
+      "backtest": "Backtest",
+      "stage2": "Stage2 Screening",
+      "full": "Full Screening + VCP",
+      "chart": "Chart Generation",
+      "updateTickers": "Ticker List Update"
+    }
+  },
+  "summary": {
+    "loadingMetrics": "Loading metrics...",
+    "noData": "No data available",
+    "totalPnl": "Total P&L",
+    "totalTrades": "Total Trades",
+    "winRate": "Win Rate",
+    "avgWin": "Avg Win",
+    "avgLoss": "Avg Loss",
+    "profitFactor": "Profit Factor",
+    "winLossCompact": "{{wins}}W / {{losses}}L"
+  },
+  "tradeTable": {
+    "loadingTrades": "Loading trades...",
+    "noTrades": "No trades found",
+    "showing": "Showing {{start}} to {{end}} of {{total}} trades",
+    "ticker": "Ticker",
+    "entryDate": "Entry Date",
+    "entryPrice": "Entry Price",
+    "exitDate": "Exit Date",
+    "exitPrice": "Exit Price",
+    "shares": "Shares",
+    "pnl": "P&L",
+    "returnPct": "Return %",
+    "exitReason": "Exit Reason",
+    "previous": "← Previous",
+    "next": "Next →",
+    "pageOf": "Page {{page}} of {{total}}"
+  },
+  "chartGallery": {
+    "loadingCharts": "Loading charts...",
+    "noCharts": "No charts available",
+    "topWinners": "Top Winners",
+    "bottomLosers": "Bottom Losers",
+    "otherCharts": "Other Charts"
+  },
+  "tickerList": {
+    "noData": "No data available"
+  },
+  "backtestForm": {
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "runBacktest": "Run Backtest",
+    "running": "Running..."
+  }
+}

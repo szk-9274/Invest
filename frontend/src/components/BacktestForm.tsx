@@ -4,6 +4,7 @@
  * Provides input fields for start/end dates and a "Run Backtest" button.
  */
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 interface BacktestFormProps {
   onSubmit: (startDate: string, endDate: string) => void
@@ -11,6 +12,7 @@ interface BacktestFormProps {
 }
 
 export function BacktestForm({ onSubmit, isLoading = false }: BacktestFormProps) {
+  const { t } = useTranslation()
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
 
@@ -24,7 +26,7 @@ export function BacktestForm({ onSubmit, isLoading = false }: BacktestFormProps)
   return (
     <form onSubmit={handleSubmit} data-testid="backtest-form">
       <div>
-        <label htmlFor="start-date">Start Date</label>
+        <label htmlFor="start-date">{t('backtestForm.startDate')}</label>
         <input
           id="start-date"
           type="date"
@@ -34,7 +36,7 @@ export function BacktestForm({ onSubmit, isLoading = false }: BacktestFormProps)
         />
       </div>
       <div>
-        <label htmlFor="end-date">End Date</label>
+        <label htmlFor="end-date">{t('backtestForm.endDate')}</label>
         <input
           id="end-date"
           type="date"
@@ -44,7 +46,7 @@ export function BacktestForm({ onSubmit, isLoading = false }: BacktestFormProps)
         />
       </div>
       <button type="submit" disabled={isLoading || !startDate || !endDate}>
-        {isLoading ? 'Running...' : 'Run Backtest'}
+        {isLoading ? t('backtestForm.running') : t('backtestForm.runBacktest')}
       </button>
     </form>
   )

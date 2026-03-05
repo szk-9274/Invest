@@ -32,6 +32,8 @@ npm run dev
 ```
 http://localhost:3000/dashboard
 http://localhost:3000/home
+http://localhost:3000/home?lang=ja
+http://localhost:3000/dashboard?lang=ja
 ```
 
 ## API エンドポイントテスト
