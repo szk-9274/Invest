@@ -20,6 +20,7 @@ wsl
 cd $HOME/code/Invest/python
 source .venv/bin/activate
 cd $HOME/code/Invest
+./devinit.sh
 
 copilot \
  --model gpt-5.3-codex \
@@ -39,7 +40,10 @@ copilot \
 ```
 
 ## tmux のデタッチ/アタッチ
+exit
+wsl --shutdown
+tmux kill-server
 - デタッチ: Ctrl+B, D
-- 再アタッチ: tmux attach -t ai
+- 再アタッチ: tmux attach -t invest
 
 （必要ならこのセクションを docs/COMMAND.md に統合します）
