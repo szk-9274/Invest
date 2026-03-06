@@ -57,3 +57,20 @@
 ### 影響範囲
 - 変更ファイル: `devinit.sh`, `tests/devinit_test.sh`, `docs/COMMAND.md`
 - 非影響: Stage1/Stage2/Backtest の売買ロジック、API 契約
+
+## logs ペイン backend/frontend 同時表示 修正計画（2026-03-06）
+
+### 問題
+- `devinit.sh` の logs ペインは `backend.log` のみを追尾しており、`frontend.log` が表示されない。
+- backend/frontend の起動出力がログファイルへ確実に蓄積される前提が弱く、logs ペインで両方の進行状況を確認しづらい。
+
+### タスク
+- [ ] `tests/devinit_test.sh` を追加し、logs ペインの追尾対象が `backend.log` と `frontend.log` の両方であることを RED で確認する。
+- [ ] `devinit.sh` に `FRONTEND_LOG_FILE` を追加し、backend/frontend 起動コマンドの出力をそれぞれ `tee -a` でログ保存する。
+- [ ] logs ペインのコマンドを `backend.log` と `frontend.log` の同時追尾に修正する（`tail -F`）。
+- [ ] `docs/COMMAND.md` に devinit 利用時の logs ペイン確認観点（2ファイル同時追尾）を追記する。
+- [ ] テスト実行で GREEN を確認し、既存挙動を壊していないことを検証する。
+
+### 影響範囲
+- 変更ファイル: `devinit.sh`, `tests/devinit_test.sh`（新規）, `docs/COMMAND.md`
+- 非影響: Stage1/Stage2/Backtest ロジック、バックエンド API 契約、フロント表示ロジック

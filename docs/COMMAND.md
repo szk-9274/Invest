@@ -28,6 +28,12 @@ npm run dev -- --host
 - React アプリは http://localhost:3000 で起動します（同一ネットワーク端末からはホストIP:3000 でもアクセス可能）
 - ホットリロード対応
 
+### devinit.sh の logs ペイン確認
+`./devinit.sh` 利用時、logs ペインは以下を同時追尾します。
+```bash
+tail -F $HOME/code/Invest/backend.log $HOME/code/Invest/frontend.log
+```
+
 ## ブラウザでアクセス
 ```
 http://localhost:3000/dashboard
