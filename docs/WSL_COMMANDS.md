@@ -23,7 +23,6 @@ cd $HOME/code/Invest
 
 copilot \
  --model gpt-5.3-codex \
- --reasoning xhigh \
  --autopilot \
  --yolo \
  --allow-all \
@@ -32,7 +31,6 @@ copilot \
 
 copilot \
  --model gpt-5-mini \
- --reasoning high \
  --autopilot \
  --yolo \
  --allow-all \
