@@ -8,6 +8,25 @@ Invest プロジェクト コマンド一覧
 ## 開発環境での起動
 複数のターミナルを開いて以下を実行してください（順番は関係ありません）
 
+### just で一括起動（推奨）
+```bash
+cd $HOME/code/Invest
+just dev
+```
+- `just dev` は `./devinit.sh` を呼び出し、tmux セッション `invest` を起動/再接続します。
+- tmux は 5 ペイン構成で起動します（上段: backend / frontend / copilot、下段: logs / git）。
+- `lazygit` が未インストールの場合は `devinit.sh` がエラー終了します。
+
+### just 補助コマンド
+```bash
+cd $HOME/code/Invest
+just stop   # tmux kill-session -t invest
+just logs   # tail -F backend.log frontend.log
+just test   # cd python && source .venv/bin/activate && pytest
+just lint   # cd python && source .venv/bin/activate && ruff check .
+just fmt    # cd python && source .venv/bin/activate && ruff format .
+```
+
 ### ターミナル1：バックエンドAPI起動
 ```bash
 cd $HOME/code/Invest/python
@@ -23,7 +42,7 @@ python -m uvicorn app:app --reload --host 0.0.0.0 --port 8000
 cd $HOME/code/Invest/python
 source .venv/bin/activate
 cd $HOME/code/Invest/frontend
-npm run dev -- --host
+npm run dev -- --host 0.0.0.0 --port 3000 --strictPort
 ```
 - React アプリは http://localhost:3000 で起動します（同一ネットワーク端末からはホストIP:3000 でもアクセス可能）
 - ホットリロード対応
@@ -32,6 +51,12 @@ npm run dev -- --host
 `./devinit.sh` 利用時、logs ペインは以下を同時追尾します。
 ```bash
 tail -F $HOME/code/Invest/backend.log $HOME/code/Invest/frontend.log
+```
+
+### devinit.sh の git ペイン確認
+`./devinit.sh` 利用時、git ペインは以下を実行します。
+```bash
+lazygit
 ```
 
 ## ブラウザでアクセス
@@ -124,6 +149,24 @@ curl -X POST http://localhost:8000/api/jobs/<job_id>/cancel
 ```
 [VITE] error: ...
 ```
+
+### WSL2 でスマホから :3000 にアクセスできない場合（Windows 側）
+管理者 PowerShell で以下を実行：
+```powershell
+# WSL の eth0 IP を確認（例: 172.31.145.34）
+wsl -d Ubuntu -- hostname -I
+
+# 既存の 3000 転送を削除（存在しない場合はエラーで問題なし）
+netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=3000
+
+# Windows 0.0.0.0:3000 -> WSL_IP:3000 を転送
+netsh interface portproxy add v4tov4 listenaddress=0.0.0.0 listenport=3000 connectaddress=<WSL_IP> connectport=3000
+
+# Windows Firewall で 3000/TCP を許可
+New-NetFirewallRule -DisplayName "WSL Vite 3000" -Direction Inbound -Protocol TCP -LocalPort 3000 -Action Allow
+```
+- WSL IP は再起動で変わるため、接続できなくなったら `connectaddress` を再設定してください。
+- 疎通確認: `http://<WindowsのLAN IP>:3000` または `http://<WindowsのTailscale IP>:3000`
 
 ### キャッシュのクリア
 ```bash

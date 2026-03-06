@@ -62,7 +62,7 @@ python -m uvicorn app:app --reload --host 0.0.0.0 --port 8000
 ```bash
 cd /mnt/c/00_mycode/Invest/frontend
 npm install
-npm run dev -- --host
+npm run dev -- --host 0.0.0.0 --port 3000 --strictPort
 ```
 
 フロントエンドは開発サーバで http://localhost:3000 に表示される想定です（同一ネットワーク端末からはホストIP:3000 でもアクセス可能、環境によりポートや設定が異なる場合があります）。
@@ -70,6 +70,34 @@ npm run dev -- --host
 ### 4) ブラウザでダッシュボードを開く
 
 http://localhost:3000/dashboard
+
+## Development
+
+### just のインストール（未導入時）
+
+```bash
+# Ubuntu / WSL
+sudo apt update
+sudo apt install -y just
+```
+
+`apt` で導入できない環境では、公式手順に従って `cargo install just` 等でインストールしてください。
+
+### just を使った開発起動
+
+```bash
+cd /mnt/c/00_mycode/Invest
+just dev
+```
+
+- `just dev` は `./devinit.sh` を実行し、tmux セッション `invest` を起動/再接続します。
+- `devinit.sh` は `lazygit` を必須にしているため、事前に `lazygit` をインストールしてください。
+- 補助コマンド:
+  - `just stop` : tmux セッション停止
+  - `just logs` : backend.log / frontend.log を追尾
+  - `just test` : pytest 実行
+  - `just lint` : ruff check 実行
+  - `just fmt` : ruff format 実行
 
 ### 5. CLI の使い方 (主要コマンド例)
 

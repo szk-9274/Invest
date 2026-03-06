@@ -74,3 +74,34 @@
 ### 影響範囲
 - 変更ファイル: `devinit.sh`, `tests/devinit_test.sh`（新規）, `docs/COMMAND.md`
 - 非影響: Stage1/Stage2/Backtest ロジック、バックエンド API 契約、フロント表示ロジック
+
+## Vite host blocked エラー修正計画（2026-03-06）
+
+### 問題
+- `http://100.104.106.6:3000` へのアクセス時に、Host ヘッダー `desktop-995hk1t.tailc6a96c.ts.net` が Vite の許可対象外となり、`Blocked request` エラーが発生する。
+
+### タスク
+- [ ] `frontend/vite.config.ts` の `server.allowedHosts` に `desktop-995hk1t.tailc6a96c.ts.net` を追加する。
+- [ ] フロントエンドのビルド/テストを実行し、既存挙動を壊していないことを確認する。
+
+### 影響範囲
+- 変更ファイル: `frontend/vite.config.ts`, `docs/PLAN.md`
+- 非影響: Stage1/Stage2/Backtest ロジック、バックエンド API 契約
+
+## Backtest一覧 `Load failed` 修正計画（2026-03-06）
+
+### 問題
+- Backtestタブで一覧取得時に `TypeError: Load failed` が表示される。
+- `frontend/src/api/backtest.ts` が `VITE_API_URL` 未設定時に `http://localhost:8000/api` を直接参照しており、リモート端末からアクセスした場合に端末自身の localhost へ接続して失敗する。
+
+### タスク
+- [ ] 変更前に frontend の build/test を実行してベースラインを確認する。
+- [ ] `listAllBacktests()` が相対パス経由で取得できることを保証するテストを先に追加し、RED を確認する。
+- [ ] `frontend/src/api/backtest.ts` のAPIベースURL解決を、Viteプロキシ前提の相対パス（`/api`）デフォルトへ修正する。
+- [ ] 既存の `VITE_API_URL` が設定されている場合はその値を優先し、未設定時のみ相対パスにフォールバックする。
+- [ ] build/test を再実行して GREEN と回帰なしを確認する。
+- [ ] 変更を feature ブランチでコミットし、PR を作成する。
+
+### 影響範囲
+- 変更ファイル: `frontend/src/api/backtest.ts`, `frontend/src/api/*.test.ts`（必要時）, `docs/PLAN.md`
+- 非影響: Stage1/Stage2/Backtest ロジック、バックエンド API 契約
