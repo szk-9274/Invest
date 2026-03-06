@@ -2,7 +2,22 @@
 set -Eeuo pipefail
 
 readonly SESSION_NAME="invest"
-readonly ROOT_DIR="/mnt/c/00_mycode/Invest"
+readonly ROOT_DIR="${HOME}/code/Invest"
+
+if [ ! -d "${ROOT_DIR}" ]; then
+  echo "エラー: ~/code/Invest が存在しません" >&2
+  exit 1
+fi
+
+cd "${ROOT_DIR}"
+
+export COLUMNS=160
+export LINES=50
+export LESS="-R"
+export EDITOR=nano
+
+echo "Copilot CLI をスマホ表示向けモードで起動しています"
+
 readonly PYTHON_DIR="${ROOT_DIR}/python"
 readonly BACKEND_DIR="${ROOT_DIR}/backend"
 readonly FRONTEND_DIR="${ROOT_DIR}/frontend"
@@ -52,7 +67,7 @@ start_commands() {
 
   backend_cmd="cd $(escape "${PYTHON_DIR}") && source $(escape "${VENV_ACTIVATE}") && cd $(escape "${BACKEND_DIR}") && python -m uvicorn app:app --reload --host 0.0.0.0 --port 8000"
   frontend_cmd="cd $(escape "${PYTHON_DIR}") && source $(escape "${VENV_ACTIVATE}") && cd $(escape "${FRONTEND_DIR}") && npm run dev -- --host"
-  copilot_cmd="cd $(escape "${PYTHON_DIR}") && source $(escape "${VENV_ACTIVATE}") && cd $(escape "${ROOT_DIR}") && copilot --model gpt-5.3-codex --yolo --autopilot --add-dir $(escape "${ROOT_DIR}")"
+  copilot_cmd="cd $(escape "${PYTHON_DIR}") && source $(escape "${VENV_ACTIVATE}") && cd $(escape "${ROOT_DIR}") && copilot --model gpt-5.3-codex --autopilot --yolo --allow-all --add-github-mcp-toolset all --add-dir ~/code/Invest"
   logs_cmd="cd $(escape "${ROOT_DIR}") && tail -f $(escape "${LOG_FILE}")"
 
   tmux send-keys -t "${SESSION_NAME}:0.0" "${backend_cmd}" C-m
