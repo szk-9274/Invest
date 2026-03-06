@@ -52,20 +52,20 @@ pip install -r requirements.txt
 
 ```bash
 cd /mnt/c/00_mycode/Invest/backend
-python -m uvicorn app:app --reload --port 8000
+python -m uvicorn app:app --reload --host 0.0.0.0 --port 8000
 ```
 
-バックエンドは http://localhost:8000 で起動します。
+バックエンドは http://localhost:8000 で起動します（同一ネットワーク端末からはホストIP:8000 でもアクセス可能）。
 
 ### 3) フロントエンド起動
 
 ```bash
 cd /mnt/c/00_mycode/Invest/frontend
 npm install
-npm run dev
+npm run dev -- --host
 ```
 
-フロントエンドは開発サーバで http://localhost:3000 に表示される想定です（環境によりポートや設定が異なる場合があります）。
+フロントエンドは開発サーバで http://localhost:3000 に表示される想定です（同一ネットワーク端末からはホストIP:3000 でもアクセス可能、環境によりポートや設定が異なる場合があります）。
 
 ### 4) ブラウザでダッシュボードを開く
 

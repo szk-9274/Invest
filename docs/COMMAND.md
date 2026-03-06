@@ -13,9 +13,9 @@ Invest プロジェクト コマンド一覧
 cd /mnt/c/00_mycode/Invest/python
 source .venv/bin/activate
 cd /mnt/c/00_mycode/Invest/backend
-python -m uvicorn app:app --reload --port 8000
+python -m uvicorn app:app --reload --host 0.0.0.0 --port 8000
 ```
-- API サーバーは http://localhost:8000 で起動します
+- API サーバーは http://localhost:8000 で起動します（同一ネットワーク端末からはホストIP:8000 でもアクセス可能）
 - ホットリロード対応
 
 ### ターミナル2：フロントエンド開発サーバー起動
@@ -23,9 +23,9 @@ python -m uvicorn app:app --reload --port 8000
 cd /mnt/c/00_mycode/Invest/python
 source .venv/bin/activate
 cd /mnt/c/00_mycode/Invest/frontend
-npm run dev
+npm run dev -- --host
 ```
-- React アプリは http://localhost:3000 で起動します
+- React アプリは http://localhost:3000 で起動します（同一ネットワーク端末からはホストIP:3000 でもアクセス可能）
 - ホットリロード対応
 
 ## ブラウザでアクセス
