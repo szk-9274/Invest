@@ -40,6 +40,18 @@ attach_or_switch() {
   exec tmux attach-session -t "${SESSION_NAME}"
 }
 
+session_is_healthy() {
+  local pane_count titles expected_title
+
+  pane_count="$(tmux list-panes -t "${SESSION_NAME}:0" 2>/dev/null | wc -l | tr -d ' ')"
+  [[ "${pane_count}" -eq 4 ]] || return 1
+
+  titles="$(tmux list-panes -t "${SESSION_NAME}:0" -F '#{pane_title}' 2>/dev/null)"
+  for expected_title in backend frontend copilot logs; do
+    grep -qx "${expected_title}" <<<"${titles}" || return 1
+  done
+}
+
 validate_paths() {
   [[ -d "${ROOT_DIR}" ]] || die "root directory not found: ${ROOT_DIR}"
   [[ -d "${PYTHON_DIR}" ]] || die "python directory not found: ${PYTHON_DIR}"
@@ -77,10 +89,22 @@ start_commands() {
 }
 
 main() {
+  local current_tmux_session=""
+
   command -v tmux >/dev/null 2>&1 || die "tmux is not installed."
 
   if tmux has-session -t "${SESSION_NAME}" 2>/dev/null; then
-    attach_or_switch
+    if session_is_healthy; then
+      attach_or_switch
+    fi
+
+    if [[ -n "${TMUX:-}" ]]; then
+      current_tmux_session="$(tmux display-message -p '#S' 2>/dev/null || true)"
+      [[ "${current_tmux_session}" != "${SESSION_NAME}" ]] || die "existing '${SESSION_NAME}' session is unhealthy in current tmux client; detach first and rerun to recreate it."
+    fi
+
+    echo "既存 tmux セッション(${SESSION_NAME}) が不完全なため再作成します"
+    tmux kill-session -t "${SESSION_NAME}"
   fi
 
   validate_paths
