@@ -23,6 +23,7 @@ readonly BACKEND_DIR="${ROOT_DIR}/backend"
 readonly FRONTEND_DIR="${ROOT_DIR}/frontend"
 readonly VENV_ACTIVATE="${PYTHON_DIR}/.venv/bin/activate"
 readonly LOG_FILE="${ROOT_DIR}/backend.log"
+readonly FRONTEND_LOG_FILE="${ROOT_DIR}/frontend.log"
 
 die() {
   echo "devinit.sh: $*" >&2
@@ -77,10 +78,10 @@ create_layout() {
 start_commands() {
   local backend_cmd frontend_cmd copilot_cmd logs_cmd
 
-  backend_cmd="cd $(escape "${PYTHON_DIR}") && source $(escape "${VENV_ACTIVATE}") && cd $(escape "${BACKEND_DIR}") && python -m uvicorn app:app --reload --host 0.0.0.0 --port 8000"
-  frontend_cmd="cd $(escape "${PYTHON_DIR}") && source $(escape "${VENV_ACTIVATE}") && cd $(escape "${FRONTEND_DIR}") && npm run dev -- --host"
+  backend_cmd="cd $(escape "${PYTHON_DIR}") && source $(escape "${VENV_ACTIVATE}") && cd $(escape "${BACKEND_DIR}") && python -m uvicorn app:app --reload --host 0.0.0.0 --port 8000 2>&1 | tee -a $(escape "${LOG_FILE}")"
+  frontend_cmd="cd $(escape "${PYTHON_DIR}") && source $(escape "${VENV_ACTIVATE}") && cd $(escape "${FRONTEND_DIR}") && npm run dev -- --host 2>&1 | tee -a $(escape "${FRONTEND_LOG_FILE}")"
   copilot_cmd="cd $(escape "${PYTHON_DIR}") && source $(escape "${VENV_ACTIVATE}") && cd $(escape "${ROOT_DIR}") && copilot --model gpt-5.3-codex --autopilot --yolo --allow-all --add-github-mcp-toolset all --add-dir ~/code/Invest"
-  logs_cmd="cd $(escape "${ROOT_DIR}") && tail -f $(escape "${LOG_FILE}")"
+  logs_cmd="cd $(escape "${ROOT_DIR}") && tail -F $(escape "${LOG_FILE}") $(escape "${FRONTEND_LOG_FILE}")"
 
   tmux send-keys -t "${SESSION_NAME}:0.0" "${backend_cmd}" C-m
   tmux send-keys -t "${SESSION_NAME}:0.1" "${frontend_cmd}" C-m
@@ -109,6 +110,7 @@ main() {
 
   validate_paths
   touch "${LOG_FILE}"
+  touch "${FRONTEND_LOG_FILE}"
   create_layout
   start_commands
   attach_or_switch
