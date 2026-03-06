@@ -20,6 +20,7 @@ wsl
 cd $HOME/code/Invest/python
 source .venv/bin/activate
 cd $HOME/code/Invest
+./devinit.sh
 
 copilot \
  --model gpt-5.3-codex \
