@@ -81,7 +81,7 @@ start_commands() {
 
   backend_cmd="cd $(escape "${PYTHON_DIR}") && source $(escape "${VENV_ACTIVATE}") && cd $(escape "${BACKEND_DIR}") && python -m uvicorn app:app --reload --host 0.0.0.0 --port 8000 2>&1 | tee -a $(escape "${LOG_FILE}")"
   frontend_cmd="cd $(escape "${PYTHON_DIR}") && source $(escape "${VENV_ACTIVATE}") && cd $(escape "${FRONTEND_DIR}") && npm run dev -- --host 0.0.0.0 --port 3000 --strictPort 2>&1 | tee -a $(escape "${FRONTEND_LOG_FILE}")"
-  copilot_cmd="cd $(escape "${PYTHON_DIR}") && source $(escape "${VENV_ACTIVATE}") && cd $(escape "${ROOT_DIR}") && copilot --model gpt-5.3-codex --autopilot --yolo --allow-all --add-github-mcp-toolset all --add-dir ~/code/Invest"
+  copilot_cmd="cd $(escape "${PYTHON_DIR}") && source $(escape "${VENV_ACTIVATE}") && cd $(escape "${ROOT_DIR}") && copilot --model gpt-5-mini --autopilot --yolo --allow-all --add-github-mcp-toolset all --add-dir ~/code/Invest"
   logs_cmd="cd $(escape "${ROOT_DIR}") && tail -F $(escape "${LOG_FILE}") $(escape "${FRONTEND_LOG_FILE}")"
   git_cmd="cd $(escape "${ROOT_DIR}") && lazygit"
 
