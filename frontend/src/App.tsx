@@ -3,8 +3,8 @@
  *
  * Routing between Home, Chart, and Backtest Dashboard pages.
  */
-import React from 'react'
-import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
+import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Home } from './pages/Home'
 import { HomeLanding } from './pages/HomeLanding'
@@ -25,7 +25,22 @@ function ErrorFallback({ error }: { error: Error | null }) {
 
 function AppContent() {
   const { t, i18n } = useTranslation()
+  const location = useLocation()
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const currentLanguage: AppLanguage = i18n.resolvedLanguage === 'ja' ? 'ja' : 'en'
+
+  useEffect(() => {
+    setIsMobileMenuOpen(false)
+  }, [location.pathname, location.search])
+
+  const handleMobileMenuToggle = () => {
+    setIsMobileMenuOpen((prev) => !prev)
+  }
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false)
+  }
+
   const handleLanguageChange = (language: AppLanguage) => {
     if (currentLanguage === language) return
     setAppLanguage(language)
@@ -35,24 +50,44 @@ function AppContent() {
     <>
       <nav className="app-nav">
         <div className="nav-brand">
-          <Link to="/">{t('nav.brand')}</Link>
+          <Link to="/" onClick={closeMobileMenu}>{t('nav.brand')}</Link>
         </div>
-        <div className="nav-links">
-          <Link to="/home" className="nav-link">{t('nav.home')}</Link>
-          <Link to="/" className="nav-link">{t('nav.backtest')}</Link>
-          <Link to="/dashboard" className="nav-link">{t('nav.dashboard')}</Link>
+        <button
+          type="button"
+          className={`menu-toggle ${isMobileMenuOpen ? 'active' : ''}`}
+          aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+          aria-controls="app-nav-links"
+          aria-expanded={isMobileMenuOpen}
+          onClick={handleMobileMenuToggle}
+        >
+          {isMobileMenuOpen ? 'Close' : 'Menu'}
+        </button>
+        <div
+          id="app-nav-links"
+          data-testid="app-nav-links"
+          className={`nav-links ${isMobileMenuOpen ? 'mobile-open' : ''}`}
+        >
+          <Link to="/home" className="nav-link" onClick={closeMobileMenu}>{t('nav.home')}</Link>
+          <Link to="/" className="nav-link" onClick={closeMobileMenu}>{t('nav.backtest')}</Link>
+          <Link to="/dashboard" className="nav-link" onClick={closeMobileMenu}>{t('nav.dashboard')}</Link>
           <div className="lang-toggle" aria-label="language toggle">
             <button
               type="button"
               className={`lang-btn ${currentLanguage === 'en' ? 'active' : ''}`}
-              onClick={() => handleLanguageChange('en')}
+              onClick={() => {
+                handleLanguageChange('en')
+                closeMobileMenu()
+              }}
             >
               {t('nav.langEn')}
             </button>
             <button
               type="button"
               className={`lang-btn ${currentLanguage === 'ja' ? 'active' : ''}`}
-              onClick={() => handleLanguageChange('ja')}
+              onClick={() => {
+                handleLanguageChange('ja')
+                closeMobileMenu()
+              }}
             >
               {t('nav.langJa')}
             </button>

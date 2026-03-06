@@ -19,4 +19,20 @@ describe('App language toggle', () => {
     expect(screen.getByRole('link', { name: 'ホーム' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'バックテストダッシュボード' })).toBeInTheDocument()
   })
+
+  it('toggles mobile navigation menu state and closes after navigation click', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    const menuButton = screen.getByRole('button', { name: 'Open navigation menu' })
+    expect(menuButton).toHaveAttribute('aria-expanded', 'false')
+
+    await user.click(menuButton)
+    expect(menuButton).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByTestId('app-nav-links')).toHaveClass('mobile-open')
+
+    await user.click(screen.getByRole('link', { name: 'Backtest Dashboard' }))
+    expect(menuButton).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.getByTestId('app-nav-links')).not.toHaveClass('mobile-open')
+  })
 })
