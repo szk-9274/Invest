@@ -307,40 +307,178 @@ export function CandlestickChart({
       try {
         if (bgImage) return
         if (!showModal || modalMode !== 'image') return
-        if (!PlotComponent) return
         if (typeof document === 'undefined') return
 
-        const Plotly = await import('plotly.js-dist-min')
-        // Create offscreen div
-        const div = document.createElement('div')
-        div.style.position = 'fixed'
-        div.style.left = '-9999px'
-        div.style.top = '-9999px'
-        document.body.appendChild(div)
+        // If traces include a candlestick trace, use Plotly to render a faithful image
+        const hasCandlestick = (traces || []).some((t: any) => t && t.type === 'candlestick')
+        if (hasCandlestick && PlotComponent) {
+          try {
+            const Plotly = await import('plotly.js-dist-min')
+            // Create offscreen div
+            const div = document.createElement('div')
+            div.style.position = 'fixed'
+            div.style.left = '-9999px'
+            div.style.top = '-9999px'
+            document.body.appendChild(div)
 
-        // Use layoutWithImage but hide images to avoid recursive background
-        const layoutForImage = { ...layoutWithImage }
-        if (layoutForImage.images) layoutForImage.images = []
-        const width = (layoutForImage && layoutForImage.width) || 1200
-        const height = (layoutForImage && layoutForImage.height) || 700
+            // Use layoutWithImage but hide images to avoid recursive background
+            const layoutForImage = { ...layoutWithImage }
+            if (layoutForImage.images) layoutForImage.images = []
+            const width = (layoutForImage && layoutForImage.width) || 1200
+            const height = (layoutForImage && layoutForImage.height) || 700
 
-        // Render and export
-        // @ts-ignore
-        await Plotly.newPlot(div, traces as any, layoutForImage as any)
-        // @ts-ignore
-        const imgData = await Plotly.toImage(div, { format: 'png', width, height, scale: 1 })
-        // Cleanup
-        // @ts-ignore
-        Plotly.purge(div)
-        document.body.removeChild(div)
+            // Render and export
+            // @ts-ignore
+            await Plotly.newPlot(div, traces as any, layoutForImage as any)
+            // @ts-ignore
+            const imgData = await Plotly.toImage(div, { format: 'png', width, height, scale: 1 })
+            // Cleanup
+            // @ts-ignore
+            Plotly.purge(div)
+            document.body.removeChild(div)
 
-        if (!cancelled && imgData) {
-          setBgImage(imgData)
+            if (!cancelled && imgData) {
+              setBgImage(imgData)
+              return
+            }
+          } catch (err) {
+            // fall through to canvas fallback
+            // eslint-disable-next-line no-console
+            console.warn('Plotly image generation failed, falling back to canvas', err)
+          }
         }
+
+        // Canvas fallback: synthesize a TradingView-like background and plot markers on it.
+        // This helps when no OHLC data exists but markers are present.
+        const canvas = document.createElement('canvas')
+        const width = 1200
+        const height = 700
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext('2d')
+        if (!ctx) return
+
+        // Draw background
+        ctx.fillStyle = THEME.background
+        ctx.fillRect(0, 0, width, height)
+
+        // Draw grid
+        ctx.strokeStyle = THEME.gridColor
+        ctx.lineWidth = 1
+        const cols = 6
+        const rows = 6
+        for (let i = 1; i < cols; i++) {
+          const x = Math.round((width * i) / cols)
+          ctx.beginPath()
+          ctx.moveTo(x, 0)
+          ctx.lineTo(x, height)
+          ctx.stroke()
+        }
+        for (let j = 1; j < rows; j++) {
+          const y = Math.round((height * j) / rows)
+          ctx.beginPath()
+          ctx.moveTo(0, y)
+          ctx.lineTo(width, y)
+          ctx.stroke()
+        }
+
+        // Draw optional title
+        ctx.fillStyle = THEME.textColor
+        ctx.font = '16px sans-serif'
+        ctx.fillText(ticker, 12, 24)
+
+        // Determine marker positions from traces (entries/exits). If no markers, show placeholder
+        const markerTrace = (traces || []).find((t: any) => t && (t.name === 'Entry' || t.name === 'Exit'))
+        let entries: any[] = []
+        let exits: any[] = []
+        if (markerTrace) {
+          // try to extract x (dates) and y (prices)
+          const xs = markerTrace.x || []
+          const ys = markerTrace.y || []
+          for (let i = 0; i < xs.length; i++) {
+            if ((markerTrace.marker && markerTrace.marker.symbol === 'triangle-up') || markerTrace.name === 'Entry') {
+              entries.push({ x: xs[i], y: ys[i] })
+            } else {
+              exits.push({ x: xs[i], y: ys[i] })
+            }
+          }
+        }
+
+        // If traces include markers in separate traces (entries/exits), handle both
+        const entryTrace = (traces || []).find((t: any) => t && t.name === 'Entry')
+        const exitTrace = (traces || []).find((t: any) => t && t.name === 'Exit')
+        if (entryTrace) {
+          const xs = entryTrace.x || []
+          const ys = entryTrace.y || []
+          entries = xs.map((x: any, idx: number) => ({ x, y: ys[idx] }))
+        }
+        if (exitTrace) {
+          const xs = exitTrace.x || []
+          const ys = exitTrace.y || []
+          exits = xs.map((x: any, idx: number) => ({ x, y: ys[idx] }))
+        }
+
+        // Use date range from markers or fallback to sample range
+        const allDates = [...(entries || []).map((e) => e.x), ...(exits || []).map((e) => e.x)].filter(Boolean)
+        let minDate = null
+        let maxDate = null
+        if (allDates.length > 0) {
+          const parsed = allDates.map((d: any) => new Date(d))
+          minDate = Math.min(...parsed.map((d) => d.getTime()))
+          maxDate = Math.max(...parsed.map((d) => d.getTime()))
+        } else {
+          // fallback to a simple two-point range
+          minDate = Date.now() - 1000 * 60 * 60 * 24 * 30
+          maxDate = Date.now()
+        }
+
+        // Price range
+        const allPrices = [...(entries || []).map((e) => e.y), ...(exits || []).map((e) => e.y)].filter((p) => Number.isFinite(p))
+        let minPrice = Math.min(...(allPrices.length ? allPrices : [0]))
+        let maxPrice = Math.max(...(allPrices.length ? allPrices : [1]))
+        if (minPrice === maxPrice) {
+          minPrice = minPrice - 1
+          maxPrice = maxPrice + 1
+        }
+
+        const dateToX = (d: any) => {
+          const t = new Date(d).getTime()
+          return 60 + ((width - 120) * (t - minDate)) / (maxDate - minDate)
+        }
+        const priceToY = (p: number) => {
+          return 40 + ((height - 80) * (maxPrice - p)) / (maxPrice - minPrice)
+        }
+
+        // Draw markers
+        for (const e of entries) {
+          const x = dateToX(e.x)
+          const y = priceToY(e.y)
+          ctx.fillStyle = THEME.entryMarkerColor
+          ctx.beginPath()
+          ctx.moveTo(x, y - 8)
+          ctx.lineTo(x - 6, y + 6)
+          ctx.lineTo(x + 6, y + 6)
+          ctx.closePath()
+          ctx.fill()
+        }
+        for (const ex of exits) {
+          const x = dateToX(ex.x)
+          const y = priceToY(ex.y)
+          ctx.fillStyle = THEME.exitMarkerColor
+          ctx.beginPath()
+          ctx.moveTo(x, y + 8)
+          ctx.lineTo(x - 6, y - 6)
+          ctx.lineTo(x + 6, y - 6)
+          ctx.closePath()
+          ctx.fill()
+        }
+
+        const dataUrl = canvas.toDataURL('image/png')
+        if (!cancelled) setBgImage(dataUrl)
       } catch (err) {
         // Non-fatal; keep bgImage null
         // eslint-disable-next-line no-console
-        console.warn('Failed to generate static image from Plotly', err)
+        console.warn('Failed to generate static image from Plotly or canvas', err)
       }
     }
 
@@ -348,7 +486,7 @@ export function CandlestickChart({
     return () => {
       cancelled = true
     }
-  }, [showModal, modalMode, PlotComponent, bgImage, traces, layoutWithImage])
+  }, [showModal, modalMode, PlotComponent, bgImage, traces, layoutWithImage, ticker])
 
   // If a background image is available, add it to the Plotly layout so it scales with the plot
   const layoutWithImage = React.useMemo(() => {
