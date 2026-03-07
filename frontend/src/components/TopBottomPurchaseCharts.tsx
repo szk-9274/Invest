@@ -214,3 +214,5 @@ export const TopBottomPurchaseCharts: React.FC<TopBottomPurchaseChartsProps> = (
     </div>
   )
 }
+
+export default TopBottomPurchaseCharts

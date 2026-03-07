@@ -300,6 +300,8 @@ export function CandlestickChart({
 
   const resetZoom = () => setZoomScale(1)
 
+  let layoutWithImage: any = layout as any
+
   // If no per-ticker background image is available, generate a static PNG from Plotly traces/layout
   React.useEffect(() => {
     let cancelled = false
@@ -388,7 +390,7 @@ export function CandlestickChart({
         ctx.fillText(ticker, 12, 24)
 
         // Determine marker positions from traces (entries/exits). If no markers, show placeholder
-        const markerTrace = (traces || []).find((t: any) => t && (t.name === 'Entry' || t.name === 'Exit'))
+        const markerTrace: any = (traces || []).find((t: any) => t && (t.name === 'Entry' || t.name === 'Exit'))
         let entries: any[] = []
         let exits: any[] = []
         if (markerTrace) {
@@ -405,8 +407,8 @@ export function CandlestickChart({
         }
 
         // If traces include markers in separate traces (entries/exits), handle both
-        const entryTrace = (traces || []).find((t: any) => t && t.name === 'Entry')
-        const exitTrace = (traces || []).find((t: any) => t && t.name === 'Exit')
+        const entryTrace: any = (traces || []).find((t: any) => t && t.name === 'Entry')
+        const exitTrace: any = (traces || []).find((t: any) => t && t.name === 'Exit')
         if (entryTrace) {
           const xs = entryTrace.x || []
           const ys = entryTrace.y || []
@@ -489,7 +491,7 @@ export function CandlestickChart({
   }, [showModal, modalMode, PlotComponent, bgImage, traces, layoutWithImage, ticker])
 
   // If a background image is available, add it to the Plotly layout so it scales with the plot
-  const layoutWithImage = React.useMemo(() => {
+  const computedLayoutWithImage = React.useMemo(() => {
     if (!bgImage) return layout
     const img = {
       source: bgImage,
@@ -505,6 +507,8 @@ export function CandlestickChart({
     }
     return { ...layout, images: [img], autosize: true }
   }, [bgImage, layout])
+
+  layoutWithImage = computedLayoutWithImage
 
   return (
     <div data-testid="candlestick-chart" style={{ width: '100%' }}>
