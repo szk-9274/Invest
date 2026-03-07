@@ -300,6 +300,56 @@ export function CandlestickChart({
 
   const resetZoom = () => setZoomScale(1)
 
+  // If no per-ticker background image is available, generate a static PNG from Plotly traces/layout
+  React.useEffect(() => {
+    let cancelled = false
+    async function generateImageFromPlot() {
+      try {
+        if (bgImage) return
+        if (!showModal || modalMode !== 'image') return
+        if (!PlotComponent) return
+        if (typeof document === 'undefined') return
+
+        const Plotly = await import('plotly.js-dist-min')
+        // Create offscreen div
+        const div = document.createElement('div')
+        div.style.position = 'fixed'
+        div.style.left = '-9999px'
+        div.style.top = '-9999px'
+        document.body.appendChild(div)
+
+        // Use layoutWithImage but hide images to avoid recursive background
+        const layoutForImage = { ...layoutWithImage }
+        if (layoutForImage.images) layoutForImage.images = []
+        const width = (layoutForImage && layoutForImage.width) || 1200
+        const height = (layoutForImage && layoutForImage.height) || 700
+
+        // Render and export
+        // @ts-ignore
+        await Plotly.newPlot(div, traces as any, layoutForImage as any)
+        // @ts-ignore
+        const imgData = await Plotly.toImage(div, { format: 'png', width, height, scale: 1 })
+        // Cleanup
+        // @ts-ignore
+        Plotly.purge(div)
+        document.body.removeChild(div)
+
+        if (!cancelled && imgData) {
+          setBgImage(imgData)
+        }
+      } catch (err) {
+        // Non-fatal; keep bgImage null
+        // eslint-disable-next-line no-console
+        console.warn('Failed to generate static image from Plotly', err)
+      }
+    }
+
+    generateImageFromPlot()
+    return () => {
+      cancelled = true
+    }
+  }, [showModal, modalMode, PlotComponent, bgImage, traces, layoutWithImage])
+
   // If a background image is available, add it to the Plotly layout so it scales with the plot
   const layoutWithImage = React.useMemo(() => {
     if (!bgImage) return layout
