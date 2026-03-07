@@ -11,8 +11,6 @@ fi
 
 cd "${ROOT_DIR}"
 
-export COLUMNS=160
-export LINES=50
 export LESS="-R"
 export EDITOR=nano
 
@@ -63,6 +61,7 @@ validate_paths() {
 
 create_layout() {
   tmux new-session -d -s "${SESSION_NAME}" -n dev -c "${ROOT_DIR}"
+	tmux set-option -g mouse on
   tmux split-window -v -p 35 -t "${SESSION_NAME}:0.0" -c "${ROOT_DIR}"
   tmux split-window -h -t "${SESSION_NAME}:0.0" -c "${ROOT_DIR}"
   tmux split-window -h -t "${SESSION_NAME}:0.2" -c "${ROOT_DIR}"
