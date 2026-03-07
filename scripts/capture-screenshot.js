@@ -3,7 +3,15 @@ const fs = require('fs');
 
 async function capture(url, outDir) {
   await fs.promises.mkdir(outDir, { recursive: true });
-  const browser = await chromium.launch();
+  let browser;
+  try {
+    browser = await chromium.launch();
+  } catch (e) {
+    console.error('Failed to launch Playwright browser. This is often caused by missing system libraries (e.g., libnspr4, libnss3).');
+    console.error('Error:', e.message || e);
+    throw e;
+  }
+
   const contextDesktop = await browser.newContext({ viewport: { width: 1280, height: 720 } });
   const page = await contextDesktop.newPage();
   await page.goto(url, { waitUntil: 'networkidle' });

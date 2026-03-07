@@ -15,19 +15,22 @@ jobs:
           node-version: '18'
       - name: Install deps
         run: |
+          sudo apt-get update
+          # Install Playwright system dependencies that are sometimes missing on runners
+          sudo apt-get install -y libnspr4 libnss3 libx11-xcb1 libxcomposite1 libxdamage1 libxrandr2 libgbm1 libxss1 libasound2 libpangocairo-1.0-0 libgtk-3-0 libxshmfence1 fonts-liberation || true
           npm ci
-          npx playwright install-deps
-          npx playwright install
+          npx playwright install-deps || true
+          npx playwright install || true
       - name: Build and start frontend preview
         run: |
           # Install frontend deps and build
           npm --prefix frontend ci
           npm --prefix frontend run build
-          # Start a preview server in background and log output
-          npm --prefix frontend run preview -- --port 5173 > frontend.log 2>&1 &
+          # Start a preview server in background and log output (use port 5174 to avoid conflicts)
+          npm --prefix frontend run preview -- --port 5174 > frontend.log 2>&1 &
           # Wait for frontend ready
           for i in $(seq 1 60); do
-            if curl -sSf http://127.0.0.1:5173/ || curl -sSf http://127.0.0.1:5173/dashboard > /dev/null; then
+            if curl -sSf http://127.0.0.1:5174/ || curl -sSf http://127.0.0.1:5174/dashboard > /dev/null; then
               echo "frontend ready"
               break
             fi
