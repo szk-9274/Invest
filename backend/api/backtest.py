@@ -267,6 +267,17 @@ def _get_backtest_results_by_dir(result_dir: str, dir_name: str) -> BacktestResu
                 chart_path = os.path.join(charts_dir, chart_file)
                 chart_key = chart_file.replace(".png", "")
                 charts[chart_key] = get_chart_as_base64(chart_path)
+
+    # Also include any top-level PNGs in the result_dir (e.g. equity_curve.png, drawdown.png)
+    try:
+        for root_file in sorted(os.listdir(result_dir)):
+            if root_file.endswith('.png'):
+                root_path = os.path.join(result_dir, root_file)
+                root_key = root_file.replace('.png', '')
+                if root_key not in charts:
+                    charts[root_key] = get_chart_as_base64(root_path)
+    except Exception:
+        pass
     
     return BacktestResultsResponse(
         timestamp=dir_name,

@@ -250,6 +250,8 @@ export function CandlestickChart({
         const keys = Object.keys(charts || {})
         // Prefer explicit '{ticker}_price_chart', then exact ticker, then any key containing ticker
         let key = keys.find((k) => k === `${ticker}_price_chart`) || keys.find((k) => k === ticker) || keys.find((k) => k.includes(ticker)) || keys.find((k) => k.includes('_price_chart'))
+        // Fallback: if no per-ticker chart, use the first available chart (e.g., equity_curve)
+        if (!key && keys.length > 0) key = keys[0]
         if (key && charts[key]) {
           if (!mounted) return
           setBgImage(charts[key])
