@@ -1,0 +1,32 @@
+name: Playwright Screenshots
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  capture-screenshots:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install deps
+        run: |
+          npm ci
+          npx playwright install-deps
+          npx playwright install
+      - name: Start mock backend
+        run: |
+          npm run mock-backend &
+          sleep 3
+      - name: Capture screenshots
+        run: |
+          npm run screenshot:ci
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: backtest-ui-screenshots
+          path: tests/screenshots/
