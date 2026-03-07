@@ -39,10 +39,19 @@ export const BacktestDashboard: React.FC = () => {
   const [selectedTimestamp, setSelectedTimestamp] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'summary' | 'charts' | 'trades'>('summary');
+  const [activeTab, setActiveTab] = useState<'run' | 'summary' | 'charts' | 'trades'>('summary');
+  const [isMobile, setIsMobile] = useState(false);
   const [activeJob, setActiveJob] = useState<JobResponse | null>(null);
   const [jobLogs, setJobLogs] = useState<string[]>([]);
   const [runError, setRunError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768);
+    check();
+    window.addEventListener('resize', check);
+    if (window.innerWidth <= 768) setActiveTab('run');
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   // Fetch list of available backtests
   useEffect(() => {
@@ -164,13 +173,15 @@ export const BacktestDashboard: React.FC = () => {
 
       <div className="dashboard-layout">
         <aside className="sidebar">
-          <RunPanel
-            onRun={handleRunCommand}
-            onCancel={handleCancelCommand}
-            activeJob={activeJob}
-            logs={jobLogs}
-            runError={runError}
-          />
+          {!(isMobile && activeTab === 'run') && (
+            <RunPanel
+              onRun={handleRunCommand}
+              onCancel={handleCancelCommand}
+              activeJob={activeJob}
+              logs={jobLogs}
+              runError={runError}
+            />
+          )}
 
           <h3>{t('dashboard.availableTests')}</h3>
           <div className="backtest-list">
@@ -205,6 +216,12 @@ export const BacktestDashboard: React.FC = () => {
 
               <div className="tabs">
                 <button
+                  className={`tab-button ${activeTab === 'run' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('run')}
+                >
+                  {t('dashboard.runTab', 'Run')}
+                </button>
+                <button
                   className={`tab-button ${activeTab === 'summary' ? 'active' : ''}`}
                   onClick={() => setActiveTab('summary')}
                 >
@@ -225,6 +242,17 @@ export const BacktestDashboard: React.FC = () => {
               </div>
 
               <div className="tab-content">
+                {activeTab === 'run' && (
+                  <div style={{padding:20}}>
+                    <RunPanel
+                      onRun={handleRunCommand}
+                      onCancel={handleCancelCommand}
+                      activeJob={activeJob}
+                      logs={jobLogs}
+                      runError={runError}
+                    />
+                  </div>
+                )}
                 {activeTab === 'summary' && (
                   <BacktestSummary data={results.summary} loading={loading} />
                 )}
