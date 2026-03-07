@@ -1,5 +1,5 @@
 import React from 'react';
-import TopBottomPurchaseChart from './TopBottomPurchaseCharts';
+import TopBottomPurchaseChart from './TopBottomPurchaseChart';
 
 export default function TopBottomGrid({
   top = [],

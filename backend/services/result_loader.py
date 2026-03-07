@@ -22,8 +22,28 @@ def load_trade_log(csv_path: str) -> List[Dict]:
         List of trade records as dictionaries
     """
     if not os.path.exists(csv_path):
-        logger.warning(f"Trade log not found: {csv_path}")
-        return []
+        # Attempt to find the file in the latest available backtest directory under the same output root
+        def _find_latest_csv_in_sibling_backtests(missing_path, filename):
+            parent = os.path.dirname(missing_path)
+            output_root = os.path.dirname(parent)
+            if not os.path.exists(output_root):
+                return None
+            for d in sorted(os.listdir(output_root), reverse=True):
+                candidate_dir = os.path.join(output_root, d)
+                if not os.path.isdir(candidate_dir):
+                    continue
+                candidate = os.path.join(candidate_dir, filename)
+                if os.path.exists(candidate):
+                    return candidate
+            return None
+
+        found = _find_latest_csv_in_sibling_backtests(csv_path, os.path.basename(csv_path))
+        if found:
+            logger.info(f"Trade log not found at {csv_path}, falling back to latest: {found}")
+            csv_path = found
+        else:
+            logger.warning(f"Trade log not found: {csv_path}")
+            return []
 
     try:
         df = pd.read_csv(csv_path)
@@ -46,8 +66,28 @@ def load_ticker_stats(csv_path: str) -> List[Dict]:
         List of ticker stat records as dictionaries
     """
     if not os.path.exists(csv_path):
-        logger.warning(f"Ticker stats not found: {csv_path}")
-        return []
+        # Try to locate ticker_stats in the latest backtest sibling directories
+        def _find_latest_csv_in_sibling_backtests(missing_path, filename):
+            parent = os.path.dirname(missing_path)
+            output_root = os.path.dirname(parent)
+            if not os.path.exists(output_root):
+                return None
+            for d in sorted(os.listdir(output_root), reverse=True):
+                candidate_dir = os.path.join(output_root, d)
+                if not os.path.isdir(candidate_dir):
+                    continue
+                candidate = os.path.join(candidate_dir, filename)
+                if os.path.exists(candidate):
+                    return candidate
+            return None
+
+        found = _find_latest_csv_in_sibling_backtests(csv_path, os.path.basename(csv_path))
+        if found:
+            logger.info(f"Ticker stats not found at {csv_path}, falling back to latest: {found}")
+            csv_path = found
+        else:
+            logger.warning(f"Ticker stats not found: {csv_path}")
+            return []
 
     try:
         df = pd.read_csv(csv_path)
@@ -127,8 +167,28 @@ def get_enriched_trade_markers(
         Dict with 'entries' and 'exits' lists
     """
     if not os.path.exists(csv_path):
-        logger.warning(f"Trade log not found: {csv_path}")
-        return {"entries": [], "exits": []}
+        # Try to locate trade_log in sibling backtest directories under the same output root
+        def _find_latest_csv_in_sibling_backtests(missing_path, filename):
+            parent = os.path.dirname(missing_path)
+            output_root = os.path.dirname(parent)
+            if not os.path.exists(output_root):
+                return None
+            for d in sorted(os.listdir(output_root), reverse=True):
+                candidate_dir = os.path.join(output_root, d)
+                if not os.path.isdir(candidate_dir):
+                    continue
+                candidate = os.path.join(candidate_dir, filename)
+                if os.path.exists(candidate):
+                    return candidate
+            return None
+
+        found = _find_latest_csv_in_sibling_backtests(csv_path, os.path.basename(csv_path))
+        if found:
+            logger.info(f"Trade log not found at {csv_path}, falling back to latest: {found}")
+            csv_path = found
+        else:
+            logger.warning(f"Trade log not found: {csv_path}")
+            return {"entries": [], "exits": []}
 
     try:
         df = pd.read_csv(csv_path)
@@ -324,3 +384,98 @@ def load_backtest_summary(output_dir: str) -> Dict:
     except Exception as e:
         logger.error(f"Failed to load backtest summary: {e}")
         return {}
+
+
+def generate_placeholder_charts(
+    result_dir: str,
+    ticker_stats_path: str,
+    trade_log_path: str,
+    top_n: int = 5,
+    bottom_n: int = 5,
+) -> List[str]:
+    """
+    Generate simple placeholder PNG charts for top/bottom tickers without external data.
+
+    This is a lightweight fallback used when yfinance/mplfinance are unavailable
+    or when network access fails. The generated images are simple dark-themed
+    thumbnails containing the ticker symbol and entry/exit markers derived from
+    the trade_log (if available).
+
+    Args:
+        result_dir: Backtest result directory where charts/ will be created
+        ticker_stats_path: Path to ticker_stats.csv
+        trade_log_path: Path to trade_log.csv (may be empty)
+        top_n: number of top tickers
+        bottom_n: number of bottom tickers
+
+    Returns:
+        List of file paths to generated images
+    """
+    try:
+        import matplotlib
+        matplotlib.use('Agg')
+        import matplotlib.pyplot as plt
+    except Exception:
+        logger.error("matplotlib not available for placeholder chart generation")
+        return []
+
+    charts_dir = os.path.join(result_dir, "charts")
+    os.makedirs(charts_dir, exist_ok=True)
+
+    # Load ticker list
+    try:
+        if not os.path.exists(ticker_stats_path):
+            logger.warning(f"Ticker stats not found for placeholder generation: {ticker_stats_path}")
+            return []
+        stats_df = pd.read_csv(ticker_stats_path)
+        if stats_df.empty:
+            return []
+        stats_df = stats_df.sort_values('total_pnl', ascending=False)
+        top = stats_df.head(min(top_n, len(stats_df)))['ticker'].tolist()
+        bottom = stats_df.tail(min(bottom_n, len(stats_df)))['ticker'].tolist()
+    except Exception as e:
+        logger.error(f"Failed to read ticker stats for placeholder generation: {e}")
+        return []
+
+    # Load trades if available
+    trades_df = None
+    if trade_log_path and os.path.exists(trade_log_path):
+        try:
+            trades_df = pd.read_csv(trade_log_path)
+            if not trades_df.empty:
+                trades_df['date'] = pd.to_datetime(trades_df['date'])
+        except Exception:
+            trades_df = None
+
+    generated = []
+
+    def _make_thumb(ticker: str, prefix: str, idx: int):
+        try:
+            fig, ax = plt.subplots(figsize=(6, 3), facecolor='#0b2948')
+            ax.set_facecolor('#0b2948')
+            # Title
+            ax.text(0.5, 0.75, ticker, color='white', fontsize=18, ha='center', va='center', transform=ax.transAxes)
+
+            if trades_df is not None and not trades_df.empty:
+                td = trades_df[trades_df['ticker'] == ticker].sort_values('date')
+                if not td.empty:
+                    xs = range(len(td))
+                    ys = td['price'].fillna(1.0)
+                    colors = ['green' if a == 'ENTRY' else 'red' for a in td.get('action', ['ENTRY'] * len(td))]
+                    ax.scatter(xs, ys, c=colors, edgecolors='white')
+                    ax.set_ylim(ys.min() * 0.9, ys.max() * 1.1)
+            ax.axis('off')
+            filename = f"{prefix}_{idx:02d}_{ticker}.png"
+            path = os.path.join(charts_dir, filename)
+            fig.savefig(path, bbox_inches='tight', facecolor=fig.get_facecolor())
+            plt.close(fig)
+            generated.append(path)
+        except Exception as e:
+            logger.error(f"Failed to create placeholder for {ticker}: {e}")
+
+    for i, t in enumerate(top, start=1):
+        _make_thumb(t, 'top', i)
+    for i, t in enumerate(bottom, start=1):
+        _make_thumb(t, 'bottom', i)
+
+    return generated

@@ -53,11 +53,14 @@ function toPurchasePoint(rawTrade: TradeRecord): PurchasePoint | null {
   }
 }
 
-export function calculateMarkerSize(amount: number, scale = 0.12): number {
+export function calculateMarkerSize(amount: number, scale = 1): number {
   if (!Number.isFinite(amount) || amount <= 0) return MIN_MARKER_SIZE
   const raw = Math.sqrt(amount) * scale
   return Math.max(MIN_MARKER_SIZE, Math.min(MAX_MARKER_SIZE, Number(raw.toFixed(2))))
 }
+
+// Backwards-compatible export: some tests and older code expect calculateSymbolSize
+export const calculateSymbolSize = calculateMarkerSize
 
 export function buildTopBottomPurchaseCharts(
   trades: TradeRecord[],
@@ -211,3 +214,5 @@ export const TopBottomPurchaseCharts: React.FC<TopBottomPurchaseChartsProps> = (
     </div>
   )
 }
+
+export default TopBottomPurchaseCharts

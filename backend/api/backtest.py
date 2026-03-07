@@ -21,6 +21,7 @@ from services.result_loader import (
     get_chart_as_base64,
     list_available_backtests,
     load_backtest_summary,
+    generate_placeholder_charts,
 )
 from services.job_runner import job_runner
 
@@ -242,13 +243,24 @@ def _get_backtest_results_by_dir(result_dir: str, dir_name: str) -> BacktestResu
     summary = load_backtest_summary(result_dir)
     
     # Load trade data
-    trades_path = os.path.join(result_dir, "trades.csv")
-    trades = load_trade_log(trades_path)
-    
+    # Some backtests generate 'trades.csv' while others use 'trade_log.csv'. Try both.
+    trades = []
+    trade_log_path = None
+    trades_candidates = [
+        os.path.join(result_dir, "trades.csv"),
+        os.path.join(result_dir, "trade_log.csv"),
+        os.path.join(result_dir, "trade_log.csv"),
+    ]
+    for p in trades_candidates:
+        if os.path.exists(p):
+            trades = load_trade_log(p)
+            trade_log_path = p
+            break
+
     # Load ticker statistics
     ticker_stats_path = os.path.join(result_dir, "ticker_stats.csv")
     ticker_stats = load_ticker_stats(ticker_stats_path)
-    
+
     # Load charts as base64
     charts = {}
     charts_dir = os.path.join(result_dir, "charts")
@@ -258,6 +270,79 @@ def _get_backtest_results_by_dir(result_dir: str, dir_name: str) -> BacktestResu
                 chart_path = os.path.join(charts_dir, chart_file)
                 chart_key = chart_file.replace(".png", "")
                 charts[chart_key] = get_chart_as_base64(chart_path)
+
+    # Also include any top-level PNGs in the result_dir (e.g. equity_curve.png, drawdown.png)
+    try:
+        for root_file in sorted(os.listdir(result_dir)):
+            if root_file.endswith('.png'):
+                root_path = os.path.join(result_dir, root_file)
+                root_key = root_file.replace('.png', '')
+                if root_key not in charts:
+                    charts[root_key] = get_chart_as_base64(root_path)
+    except Exception:
+        pass
+
+    # If no per-ticker charts were found (only top-level summary images), attempt to generate them
+    need_generation = True
+    # Detect existing per-ticker charts by key patterns
+    if charts:
+        for k in charts.keys():
+            if k.startswith('top_') or k.startswith('bottom_') or k.endswith('_price_chart'):
+                need_generation = False
+                break
+
+    if need_generation:
+        # Ensure repo root is on sys.path so sibling 'python' package can be imported
+        import sys
+        from pathlib import Path as _Path
+        _repo_root = str(_Path(__file__).resolve().parents[2])
+        if _repo_root not in sys.path:
+            sys.path.insert(0, _repo_root)
+        # First try the full-featured ticker_charts module which may fetch data (yfinance)
+        try:
+            # Import here to avoid hard dependency unless needed
+            from python.backtest import ticker_charts as tc
+            # Only attempt generation if ticker_stats exists (we have tickers to create charts for)
+            if os.path.exists(ticker_stats_path):
+                logger.info("No per-ticker charts found; attempting to generate per-ticker charts")
+                try:
+                    # generate_top_bottom_charts will fetch price data as needed and write PNGs under result_dir/charts
+                    tc.generate_top_bottom_charts(ticker_stats_path, trade_log_path or "", result_dir)
+                    # Reload generated charts
+                    if os.path.exists(charts_dir):
+                        for chart_file in sorted(os.listdir(charts_dir)):
+                            if chart_file.endswith(".png"):
+                                chart_path = os.path.join(charts_dir, chart_file)
+                                chart_key = chart_file.replace(".png", "")
+                                charts[chart_key] = get_chart_as_base64(chart_path)
+                except Exception as inner_e:
+                    logger.warning(f"Chart generation attempted but failed: {inner_e}")
+                    # Attempt lightweight placeholder generation as a fallback (no network dependency)
+                    try:
+                        logger.info("Attempting placeholder chart generation as fallback")
+                        generate_placeholder_charts(result_dir, ticker_stats_path, trade_log_path or "")
+                        if os.path.exists(charts_dir):
+                            for chart_file in sorted(os.listdir(charts_dir)):
+                                if chart_file.endswith(".png"):
+                                    chart_path = os.path.join(charts_dir, chart_file)
+                                    chart_key = chart_file.replace(".png", "")
+                                    charts[chart_key] = get_chart_as_base64(chart_path)
+                    except Exception as fallback_e:
+                        logger.error(f"Placeholder chart generation failed: {fallback_e}")
+        except Exception as e:
+            logger.debug(f"Ticker chart generation module not available: {e}")
+            # If the heavy chart module isn't available, try the lightweight placeholder generator
+            try:
+                logger.info("Ticker chart module not available; generating placeholder charts")
+                generate_placeholder_charts(result_dir, ticker_stats_path, trade_log_path or "")
+                if os.path.exists(charts_dir):
+                    for chart_file in sorted(os.listdir(charts_dir)):
+                        if chart_file.endswith(".png"):
+                            chart_path = os.path.join(charts_dir, chart_file)
+                            chart_key = chart_file.replace(".png", "")
+                            charts[chart_key] = get_chart_as_base64(chart_path)
+            except Exception as fallback_e:
+                logger.error(f"Placeholder chart generation failed: {fallback_e}")
     
     return BacktestResultsResponse(
         timestamp=dir_name,
