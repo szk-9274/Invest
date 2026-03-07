@@ -68,7 +68,6 @@ function AppContent() {
           className={`nav-links ${isMobileMenuOpen ? 'mobile-open' : ''}`}
         >
           <Link to="/home" className="nav-link" onClick={closeMobileMenu}>{t('nav.home')}</Link>
-          <Link to="/" className="nav-link" onClick={closeMobileMenu}>{t('nav.backtest')}</Link>
           <Link to="/dashboard" className="nav-link" onClick={closeMobileMenu}>{t('nav.dashboard')}</Link>
           <div className="lang-toggle" aria-label="language toggle">
             <button
