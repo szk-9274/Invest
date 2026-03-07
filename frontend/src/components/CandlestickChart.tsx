@@ -426,8 +426,8 @@ export function CandlestickChart({
         let maxDate: any = null
         if (candleTrace && candleTrace.x && candleTrace.x.length > 0) {
           const parsed = candleTrace.x.map((d: any) => new Date(d))
-          minDate = Math.min(...parsed.map((d) => d.getTime()))
-          maxDate = Math.max(...parsed.map((d) => d.getTime()))
+          minDate = Math.min(...parsed.map((d: Date) => d.getTime()))
+          maxDate = Math.max(...parsed.map((d: Date) => d.getTime()))
         } else {
           // Fallback to marker-based range or a default 30-day window
           const allDates = [...(entries || []).map((e) => e.x), ...(exits || []).map((e) => e.x)].filter(Boolean)
