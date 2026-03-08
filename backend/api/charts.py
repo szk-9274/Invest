@@ -78,6 +78,16 @@ def get_trade_markers(
         output_dir = DEFAULT_OUTPUT_DIR
 
     trade_log_path = os.path.join(output_dir, "trade_log.csv")
+
+    # If trade_log not present at root, try latest backtest subdirectory
+    if not os.path.exists(trade_log_path):
+        try:
+            dirs = sorted([d for d in os.listdir(output_dir) if d.startswith("backtest_")], reverse=True)
+            if dirs:
+                trade_log_path = os.path.join(output_dir, dirs[0], "trade_log.csv")
+        except Exception:
+            pass
+
     all_trades = load_trade_log(trade_log_path)
 
     entries = []

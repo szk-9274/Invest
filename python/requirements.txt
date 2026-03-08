@@ -24,8 +24,8 @@ tqdm>=4.66.0
 tenacity>=8.2.0
 
 # Visualization (optional - install separately if needed)
-# matplotlib>=3.7.0
-mplfinance>=0.12.9
+matplotlib>=3.7.0
+mplfinance>=0.12.10b0
 
 fastapi
 uvicorn[standard]

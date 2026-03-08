@@ -39,6 +39,14 @@ export const RunPanel: React.FC<RunPanelProps> = ({
   const [submitting, setSubmitting] = useState(false);
 
   const isRunning = activeJob?.status === 'queued' || activeJob?.status === 'running';
+  const [isMobile, setIsMobile] = useState(false);
+
+  React.useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   const statusColor = useMemo(() => {
     switch (activeJob?.status) {
@@ -107,7 +115,7 @@ export const RunPanel: React.FC<RunPanelProps> = ({
   };
 
   return (
-    <section className="run-panel">
+    <section className={"run-panel" + (isMobile ? ' run-panel-mobile' : '')}>
       <div className="run-panel-header">
         <h3>{t('runPanel.title')}</h3>
         <div className="status-line">

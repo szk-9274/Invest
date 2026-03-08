@@ -376,55 +376,60 @@ def _calculate_indicators(data: pd.DataFrame) -> List:
     close = data['Close']
 
     # SMA 20 (cyan/turquoise)
-    sma20 = close.rolling(window=20).mean()
-    addplots.append(mpf.make_addplot(
-        sma20,
-        color='#00bcd4',
-        width=1.0,
-        label='SMA20'
-    ))
+    sma20 = close.rolling(window=20, min_periods=1).mean()
+    if not sma20.dropna().empty:
+        addplots.append(mpf.make_addplot(
+            sma20,
+            color='#00bcd4',
+            width=1.0,
+            label='SMA20'
+        ))
 
     # SMA 50 (yellow/gold)
-    sma50 = close.rolling(window=50).mean()
-    addplots.append(mpf.make_addplot(
-        sma50,
-        color='#ffeb3b',
-        width=1.0,
-        label='SMA50'
-    ))
+    sma50 = close.rolling(window=50, min_periods=1).mean()
+    if not sma50.dropna().empty:
+        addplots.append(mpf.make_addplot(
+            sma50,
+            color='#ffeb3b',
+            width=1.0,
+            label='SMA50'
+        ))
 
     # SMA 200 (magenta/pink)
-    sma200 = close.rolling(window=200).mean()
-    addplots.append(mpf.make_addplot(
-        sma200,
-        color='#e91e63',
-        width=1.0,
-        label='SMA200'
-    ))
+    sma200 = close.rolling(window=200, min_periods=1).mean()
+    if not sma200.dropna().empty:
+        addplots.append(mpf.make_addplot(
+            sma200,
+            color='#e91e63',
+            width=1.0,
+            label='SMA200'
+        ))
 
     # Bollinger Bands (20, 2)
-    bb_middle = close.rolling(window=20).mean()
-    bb_std = close.rolling(window=20).std()
+    bb_middle = close.rolling(window=20, min_periods=1).mean()
+    bb_std = close.rolling(window=20, min_periods=1).std()
     bb_upper = bb_middle + (bb_std * 2)
     bb_lower = bb_middle - (bb_std * 2)
 
     # Upper band (gray, dashed effect via alpha)
-    addplots.append(mpf.make_addplot(
-        bb_upper,
-        color='#9e9e9e',
-        width=0.8,
-        linestyle='--',
-        alpha=0.7
-    ))
+    if not bb_upper.dropna().empty:
+        addplots.append(mpf.make_addplot(
+            bb_upper,
+            color='#9e9e9e',
+            width=0.8,
+            linestyle='--',
+            alpha=0.7
+        ))
 
     # Lower band (gray, dashed effect via alpha)
-    addplots.append(mpf.make_addplot(
-        bb_lower,
-        color='#9e9e9e',
-        width=0.8,
-        linestyle='--',
-        alpha=0.7
-    ))
+    if not bb_lower.dropna().empty:
+        addplots.append(mpf.make_addplot(
+            bb_lower,
+            color='#9e9e9e',
+            width=0.8,
+            linestyle='--',
+            alpha=0.7
+        ))
 
     return addplots
 
@@ -497,9 +502,15 @@ def generate_price_chart_from_dataframe(
 
     # Generate chart
     try:
+        # Choose plot type: use line for very large datasets to avoid overcrowded candles
+        plot_type = 'candle'
+        if len(chart_data) > AUTO_RESAMPLE_THRESHOLD:
+            logger.info(f"Large dataset ({len(chart_data)} rows) > {AUTO_RESAMPLE_THRESHOLD}: using line plot for performance.")
+            plot_type = 'line'
+
         fig, axes = mpf.plot(
             chart_data,
-            type='candle',
+            type=plot_type,
             style=chart_style,
             title=f'{ticker} - Price Chart',
             ylabel='Price',
@@ -649,9 +660,10 @@ class TickerCharts:
         addplots = []
         colors = ['blue', 'orange']
         for i, period in enumerate(self.sma_periods):
-            sma = chart_data['close'].rolling(window=period).mean()
-            ap = mpf.make_addplot(sma, color=colors[i % len(colors)], width=1.0)
-            addplots.append(ap)
+            sma = chart_data['close'].rolling(window=period, min_periods=1).mean()
+            if not sma.dropna().empty:
+                ap = mpf.make_addplot(sma, color=colors[i % len(colors)], width=1.0)
+                addplots.append(ap)
 
         # Create entry/exit markers
         entry_dates, exit_dates = self.get_marker_dates(trades)
@@ -696,9 +708,15 @@ class TickerCharts:
         chart_path = os.path.join(charts_dir, f'{ticker}.png')
 
         try:
+            # For large datasets prefer a line plot to keep image readable and performant
+            plot_type = 'candle'
+            if len(chart_data) > AUTO_RESAMPLE_THRESHOLD:
+                logger.info(f"Large dataset ({len(chart_data)} rows) > {AUTO_RESAMPLE_THRESHOLD}: using line plot for performance.")
+                plot_type = 'line'
+
             mpf.plot(
                 chart_data,
-                type='candle',
+                type=plot_type,
                 style='charles',
                 title=title,
                 ylabel='Price',

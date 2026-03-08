@@ -13,6 +13,7 @@ from pathlib import Path
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from loguru import logger
+import pandas as pd
 
 from services.result_loader import (
     load_trade_log,
@@ -21,6 +22,7 @@ from services.result_loader import (
     get_chart_as_base64,
     list_available_backtests,
     load_backtest_summary,
+    generate_placeholder_charts,
 )
 from services.job_runner import job_runner
 
@@ -191,11 +193,17 @@ def list_backtests():
 
 
 @router.get("/latest")
-def get_latest_results() -> BacktestResultsResponse:
-    """Get the latest backtest results."""
+def get_latest_results(range: Optional[str] = None) -> BacktestResultsResponse:
+    """Get the latest backtest results or a range-specific backtest.
+
+    Query parameters:
+    - range: optional string used to select a backtest directory. If the string
+      is found as a substring in an existing backtest directory name, that
+      directory will be returned. Special value 'ALL' returns the latest.
+    """
     output_dir = DEFAULT_OUTPUT_DIR
     
-    # Find the latest backtest directory
+    # Ensure output directory exists
     if not os.path.exists(output_dir):
         raise HTTPException(status_code=404, detail="No backtest results found")
     
@@ -203,7 +211,30 @@ def get_latest_results() -> BacktestResultsResponse:
         dirs = sorted([d for d in os.listdir(output_dir) if d.startswith("backtest_")], reverse=True)
         if not dirs:
             raise HTTPException(status_code=404, detail="No backtest results found")
-        
+
+        # If a range parameter was provided, attempt to find a matching directory
+        if range:
+            # Normalize
+            r = range.strip()
+            # If user asked for ALL, return latest
+            if r.upper() == "ALL":
+                chosen = dirs[0]
+                return _get_backtest_results_by_dir(os.path.join(output_dir, chosen), chosen)
+
+            # Try to match directories that contain the range string
+            candidates = [d for d in dirs if r in d]
+            if candidates:
+                chosen = candidates[0]
+                return _get_backtest_results_by_dir(os.path.join(output_dir, chosen), chosen)
+
+            # If range looks like a 4-digit year, try match backtest_YYYY
+            if len(r) == 4 and r.isdigit():
+                year_candidates = [d for d in dirs if f"backtest_{r}-" in d]
+                if year_candidates:
+                    chosen = year_candidates[0]
+                    return _get_backtest_results_by_dir(os.path.join(output_dir, chosen), chosen)
+
+            # No match found; fall back to latest
         latest_dir = dirs[0]
         return _get_backtest_results_by_dir(os.path.join(output_dir, latest_dir), latest_dir)
     except HTTPException:
@@ -242,13 +273,24 @@ def _get_backtest_results_by_dir(result_dir: str, dir_name: str) -> BacktestResu
     summary = load_backtest_summary(result_dir)
     
     # Load trade data
-    trades_path = os.path.join(result_dir, "trades.csv")
-    trades = load_trade_log(trades_path)
-    
+    # Some backtests generate 'trades.csv' while others use 'trade_log.csv'. Try both.
+    trades = []
+    trade_log_path = None
+    trades_candidates = [
+        os.path.join(result_dir, "trades.csv"),
+        os.path.join(result_dir, "trade_log.csv"),
+        os.path.join(result_dir, "trade_log.csv"),
+    ]
+    for p in trades_candidates:
+        if os.path.exists(p):
+            trades = load_trade_log(p)
+            trade_log_path = p
+            break
+
     # Load ticker statistics
     ticker_stats_path = os.path.join(result_dir, "ticker_stats.csv")
     ticker_stats = load_ticker_stats(ticker_stats_path)
-    
+
     # Load charts as base64
     charts = {}
     charts_dir = os.path.join(result_dir, "charts")
@@ -258,7 +300,103 @@ def _get_backtest_results_by_dir(result_dir: str, dir_name: str) -> BacktestResu
                 chart_path = os.path.join(charts_dir, chart_file)
                 chart_key = chart_file.replace(".png", "")
                 charts[chart_key] = get_chart_as_base64(chart_path)
-    
+
+    # Also include any top-level PNGs in the result_dir (e.g. equity_curve.png, drawdown.png)
+    try:
+        for root_file in sorted(os.listdir(result_dir)):
+            if root_file.endswith('.png'):
+                root_path = os.path.join(result_dir, root_file)
+                root_key = root_file.replace('.png', '')
+                if root_key not in charts:
+                    charts[root_key] = get_chart_as_base64(root_path)
+    except Exception:
+        pass
+
+    # If no per-ticker charts were found (only top-level summary images), attempt to generate them
+    need_generation = True
+    # Detect existing per-ticker charts by key patterns
+    if charts:
+        for k in charts.keys():
+            if k.startswith('top_') or k.startswith('bottom_') or k.endswith('_price_chart'):
+                need_generation = False
+                break
+
+    if need_generation:
+        # Ensure repo root is on sys.path so sibling 'python' package can be imported
+        import sys
+        from pathlib import Path as _Path
+        _repo_root = str(_Path(__file__).resolve().parents[2])
+        if _repo_root not in sys.path:
+            sys.path.insert(0, _repo_root)
+        # First try the full-featured ticker_charts module which may fetch data (yfinance)
+        try:
+            # Import here to avoid hard dependency unless needed
+            from python.backtest import ticker_charts as tc
+            # Only attempt generation if ticker_stats exists (we have tickers to create charts for)
+            if os.path.exists(ticker_stats_path):
+                logger.info("No per-ticker charts found; attempting to generate per-ticker charts")
+                try:
+                    # generate_top_bottom_charts will fetch price data as needed and write PNGs under result_dir/charts
+                    tc.generate_top_bottom_charts(ticker_stats_path, trade_log_path or "", result_dir)
+                    # Reload generated charts
+                    if os.path.exists(charts_dir):
+                        for chart_file in sorted(os.listdir(charts_dir)):
+                            if chart_file.endswith(".png"):
+                                chart_path = os.path.join(charts_dir, chart_file)
+                                chart_key = chart_file.replace(".png", "")
+                                charts[chart_key] = get_chart_as_base64(chart_path)
+                except Exception as inner_e:
+                    logger.warning(f"Chart generation attempted but failed: {inner_e}")
+                    # Attempt lightweight placeholder generation as a fallback (no network dependency)
+                    try:
+                        logger.info("Attempting placeholder chart generation as fallback")
+                        generate_placeholder_charts(result_dir, ticker_stats_path, trade_log_path or "")
+                        if os.path.exists(charts_dir):
+                            for chart_file in sorted(os.listdir(charts_dir)):
+                                if chart_file.endswith(".png"):
+                                    chart_path = os.path.join(charts_dir, chart_file)
+                                    chart_key = chart_file.replace(".png", "")
+                                    charts[chart_key] = get_chart_as_base64(chart_path)
+                    except Exception as fallback_e:
+                        logger.error(f"Placeholder chart generation failed: {fallback_e}")
+        except Exception as e:
+            logger.debug(f"Ticker chart generation module not available: {e}")
+            # If the heavy chart module isn't available, try the lightweight placeholder generator
+            try:
+                logger.info("Ticker chart module not available; generating placeholder charts")
+                generate_placeholder_charts(result_dir, ticker_stats_path or "", trade_log_path or "")
+                if os.path.exists(charts_dir):
+                    for chart_file in sorted(os.listdir(charts_dir)):
+                        if chart_file.endswith(".png"):
+                            chart_path = os.path.join(charts_dir, chart_file)
+                            chart_key = chart_file.replace(".png", "")
+                            charts[chart_key] = get_chart_as_base64(chart_path)
+            except Exception as fallback_e:
+                logger.error(f"Placeholder chart generation failed: {fallback_e}")
+
+    # Provide convenient aliases: map filenames to ticker-based keys so frontend can find images by ticker symbol
+    try:
+        for chart_key in list(charts.keys()):
+            try:
+                symbol = None
+                if chart_key.endswith('_price_chart'):
+                    symbol = chart_key.replace('_price_chart', '')
+                else:
+                    parts = chart_key.split('_')
+                    if len(parts) >= 2:
+                        cand = parts[-1]
+                        if any(ch.isalpha() for ch in cand):
+                            symbol = cand
+                if symbol:
+                    if f"{symbol}_price_chart" not in charts:
+                        charts[f"{symbol}_price_chart"] = charts[chart_key]
+                    if symbol not in charts:
+                        charts[symbol] = charts[chart_key]
+            except Exception:
+                continue
+    except Exception:
+        pass
+
     return BacktestResultsResponse(
         timestamp=dir_name,
         summary=summary,
@@ -266,3 +404,81 @@ def _get_backtest_results_by_dir(result_dir: str, dir_name: str) -> BacktestResu
         ticker_stats=ticker_stats,
         charts=charts,
     )
+
+
+@router.get('/ohlc')
+def get_ohlc(ticker: str, range: Optional[str] = None, start_date: Optional[str] = None, end_date: Optional[str] = None):
+    """Return OHLCV data for a given ticker and date range.
+
+    Query params:
+    - ticker: required ticker symbol
+    - range: optional year string (e.g., '2023') or 'ALL'
+    - start_date, end_date: optional explicit dates (YYYY-MM-DD)
+
+    Returns JSON: { data: [{ time: 'YYYY-MM-DD', open, high, low, close, volume }, ...] }
+    """
+    # Determine date range
+    if range and not (start_date and end_date):
+        r = range.strip()
+        if r.upper() == 'ALL':
+            # default to last 365 days
+            from datetime import datetime, timedelta
+            end = datetime.utcnow().date()
+            start = end - timedelta(days=365)
+            start_date = start.isoformat()
+            end_date = end.isoformat()
+        elif len(r) == 4 and r.isdigit():
+            start_date = f"{r}-01-01"
+            end_date = f"{r}-12-31"
+        else:
+            # unknown range, fallback to last 365 days
+            from datetime import datetime, timedelta
+            end = datetime.utcnow().date()
+            start = end - timedelta(days=365)
+            start_date = start.isoformat()
+            end_date = end.isoformat()
+
+    if not start_date or not end_date:
+        raise HTTPException(status_code=400, detail='start_date and end_date or range (year) must be provided')
+
+    # Use python.backtest.ticker_charts to fetch via yfinance when available
+    try:
+        # Import ticker_charts by file path to avoid executing python.backtest __init__ which pulls other modules
+        import importlib.util
+        from pathlib import Path as _Path
+        _repo_root = str(_Path(__file__).resolve().parents[2])
+        tc_path = os.path.join(_repo_root, 'python', 'backtest', 'ticker_charts.py')
+        spec = importlib.util.spec_from_file_location('ticker_charts_module', tc_path)
+        tc = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(tc)
+
+        if not getattr(tc, 'YFINANCE_AVAILABLE', False):
+            raise RuntimeError('yfinance not available in environment')
+
+        # fetch via yfinance inside the ticker_charts module
+        stock = tc.yf.Ticker(ticker)
+        df = stock.history(start=start_date, end=end_date)
+        if df is None or df.empty:
+            return {'data': []}
+
+        # normalize index and columns
+        df.reset_index(inplace=True)
+        # Determine date column name if different
+        date_col = 'Date' if 'Date' in df.columns else df.columns[0]
+        df[date_col] = pd.to_datetime(df[date_col]).dt.strftime('%Y-%m-%d')
+
+        data = []
+        for _, row in df.iterrows():
+            data.append({
+                'time': row[date_col],
+                'open': None if pd.isna(row.get('Open')) else float(row.get('Open')),
+                'high': None if pd.isna(row.get('High')) else float(row.get('High')),
+                'low': None if pd.isna(row.get('Low')) else float(row.get('Low')),
+                'close': None if pd.isna(row.get('Close')) else float(row.get('Close')),
+                'volume': None if pd.isna(row.get('Volume')) else int(row.get('Volume')),
+            })
+        return {'data': data}
+    except Exception as e:
+        logger.error(f'Failed to fetch OHLC for {ticker}: {e}')
+        raise HTTPException(status_code=503, detail=str(e))
+

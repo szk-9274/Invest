@@ -1,0 +1,72 @@
+name: Playwright Screenshots
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  capture-screenshots:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install deps
+        run: |
+          sudo apt-get update
+          # Install Playwright system dependencies that are sometimes missing on runners
+          sudo apt-get install -y libnspr4 libnss3 libx11-xcb1 libxcomposite1 libxdamage1 libxrandr2 libgbm1 libxss1 libasound2 libpangocairo-1.0-0 libgtk-3-0 libatk-bridge2.0-0 libxshmfence1 fonts-liberation || true
+
+          npm ci
+          npx playwright install-deps || true
+          npx playwright install || true
+      - name: Build and start frontend preview
+        run: |
+          # Install frontend deps and build
+          npm --prefix frontend ci || npm --prefix frontend install --no-audit --no-fund
+          npm --prefix frontend run build
+          # Start a preview server in background and log output (use port 5174 to avoid conflicts)
+          npm --prefix frontend run preview -- --port 5174 > frontend.log 2>&1 &
+          # Wait for frontend ready
+          for i in $(seq 1 60); do
+            if curl -sSf http://127.0.0.1:5174/ || curl -sSf http://127.0.0.1:5174/dashboard > /dev/null; then
+              echo "frontend ready"
+              break
+            fi
+            echo "waiting for frontend... ($i)"
+            sleep 1
+          done
+      - name: Start mock backend
+        run: |
+          npm run mock-backend > mock-backend.log 2>&1 &
+          # Wait for readiness by polling the health endpoint
+          for i in $(seq 1 30); do
+            if curl -sSf http://127.0.0.1:8000/api/backtest/latest > /dev/null; then
+              echo "mock-backend ready"
+              break
+            fi
+            echo "waiting for mock-backend... ($i)"
+            sleep 1
+          done
+      - name: Capture screenshots
+        run: |
+          cat frontend.log || true
+          cat mock-backend.log || true
+          npm run screenshot:ci
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playright-logs
+          path: |
+            **/mock-backend.log
+            **/frontend.log
+
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: backtest-ui-screenshots
+          path: tests/screenshots/

@@ -47,7 +47,12 @@ export interface BacktestMetadata {
   dir_name: string;
 }
 
-const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000/api';
+type ApiImportMetaEnv = {
+  VITE_API_URL?: string;
+};
+
+const configuredApiBaseUrl = ((import.meta as { env?: ApiImportMetaEnv }).env?.VITE_API_URL ?? '').trim();
+const API_BASE_URL = (configuredApiBaseUrl || '/api').replace(/\/$/, '');
 
 /**
  * Fetch latest backtest results
