@@ -242,6 +242,9 @@ export function CandlestickChart({
 
   // Background chart image (base64 data URI) fetched from backend latest results
   const [bgImage, setBgImage] = React.useState<string | null>(null)
+  // OHLC data for interactive charts (lightweight-charts)
+  const [ohlcData, setOhlcData] = React.useState<any[] | null>(null)
+  const chartContainerRef = React.useRef<HTMLDivElement | null>(null)
 
   // Fetch chart image for a specific period (client-side request to backend with optional range query)
   const fetchChartForPeriod = React.useCallback(async (p: string) => {
@@ -257,6 +260,36 @@ export function CandlestickChart({
     } catch (e) {
       // eslint-disable-next-line no-console
       console.warn('Failed to fetch chart for period', e)
+    }
+  }, [ticker])
+
+  // Fetch OHLC JSON for interactive chart when a specific year is selected
+  const fetchOhlcForYear = React.useCallback(async (y: string) => {
+    try {
+      const res = await fetch(`/api/backtest/ohlc?ticker=${encodeURIComponent(ticker)}&range=${encodeURIComponent(y)}`)
+      if (!res.ok) {
+        console.warn('OHLC fetch returned', res.status)
+        setOhlcData(null)
+        return
+      }
+      const payload = await res.json()
+      if (payload && Array.isArray(payload.data) && payload.data.length > 0) {
+        // convert to lightweight-charts format: { time, open, high, low, close }
+        const series = payload.data.map((r: any) => ({
+          time: r.time,
+          open: r.open,
+          high: r.high,
+          low: r.low,
+          close: r.close,
+          volume: r.volume,
+        }))
+        setOhlcData(series)
+      } else {
+        setOhlcData(null)
+      }
+    } catch (e) {
+      console.warn('Failed to fetch OHLC', e)
+      setOhlcData(null)
     }
   }, [ticker])
 
@@ -306,6 +339,44 @@ export function CandlestickChart({
   // const [lastMousePos, setLastMousePos] = React.useState<{x:number,y:number}|null>(null)
   // const [lastTouchDistance, setLastTouchDistance] = React.useState<number|null>(null)
   // const [lastTouchCenter, setLastTouchCenter] = React.useState<{x:number,y:number}|null>(null)
+
+  // Render lightweight-charts when OHLC data is available
+  React.useEffect(() => {
+    let chart: any = null
+    let series: any = null
+    let volSeries: any = null
+    let mounted = true
+    const render = async () => {
+      if (!chartContainerRef.current) return
+      if (!ohlcData || ohlcData.length === 0) return
+      try {
+        const lc = await import('lightweight-charts')
+        if (!mounted) return
+        // clear
+        chartContainerRef.current.innerHTML = ''
+        chart = lc.createChart(chartContainerRef.current, {
+          layout: { backgroundColor: THEME.background, textColor: THEME.textColor },
+          width: width || 800,
+          height: height || 450,
+          rightPriceScale: { visible: true },
+        })
+        series = chart.addCandlestickSeries({ upColor: THEME.upColor, downColor: THEME.downColor, wickUpColor: THEME.upColor, wickDownColor: THEME.downColor })
+        series.setData(ohlcData)
+        // volume
+        volSeries = chart.addHistogramSeries({ priceFormat: { type: 'volume' }, scaleMargins: { top: 0.8, bottom: 0 } })
+        volSeries.setData(ohlcData.map((d: any) => ({ time: d.time, value: d.volume, color: d.close >= d.open ? THEME.volumeUpColor : THEME.volumeDownColor })))
+      } catch (e) {
+        // If lightweight-charts not available, fall back to image
+        // eslint-disable-next-line no-console
+        console.warn('lightweight-charts failed to load or render', e)
+      }
+    }
+    render()
+    return () => {
+      mounted = false
+      if (chart && chart.remove) chart.remove()
+    }
+  }, [ohlcData, width, height])
 
   const onWheelZoom = (e: React.WheelEvent) => {
     // zoom disabled
@@ -616,6 +687,14 @@ export function CandlestickChart({
           <div
             role="button"
             tabIndex={0}
+            ref={chartContainerRef}
+            style={{ width: '100%', minHeight: 300 }}
+          >
+            {/* If interactive OHLC is available, lightweight-charts will render into this container. Otherwise bgImage is used as background. */}
+            {(!ohlcData && bgImage) && (
+              <img src={bgImage} alt={`${ticker} price chart`} style={{ width: '100%', display: 'block' }} />
+            )}
+          </div>
             onClick={() => { setModalMode('image'); setShowModal(true) }}
             onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (setModalMode('image'), setShowModal(true))}
             data-testid="chart-rendered"
