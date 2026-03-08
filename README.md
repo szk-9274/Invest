@@ -37,7 +37,7 @@
 ### 1) Python 環境の準備（Windows PowerShell の例）
 
 ```bash
-cd /mnt/c/00_mycode/Invest/python
+cd /home/fpxszk/code/Invest/python
 # 仮想環境作成（任意の名前、ここでは .venv を例示）
 python -m venv .venv
 # 仮想環境を有効化
@@ -51,7 +51,7 @@ pip install -r requirements.txt
 ### 2) バックエンド起動
 
 ```bash
-cd /mnt/c/00_mycode/Invest/backend
+cd /home/fpxszk/code/Invest/backend
 python -m uvicorn app:app --reload --host 0.0.0.0 --port 8000
 ```
 
@@ -60,7 +60,7 @@ python -m uvicorn app:app --reload --host 0.0.0.0 --port 8000
 ### 3) フロントエンド起動
 
 ```bash
-cd /mnt/c/00_mycode/Invest/frontend
+cd /home/fpxszk/code/Invest/frontend
 npm install
 npm run dev -- --host 0.0.0.0 --port 3000 --strictPort
 ```
@@ -86,7 +86,7 @@ sudo apt install -y just
 ### just を使った開発起動
 
 ```bash
-cd /mnt/c/00_mycode/Invest
+cd /home/fpxszk/code/Invest
 just dev
 ```
 
@@ -104,7 +104,7 @@ just dev
 - Stage2（スクリーニング）:
 
 ```bash
-cd /mnt/c/00_mycode/Invest/python
+cd /home/fpxszk/code/Invest/python
 python main.py --mode stage2
 python main.py --mode stage2 --with-fundamentals
 ```
@@ -112,7 +112,7 @@ python main.py --mode stage2 --with-fundamentals
 - Backtest（バックテスト）:
 
 ```bash
-cd /mnt/c/00_mycode/Invest/python
+cd /home/fpxszk/code/Invest/python
 python main.py --mode backtest
 python main.py --mode backtest --start 2023-01-01 --end 2024-01-01
 python main.py --mode backtest --tickers AAPL,MSFT,NVDA
