@@ -29,10 +29,13 @@ just fmt    # cd python && source .venv/bin/activate && ruff format .
 
 ### ターミナル1：バックエンドAPI起動
 ```bash
-cd $HOME/code/Invest/python
-source .venv/bin/activate
-cd $HOME/code/Invest/backend
-python -m uvicorn app:app --reload --host 0.0.0.0 --port 8000
+cd $HOME/code/Invest
+# Option A (推奨): start uvicorn from repository root so package imports resolve naturally
+python -m uvicorn backend.app:app --reload --host 0.0.0.0 --port 8000
+
+# Option B: if you prefer starting from the backend directory, set PYTHONPATH to the repo root
+# cd $HOME/code/Invest/backend
+# PYTHONPATH=$HOME/code/Invest python -m uvicorn app:app --reload --host 0.0.0.0 --port 8000
 ```
 - API サーバーは http://localhost:8000 で起動します（同一ネットワーク端末からはホストIP:8000 でもアクセス可能）
 - ホットリロード対応
