@@ -1,5 +1,6 @@
 import React from 'react'
 import Plot from 'react-plotly.js'
+import { CandlestickChart } from './CandlestickChart'
 import { TradeRecord, TickerStats } from '../api/backtest'
 
 interface PurchasePoint {
@@ -130,35 +131,15 @@ export const TopBottomPurchaseCharts: React.FC<TopBottomPurchaseChartsProps> = (
               <span>{item.ticker}</span>
               <span className={`badge ${item.group}`}>{item.group === 'top' ? 'TOP' : 'BOTTOM'}</span>
             </div>
-            <Plot
-              data={[
-                {
-                  type: item.purchases.length > 200 ? 'scattergl' : 'scatter',
-                  mode: 'markers',
-                  x: item.purchases.map((point) => point.timestamp),
-                  y: item.purchases.map((point) => point.price),
-                  customdata: item.purchases.map((point) => [point.amount]),
-                  marker: {
-                    size: item.purchases.map((point) => calculateMarkerSize(point.amount)),
-                    color: item.totalPnl >= 0 ? '#22c55e' : '#ef4444',
-                    opacity: 0.75,
-                  },
-                  hovertemplate:
-                    'Date: %{x}<br>Price: $%{y:,.2f}<br>Amount: $%{customdata[0]:,.2f}<extra></extra>',
-                },
-              ]}
-              layout={{
-                margin: { t: 10, r: 16, l: 40, b: 34 },
-                paper_bgcolor: '#ffffff',
-                plot_bgcolor: '#ffffff',
-                xaxis: { type: 'date', tickfont: { size: 10 } },
-                yaxis: { tickprefix: '$', tickfont: { size: 10 } },
-                showlegend: false,
-                height: 240,
-              }}
-              config={{ displayModeBar: false, responsive: true }}
-              style={{ width: '100%' }}
-            />
+            <div style={{ width: '100%' }}>
+              <CandlestickChart
+                ticker={item.ticker}
+                data={{ dates: [], open: [], high: [], low: [], close: [], volume: [] }}
+                markers={{ entries: item.purchases.map(p => ({ date: p.timestamp, price: p.price })), exits: [] }}
+                width={420}
+                height={240}
+              />
+            </div>
           </div>
         ))}
       </div>

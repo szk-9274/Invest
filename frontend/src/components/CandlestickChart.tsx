@@ -355,7 +355,7 @@ export function CandlestickChart({
         // clear
         chartContainerRef.current.innerHTML = ''
         chart = lc.createChart(chartContainerRef.current, {
-          layout: { backgroundColor: THEME.background, textColor: THEME.textColor },
+          layout: { background: { color: THEME.background }, textColor: THEME.textColor },
           width: width || 800,
           height: height || 450,
           rightPriceScale: { visible: true },
@@ -680,23 +680,17 @@ export function CandlestickChart({
         </div>
       </div>
 
-      {data.dates.length === 0 ? (
+      {(data.dates.length === 0 && !bgImage && (!markers || ((markers.entries?.length||0) === 0 && (markers.exits?.length||0) === 0)) && !ohlcData) ? (
         <p data-testid="no-data-message">No chart data available</p>
       ) : (
         <div data-testid="plotly-chart">
           {/* In production, this would use react-plotly.js Plot component */}
           {/* Static placeholder for testability; clicking opens interactive modal */}
+
           <div
             role="button"
             tabIndex={0}
             ref={chartContainerRef}
-            style={{ width: '100%', minHeight: 300 }}
-          >
-            {/* If interactive OHLC is available, lightweight-charts will render into this container. Otherwise bgImage is used as background. */}
-            {(!ohlcData && bgImage) && (
-              <img src={bgImage} alt={`${ticker} price chart`} style={{ width: '100%', display: 'block' }} />
-            )}
-          </div>
             onClick={() => { setModalMode('image'); setShowModal(true) }}
             onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (setModalMode('image'), setShowModal(true))}
             data-testid="chart-rendered"
@@ -711,8 +705,14 @@ export function CandlestickChart({
               justifyContent: 'center',
               position: 'relative',
               backgroundColor: '#0f172a',
+              width: '100%'
             }}
           >
+            {/* If interactive OHLC is available, lightweight-charts will render into this container. Otherwise bgImage is used as background. */}
+            {(!ohlcData && bgImage) && (
+              <img src={bgImage} alt={`${ticker} price chart`} style={{ width: '100%', display: 'block' }} />
+            )}
+
             {/* If Plotly is available, render a small interactive preview (markers over background image)
                 Otherwise fall back to a CSS background preview */}
             {PlotComponent ? (
@@ -750,6 +750,7 @@ export function CandlestickChart({
                 </div>
               </div>
             )}
+
           </div>
 
         </div>
