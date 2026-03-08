@@ -143,7 +143,7 @@ describe('buildChartLayout', () => {
 
   it('enables zoom dragmode', () => {
     const layout = buildChartLayout('AAPL')
-    expect(layout.dragmode).toBe('zoom')
+    expect(layout.dragmode).toBe('pan')
   })
 
   it('uses custom width and height when provided', () => {

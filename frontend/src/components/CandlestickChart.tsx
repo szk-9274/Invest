@@ -217,7 +217,7 @@ export function buildChartLayout(ticker: string, width?: number, height?: number
       bgcolor: 'rgba(19, 23, 34, 0.8)',
       font: { color: THEME.textColor },
     },
-    dragmode: 'zoom' as const,
+    dragmode: 'pan' as const, // zoom temporarily disabled
   }
 }
 
@@ -289,21 +289,21 @@ export function CandlestickChart({
 
   // Modal view mode: initially show enlarged image, user can switch to interactive plot
   const [modalMode, setModalMode] = React.useState<'image' | 'plot'>('image')
-  const [zoomScale, setZoomScale] = React.useState<number>(1)
+  // Zoom and pan temporarily disabled
+  // const [zoomScale, setZoomScale] = React.useState<number>(1)
   const zoomStep = 0.25
-  const [imgOffset, setImgOffset] = React.useState<{x:number,y:number}>({x:0,y:0})
-  const [isDragging, setIsDragging] = React.useState(false)
-  const [lastMousePos, setLastMousePos] = React.useState<{x:number,y:number}|null>(null)
-  const [lastTouchDistance, setLastTouchDistance] = React.useState<number|null>(null)
-  const [lastTouchCenter, setLastTouchCenter] = React.useState<{x:number,y:number}|null>(null)
+  // const [imgOffset, setImgOffset] = React.useState<{x:number,y:number}>({x:0,y:0})
+  // const [isDragging, setIsDragging] = React.useState(false)
+  // const [lastMousePos, setLastMousePos] = React.useState<{x:number,y:number}|null>(null)
+  // const [lastTouchDistance, setLastTouchDistance] = React.useState<number|null>(null)
+  // const [lastTouchCenter, setLastTouchCenter] = React.useState<{x:number,y:number}|null>(null)
 
   const onWheelZoom = (e: React.WheelEvent) => {
-    if (!e.ctrlKey && !e.metaKey) return
-    e.preventDefault()
-    setZoomScale((s) => Math.max(0.2, Math.min(8, Number((s + (e.deltaY > 0 ? -zoomStep : zoomStep)).toFixed(2)))))
+    // zoom disabled
+    return
   }
 
-  const resetZoom = () => setZoomScale(1)
+  const resetZoom = () => { /* zoom reset disabled */ }
 
   let layoutWithImage: any = layout as any
 
@@ -616,7 +616,7 @@ export function CandlestickChart({
 
       {/* Full-screen interactive modal */}
       {showModal && (
-        <div className="candlestick-modal" role="dialog" aria-modal="true" onWheel={onWheelZoom}>
+        <div className="candlestick-modal" role="dialog" aria-modal="true">
           <div className="candlestick-modal-content">
             <button className="modal-close" onClick={() => { setShowModal(false); resetZoom(); setModalMode('image') }} aria-label="Close">×</button>
 
@@ -626,9 +626,7 @@ export function CandlestickChart({
                 <div style={{ padding: 8, display: 'flex', gap: 8, alignItems: 'center' }}>
                   <div style={{ color: THEME.textColor }}>{ticker} — 拡大画像</div>
                   <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
-                    <button onClick={() => setZoomScale((s) => Math.max(0.2, Number((s - zoomStep).toFixed(2))))} aria-label="Zoom out">−</button>
-                    <button onClick={() => setZoomScale((s) => Math.min(8, Number((s + zoomStep).toFixed(2))))} aria-label="Zoom in">＋</button>
-                    <button onClick={resetZoom} aria-label="Reset zoom">Reset</button>
+                    {/* Zoom controls temporarily disabled */}
                     <button onClick={() => setModalMode('plot')} aria-label="Open interactive chart">詳細を開く</button>
                   </div>
                 </div>
@@ -639,43 +637,8 @@ export function CandlestickChart({
                       data-testid="chart-modal-image"
                       src={bgImage}
                       alt={`${ticker} chart`}
-                      style={{ transform: `translate(${imgOffset.x}px, ${imgOffset.y}px) scale(${zoomScale})`, transformOrigin: 'center', maxWidth: '100%', maxHeight: '100%', display: 'block', touchAction: 'none', cursor: isDragging ? 'grabbing' : 'grab' }}
+                      style={{ maxWidth: '100%', maxHeight: '100%', display: 'block', touchAction: 'none' }}
                       draggable={false}
-                      onMouseDown={(e) => { setIsDragging(true); setLastMousePos({x: e.clientX, y: e.clientY}) }}
-                      onMouseMove={(e) => { if (!isDragging || !lastMousePos) return; const dx = e.clientX - lastMousePos.x; const dy = e.clientY - lastMousePos.y; setImgOffset((p) => ({x: p.x + dx, y: p.y + dy})); setLastMousePos({x: e.clientX, y: e.clientY}) }}
-                      onMouseUp={() => { setIsDragging(false); setLastMousePos(null) }}
-                      onMouseLeave={() => { setIsDragging(false); setLastMousePos(null) }}
-                      onTouchStart={(e) => {
-                        if (e.touches.length === 2) {
-                          const dx = e.touches[0].clientX - e.touches[1].clientX
-                          const dy = e.touches[0].clientY - e.touches[1].clientY
-                          setLastTouchDistance(Math.hypot(dx, dy))
-                          const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2
-                          const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2
-                          setLastTouchCenter({x: cx, y: cy})
-                        } else if (e.touches.length === 1) {
-                          setLastMousePos({x: e.touches[0].clientX, y: e.touches[0].clientY})
-                          setIsDragging(true)
-                        }
-                      }}
-                      onTouchMove={(e) => {
-                        if (e.touches.length === 2 && lastTouchDistance) {
-                          const dx = e.touches[0].clientX - e.touches[1].clientX
-                          const dy = e.touches[0].clientY - e.touches[1].clientY
-                          const dist = Math.hypot(dx, dy)
-                          const factor = dist / lastTouchDistance
-                          setZoomScale((s) => Math.max(0.2, Math.min(8, Number((s * factor).toFixed(2)))))
-                          setLastTouchDistance(dist)
-                        } else if (e.touches.length === 1 && isDragging && lastMousePos) {
-                          const nx = e.touches[0].clientX
-                          const ny = e.touches[0].clientY
-                          const dx = nx - lastMousePos.x
-                          const dy = ny - lastMousePos.y
-                          setImgOffset((p) => ({x: p.x + dx, y: p.y + dy}))
-                          setLastMousePos({x: nx, y: ny})
-                        }
-                      }}
-                      onTouchEnd={(e) => { if (e.touches.length < 2) setLastTouchDistance(null); if (e.touches.length === 0) { setIsDragging(false); setLastMousePos(null); } }}
                     />
                   ) : (
                     <div style={{ color: THEME.textColor }}>No background image available</div>
@@ -699,7 +662,7 @@ export function CandlestickChart({
                     <PlotComponent
                       data={traces as any}
                       layout={layoutWithImage as any}
-                      config={{responsive: true, scrollZoom: true}}
+                      config={{responsive: true, scrollZoom: false}}
                       useResizeHandler
                       style={{width: '100%', height: '100%'}}
                     />
