@@ -363,7 +363,7 @@ def _get_backtest_results_by_dir(result_dir: str, dir_name: str) -> BacktestResu
             # If the heavy chart module isn't available, try the lightweight placeholder generator
             try:
                 logger.info("Ticker chart module not available; generating placeholder charts")
-                generate_placeholder_charts(result_dir, ticker_stats_path, trade_log_path or "")
+                generate_placeholder_charts(result_dir, ticker_stats_path or "", trade_log_path or "")
                 if os.path.exists(charts_dir):
                     for chart_file in sorted(os.listdir(charts_dir)):
                         if chart_file.endswith(".png"):
@@ -372,7 +372,30 @@ def _get_backtest_results_by_dir(result_dir: str, dir_name: str) -> BacktestResu
                             charts[chart_key] = get_chart_as_base64(chart_path)
             except Exception as fallback_e:
                 logger.error(f"Placeholder chart generation failed: {fallback_e}")
-    
+
+    # Provide convenient aliases: map filenames to ticker-based keys so frontend can find images by ticker symbol
+    try:
+        for chart_key in list(charts.keys()):
+            try:
+                symbol = None
+                if chart_key.endswith('_price_chart'):
+                    symbol = chart_key.replace('_price_chart', '')
+                else:
+                    parts = chart_key.split('_')
+                    if len(parts) >= 2:
+                        cand = parts[-1]
+                        if any(ch.isalpha() for ch in cand):
+                            symbol = cand
+                if symbol:
+                    if f"{symbol}_price_chart" not in charts:
+                        charts[f"{symbol}_price_chart"] = charts[chart_key]
+                    if symbol not in charts:
+                        charts[symbol] = charts[chart_key]
+            except Exception:
+                continue
+    except Exception:
+        pass
+
     return BacktestResultsResponse(
         timestamp=dir_name,
         summary=summary,
