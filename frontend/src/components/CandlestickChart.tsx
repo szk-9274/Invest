@@ -658,6 +658,8 @@ export function CandlestickChart({
                 setPeriod('ALL')
                 // request backend for that year's pre-generated backtest
                 fetchChartForPeriod(y)
+                // fetch OHLC for interactive chart
+                fetchOhlcForYear(y)
               }}
               style={{
                 padding: '6px 8px',
