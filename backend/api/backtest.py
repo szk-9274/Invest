@@ -13,6 +13,7 @@ from pathlib import Path
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from loguru import logger
+import pandas as pd
 
 from services.result_loader import (
     load_trade_log,
@@ -192,11 +193,17 @@ def list_backtests():
 
 
 @router.get("/latest")
-def get_latest_results() -> BacktestResultsResponse:
-    """Get the latest backtest results."""
+def get_latest_results(range: Optional[str] = None) -> BacktestResultsResponse:
+    """Get the latest backtest results or a range-specific backtest.
+
+    Query parameters:
+    - range: optional string used to select a backtest directory. If the string
+      is found as a substring in an existing backtest directory name, that
+      directory will be returned. Special value 'ALL' returns the latest.
+    """
     output_dir = DEFAULT_OUTPUT_DIR
     
-    # Find the latest backtest directory
+    # Ensure output directory exists
     if not os.path.exists(output_dir):
         raise HTTPException(status_code=404, detail="No backtest results found")
     
@@ -204,7 +211,30 @@ def get_latest_results() -> BacktestResultsResponse:
         dirs = sorted([d for d in os.listdir(output_dir) if d.startswith("backtest_")], reverse=True)
         if not dirs:
             raise HTTPException(status_code=404, detail="No backtest results found")
-        
+
+        # If a range parameter was provided, attempt to find a matching directory
+        if range:
+            # Normalize
+            r = range.strip()
+            # If user asked for ALL, return latest
+            if r.upper() == "ALL":
+                chosen = dirs[0]
+                return _get_backtest_results_by_dir(os.path.join(output_dir, chosen), chosen)
+
+            # Try to match directories that contain the range string
+            candidates = [d for d in dirs if r in d]
+            if candidates:
+                chosen = candidates[0]
+                return _get_backtest_results_by_dir(os.path.join(output_dir, chosen), chosen)
+
+            # If range looks like a 4-digit year, try match backtest_YYYY
+            if len(r) == 4 and r.isdigit():
+                year_candidates = [d for d in dirs if f"backtest_{r}-" in d]
+                if year_candidates:
+                    chosen = year_candidates[0]
+                    return _get_backtest_results_by_dir(os.path.join(output_dir, chosen), chosen)
+
+            # No match found; fall back to latest
         latest_dir = dirs[0]
         return _get_backtest_results_by_dir(os.path.join(output_dir, latest_dir), latest_dir)
     except HTTPException:
@@ -334,7 +364,7 @@ def _get_backtest_results_by_dir(result_dir: str, dir_name: str) -> BacktestResu
             # If the heavy chart module isn't available, try the lightweight placeholder generator
             try:
                 logger.info("Ticker chart module not available; generating placeholder charts")
-                generate_placeholder_charts(result_dir, ticker_stats_path, trade_log_path or "")
+                generate_placeholder_charts(result_dir, ticker_stats_path or "", trade_log_path or "")
                 if os.path.exists(charts_dir):
                     for chart_file in sorted(os.listdir(charts_dir)):
                         if chart_file.endswith(".png"):
@@ -343,7 +373,30 @@ def _get_backtest_results_by_dir(result_dir: str, dir_name: str) -> BacktestResu
                             charts[chart_key] = get_chart_as_base64(chart_path)
             except Exception as fallback_e:
                 logger.error(f"Placeholder chart generation failed: {fallback_e}")
-    
+
+    # Provide convenient aliases: map filenames to ticker-based keys so frontend can find images by ticker symbol
+    try:
+        for chart_key in list(charts.keys()):
+            try:
+                symbol = None
+                if chart_key.endswith('_price_chart'):
+                    symbol = chart_key.replace('_price_chart', '')
+                else:
+                    parts = chart_key.split('_')
+                    if len(parts) >= 2:
+                        cand = parts[-1]
+                        if any(ch.isalpha() for ch in cand):
+                            symbol = cand
+                if symbol:
+                    if f"{symbol}_price_chart" not in charts:
+                        charts[f"{symbol}_price_chart"] = charts[chart_key]
+                    if symbol not in charts:
+                        charts[symbol] = charts[chart_key]
+            except Exception:
+                continue
+    except Exception:
+        pass
+
     return BacktestResultsResponse(
         timestamp=dir_name,
         summary=summary,
@@ -351,3 +404,81 @@ def _get_backtest_results_by_dir(result_dir: str, dir_name: str) -> BacktestResu
         ticker_stats=ticker_stats,
         charts=charts,
     )
+
+
+@router.get('/ohlc')
+def get_ohlc(ticker: str, range: Optional[str] = None, start_date: Optional[str] = None, end_date: Optional[str] = None):
+    """Return OHLCV data for a given ticker and date range.
+
+    Query params:
+    - ticker: required ticker symbol
+    - range: optional year string (e.g., '2023') or 'ALL'
+    - start_date, end_date: optional explicit dates (YYYY-MM-DD)
+
+    Returns JSON: { data: [{ time: 'YYYY-MM-DD', open, high, low, close, volume }, ...] }
+    """
+    # Determine date range
+    if range and not (start_date and end_date):
+        r = range.strip()
+        if r.upper() == 'ALL':
+            # default to last 365 days
+            from datetime import datetime, timedelta
+            end = datetime.utcnow().date()
+            start = end - timedelta(days=365)
+            start_date = start.isoformat()
+            end_date = end.isoformat()
+        elif len(r) == 4 and r.isdigit():
+            start_date = f"{r}-01-01"
+            end_date = f"{r}-12-31"
+        else:
+            # unknown range, fallback to last 365 days
+            from datetime import datetime, timedelta
+            end = datetime.utcnow().date()
+            start = end - timedelta(days=365)
+            start_date = start.isoformat()
+            end_date = end.isoformat()
+
+    if not start_date or not end_date:
+        raise HTTPException(status_code=400, detail='start_date and end_date or range (year) must be provided')
+
+    # Use python.backtest.ticker_charts to fetch via yfinance when available
+    try:
+        # Import ticker_charts by file path to avoid executing python.backtest __init__ which pulls other modules
+        import importlib.util
+        from pathlib import Path as _Path
+        _repo_root = str(_Path(__file__).resolve().parents[2])
+        tc_path = os.path.join(_repo_root, 'python', 'backtest', 'ticker_charts.py')
+        spec = importlib.util.spec_from_file_location('ticker_charts_module', tc_path)
+        tc = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(tc)
+
+        if not getattr(tc, 'YFINANCE_AVAILABLE', False):
+            raise RuntimeError('yfinance not available in environment')
+
+        # fetch via yfinance inside the ticker_charts module
+        stock = tc.yf.Ticker(ticker)
+        df = stock.history(start=start_date, end=end_date)
+        if df is None or df.empty:
+            return {'data': []}
+
+        # normalize index and columns
+        df.reset_index(inplace=True)
+        # Determine date column name if different
+        date_col = 'Date' if 'Date' in df.columns else df.columns[0]
+        df[date_col] = pd.to_datetime(df[date_col]).dt.strftime('%Y-%m-%d')
+
+        data = []
+        for _, row in df.iterrows():
+            data.append({
+                'time': row[date_col],
+                'open': None if pd.isna(row.get('Open')) else float(row.get('Open')),
+                'high': None if pd.isna(row.get('High')) else float(row.get('High')),
+                'low': None if pd.isna(row.get('Low')) else float(row.get('Low')),
+                'close': None if pd.isna(row.get('Close')) else float(row.get('Close')),
+                'volume': None if pd.isna(row.get('Volume')) else int(row.get('Volume')),
+            })
+        return {'data': data}
+    except Exception as e:
+        logger.error(f'Failed to fetch OHLC for {ticker}: {e}')
+        raise HTTPException(status_code=503, detail=str(e))
+

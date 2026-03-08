@@ -340,7 +340,18 @@ def list_available_backtests(output_dir: str) -> List[Dict]:
                 logger.warning(f"Failed to parse backtest directory {dir_name}: {e}")
                 continue
 
-        return backtests
+        # Filter to allowed years (2020-2025) as a temporary restriction per user request
+        try:
+            allowed_years = {str(y) for y in range(2020, 2026)}
+            filtered = []
+            for b in backtests:
+                sd = b.get('start_date', '')
+                year = sd.split('-')[0] if sd else ''
+                if year in allowed_years:
+                    filtered.append(b)
+            return filtered
+        except Exception:
+            return backtests
     except Exception as e:
         logger.error(f"Failed to list backtests: {e}")
         return []

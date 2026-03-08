@@ -217,7 +217,7 @@ export function buildChartLayout(ticker: string, width?: number, height?: number
       bgcolor: 'rgba(19, 23, 34, 0.8)',
       font: { color: THEME.textColor },
     },
-    dragmode: 'zoom' as const,
+    dragmode: 'pan' as const, // zoom temporarily disabled
   }
 }
 
@@ -235,39 +235,81 @@ export function CandlestickChart({
   const [PlotComponent, setPlotComponent] = React.useState<any>(null)
   const [plotError, setPlotError] = React.useState<string | null>(null)
 
+  // Period selector state (1M/3M/6M/1Y/ALL). Defaults to ALL.
+  const [period, setPeriod] = React.useState<'1M' | '3M' | '6M' | '1Y' | 'ALL'>('ALL')
+  // Year quick selector (used to request pre-generated backtests like 2022/2023/2024/2025)
+  const [year, setYear] = React.useState<string | null>(null)
+
   // Background chart image (base64 data URI) fetched from backend latest results
   const [bgImage, setBgImage] = React.useState<string | null>(null)
+  // OHLC data for interactive charts (lightweight-charts)
+  const [ohlcData, setOhlcData] = React.useState<any[] | null>(null)
+  const chartContainerRef = React.useRef<HTMLDivElement | null>(null)
 
-  // Fetch latest backtest charts and pick the one corresponding to this ticker
+  // Fetch chart image for a specific period (client-side request to backend with optional range query)
+  const fetchChartForPeriod = React.useCallback(async (p: string) => {
+    try {
+      const res = await fetch(`/api/backtest/latest?range=${encodeURIComponent(p)}`)
+      if (!res.ok) return
+      const data = await res.json()
+      const charts = (data && (data as any).charts) || {}
+      const keys = Object.keys(charts || {})
+      let key = keys.find((k) => k === `${ticker}_price_chart`) || keys.find((k) => k === ticker) || keys.find((k) => k.includes(ticker)) || keys.find((k) => k.includes('_price_chart'))
+      if (!key && keys.length > 0) key = keys[0]
+      if (key && charts[key]) setBgImage(charts[key])
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn('Failed to fetch chart for period', e)
+    }
+  }, [ticker])
+
+  // Fetch OHLC JSON for interactive chart when a specific year is selected
+  const fetchOhlcForYear = React.useCallback(async (y: string) => {
+    try {
+      const res = await fetch(`/api/backtest/ohlc?ticker=${encodeURIComponent(ticker)}&range=${encodeURIComponent(y)}`)
+      if (!res.ok) {
+        console.warn('OHLC fetch returned', res.status)
+        setOhlcData(null)
+        return
+      }
+      const payload = await res.json()
+      if (payload && Array.isArray(payload.data) && payload.data.length > 0) {
+        // convert to lightweight-charts format: { time, open, high, low, close }
+        const series = payload.data.map((r: any) => ({
+          time: r.time,
+          open: r.open,
+          high: r.high,
+          low: r.low,
+          close: r.close,
+          volume: r.volume,
+        }))
+        setOhlcData(series)
+      } else {
+        setOhlcData(null)
+      }
+    } catch (e) {
+      console.warn('Failed to fetch OHLC', e)
+      setOhlcData(null)
+    }
+  }, [ticker])
+
+  // Fetch latest backtest charts and pick the one corresponding to this ticker or selected period
   React.useEffect(() => {
     let mounted = true
-    async function fetchChartImage() {
+    async function run() {
       try {
-        const res = await fetch('/api/backtest/latest')
-        if (!res.ok) return
-        const data = await res.json()
-        const charts = (data && (data as any).charts) || {}
-        const keys = Object.keys(charts || {})
-        // Prefer explicit '{ticker}_price_chart', then exact ticker, then any key containing ticker
-        let key = keys.find((k) => k === `${ticker}_price_chart`) || keys.find((k) => k === ticker) || keys.find((k) => k.includes(ticker)) || keys.find((k) => k.includes('_price_chart'))
-        // Fallback: if no per-ticker chart, use the first available chart (e.g., equity_curve)
-        if (!key && keys.length > 0) key = keys[0]
-        if (key && charts[key]) {
-          if (!mounted) return
-          setBgImage(charts[key])
-        }
+        await fetchChartForPeriod(period)
       } catch (e) {
-        // Non-fatal - background image is optional
         // eslint-disable-next-line no-console
-        console.warn('Failed to fetch chart image for background', e)
+        console.warn('fetchChartForPeriod failed', e)
       }
     }
 
-    fetchChartImage()
+    run()
     return () => {
       mounted = false
     }
-  }, [ticker])
+  }, [ticker, period, fetchChartForPeriod])
 
   // Load Plotly component lazily on mount so preview can render markers over image
   React.useEffect(() => {
@@ -289,21 +331,59 @@ export function CandlestickChart({
 
   // Modal view mode: initially show enlarged image, user can switch to interactive plot
   const [modalMode, setModalMode] = React.useState<'image' | 'plot'>('image')
-  const [zoomScale, setZoomScale] = React.useState<number>(1)
+  // Zoom and pan temporarily disabled
+  // const [zoomScale, setZoomScale] = React.useState<number>(1)
   const zoomStep = 0.25
-  const [imgOffset, setImgOffset] = React.useState<{x:number,y:number}>({x:0,y:0})
-  const [isDragging, setIsDragging] = React.useState(false)
-  const [lastMousePos, setLastMousePos] = React.useState<{x:number,y:number}|null>(null)
-  const [lastTouchDistance, setLastTouchDistance] = React.useState<number|null>(null)
-  const [lastTouchCenter, setLastTouchCenter] = React.useState<{x:number,y:number}|null>(null)
+  // const [imgOffset, setImgOffset] = React.useState<{x:number,y:number}>({x:0,y:0})
+  // const [isDragging, setIsDragging] = React.useState(false)
+  // const [lastMousePos, setLastMousePos] = React.useState<{x:number,y:number}|null>(null)
+  // const [lastTouchDistance, setLastTouchDistance] = React.useState<number|null>(null)
+  // const [lastTouchCenter, setLastTouchCenter] = React.useState<{x:number,y:number}|null>(null)
+
+  // Render lightweight-charts when OHLC data is available
+  React.useEffect(() => {
+    let chart: any = null
+    let series: any = null
+    let volSeries: any = null
+    let mounted = true
+    const render = async () => {
+      if (!chartContainerRef.current) return
+      if (!ohlcData || ohlcData.length === 0) return
+      try {
+        const lc = await import('lightweight-charts')
+        if (!mounted) return
+        // clear
+        chartContainerRef.current.innerHTML = ''
+        chart = lc.createChart(chartContainerRef.current, {
+          layout: { backgroundColor: THEME.background, textColor: THEME.textColor },
+          width: width || 800,
+          height: height || 450,
+          rightPriceScale: { visible: true },
+        })
+        series = chart.addCandlestickSeries({ upColor: THEME.upColor, downColor: THEME.downColor, wickUpColor: THEME.upColor, wickDownColor: THEME.downColor })
+        series.setData(ohlcData)
+        // volume
+        volSeries = chart.addHistogramSeries({ priceFormat: { type: 'volume' }, scaleMargins: { top: 0.8, bottom: 0 } })
+        volSeries.setData(ohlcData.map((d: any) => ({ time: d.time, value: d.volume, color: d.close >= d.open ? THEME.volumeUpColor : THEME.volumeDownColor })))
+      } catch (e) {
+        // If lightweight-charts not available, fall back to image
+        // eslint-disable-next-line no-console
+        console.warn('lightweight-charts failed to load or render', e)
+      }
+    }
+    render()
+    return () => {
+      mounted = false
+      if (chart && chart.remove) chart.remove()
+    }
+  }, [ohlcData, width, height])
 
   const onWheelZoom = (e: React.WheelEvent) => {
-    if (!e.ctrlKey && !e.metaKey) return
-    e.preventDefault()
-    setZoomScale((s) => Math.max(0.2, Math.min(8, Number((s + (e.deltaY > 0 ? -zoomStep : zoomStep)).toFixed(2)))))
+    // zoom disabled
+    return
   }
 
-  const resetZoom = () => setZoomScale(1)
+  const resetZoom = () => { /* zoom reset disabled */ }
 
   let layoutWithImage: any = layout as any
 
@@ -547,6 +627,59 @@ export function CandlestickChart({
 
   return (
     <div data-testid="candlestick-chart" style={{ width: '100%' }}>
+      {/* Period selector (client-side for now). Backend may honor ?range= in future. */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+        <label style={{ color: THEME.textColor }}>Period:</label>
+        <select
+          aria-label="Chart period"
+          value={period}
+          onChange={(e) => {
+            const v = e.target.value as any
+            setPeriod(v)
+          }}
+          style={{ padding: '6px 8px', borderRadius: 6 }}
+        >
+          <option value="1M">1M</option>
+          <option value="3M">3M</option>
+          <option value="6M">6M</option>
+          <option value="1Y">1Y</option>
+          <option value="ALL">All</option>
+        </select>
+
+        {/* Year quick selector for convenient one-click backtests (2022-2025) */}
+        <label style={{ color: THEME.textColor, marginLeft: 6 }}>Year:</label>
+        <div role="group" aria-label="Year selector" style={{ display: 'flex', gap: 6 }}>
+          {['2022', '2023', '2024', '2025'].map((y) => (
+            <button
+              key={y}
+              onClick={() => {
+                setYear(y)
+                // keep full-range period when selecting a year
+                setPeriod('ALL')
+                // request backend for that year's pre-generated backtest
+                fetchChartForPeriod(y)
+                // fetch OHLC for interactive chart
+                fetchOhlcForYear(y)
+              }}
+              style={{
+                padding: '6px 8px',
+                borderRadius: 6,
+                background: year === y ? '#243447' : 'transparent',
+                color: THEME.textColor,
+                border: '1px solid rgba(255,255,255,0.06)'
+              }}
+              aria-pressed={year === y}
+            >
+              {y}
+            </button>
+          ))}
+        </div>
+
+        <div style={{ marginLeft: 'auto', color: 'rgba(209,212,220,0.9)' }}>
+          {period === 'ALL' ? (year ? year : 'Full range') : period}
+        </div>
+      </div>
+
       {data.dates.length === 0 ? (
         <p data-testid="no-data-message">No chart data available</p>
       ) : (
@@ -556,6 +689,14 @@ export function CandlestickChart({
           <div
             role="button"
             tabIndex={0}
+            ref={chartContainerRef}
+            style={{ width: '100%', minHeight: 300 }}
+          >
+            {/* If interactive OHLC is available, lightweight-charts will render into this container. Otherwise bgImage is used as background. */}
+            {(!ohlcData && bgImage) && (
+              <img src={bgImage} alt={`${ticker} price chart`} style={{ width: '100%', display: 'block' }} />
+            )}
+          </div>
             onClick={() => { setModalMode('image'); setShowModal(true) }}
             onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (setModalMode('image'), setShowModal(true))}
             data-testid="chart-rendered"
@@ -616,7 +757,7 @@ export function CandlestickChart({
 
       {/* Full-screen interactive modal */}
       {showModal && (
-        <div className="candlestick-modal" role="dialog" aria-modal="true" onWheel={onWheelZoom}>
+        <div className="candlestick-modal" role="dialog" aria-modal="true">
           <div className="candlestick-modal-content">
             <button className="modal-close" onClick={() => { setShowModal(false); resetZoom(); setModalMode('image') }} aria-label="Close">×</button>
 
@@ -626,9 +767,7 @@ export function CandlestickChart({
                 <div style={{ padding: 8, display: 'flex', gap: 8, alignItems: 'center' }}>
                   <div style={{ color: THEME.textColor }}>{ticker} — 拡大画像</div>
                   <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
-                    <button onClick={() => setZoomScale((s) => Math.max(0.2, Number((s - zoomStep).toFixed(2))))} aria-label="Zoom out">−</button>
-                    <button onClick={() => setZoomScale((s) => Math.min(8, Number((s + zoomStep).toFixed(2))))} aria-label="Zoom in">＋</button>
-                    <button onClick={resetZoom} aria-label="Reset zoom">Reset</button>
+                    {/* Zoom controls temporarily disabled */}
                     <button onClick={() => setModalMode('plot')} aria-label="Open interactive chart">詳細を開く</button>
                   </div>
                 </div>
@@ -639,43 +778,8 @@ export function CandlestickChart({
                       data-testid="chart-modal-image"
                       src={bgImage}
                       alt={`${ticker} chart`}
-                      style={{ transform: `translate(${imgOffset.x}px, ${imgOffset.y}px) scale(${zoomScale})`, transformOrigin: 'center', maxWidth: '100%', maxHeight: '100%', display: 'block', touchAction: 'none', cursor: isDragging ? 'grabbing' : 'grab' }}
+                      style={{ maxWidth: '100%', maxHeight: '100%', display: 'block', touchAction: 'none' }}
                       draggable={false}
-                      onMouseDown={(e) => { setIsDragging(true); setLastMousePos({x: e.clientX, y: e.clientY}) }}
-                      onMouseMove={(e) => { if (!isDragging || !lastMousePos) return; const dx = e.clientX - lastMousePos.x; const dy = e.clientY - lastMousePos.y; setImgOffset((p) => ({x: p.x + dx, y: p.y + dy})); setLastMousePos({x: e.clientX, y: e.clientY}) }}
-                      onMouseUp={() => { setIsDragging(false); setLastMousePos(null) }}
-                      onMouseLeave={() => { setIsDragging(false); setLastMousePos(null) }}
-                      onTouchStart={(e) => {
-                        if (e.touches.length === 2) {
-                          const dx = e.touches[0].clientX - e.touches[1].clientX
-                          const dy = e.touches[0].clientY - e.touches[1].clientY
-                          setLastTouchDistance(Math.hypot(dx, dy))
-                          const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2
-                          const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2
-                          setLastTouchCenter({x: cx, y: cy})
-                        } else if (e.touches.length === 1) {
-                          setLastMousePos({x: e.touches[0].clientX, y: e.touches[0].clientY})
-                          setIsDragging(true)
-                        }
-                      }}
-                      onTouchMove={(e) => {
-                        if (e.touches.length === 2 && lastTouchDistance) {
-                          const dx = e.touches[0].clientX - e.touches[1].clientX
-                          const dy = e.touches[0].clientY - e.touches[1].clientY
-                          const dist = Math.hypot(dx, dy)
-                          const factor = dist / lastTouchDistance
-                          setZoomScale((s) => Math.max(0.2, Math.min(8, Number((s * factor).toFixed(2)))))
-                          setLastTouchDistance(dist)
-                        } else if (e.touches.length === 1 && isDragging && lastMousePos) {
-                          const nx = e.touches[0].clientX
-                          const ny = e.touches[0].clientY
-                          const dx = nx - lastMousePos.x
-                          const dy = ny - lastMousePos.y
-                          setImgOffset((p) => ({x: p.x + dx, y: p.y + dy}))
-                          setLastMousePos({x: nx, y: ny})
-                        }
-                      }}
-                      onTouchEnd={(e) => { if (e.touches.length < 2) setLastTouchDistance(null); if (e.touches.length === 0) { setIsDragging(false); setLastMousePos(null); } }}
                     />
                   ) : (
                     <div style={{ color: THEME.textColor }}>No background image available</div>
@@ -699,7 +803,7 @@ export function CandlestickChart({
                     <PlotComponent
                       data={traces as any}
                       layout={layoutWithImage as any}
-                      config={{responsive: true, scrollZoom: true}}
+                      config={{responsive: true, scrollZoom: false}}
                       useResizeHandler
                       style={{width: '100%', height: '100%'}}
                     />
