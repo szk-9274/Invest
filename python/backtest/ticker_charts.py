@@ -502,9 +502,15 @@ def generate_price_chart_from_dataframe(
 
     # Generate chart
     try:
+        # Choose plot type: use line for very large datasets to avoid overcrowded candles
+        plot_type = 'candle'
+        if len(chart_data) > AUTO_RESAMPLE_THRESHOLD:
+            logger.info(f"Large dataset ({len(chart_data)} rows) > {AUTO_RESAMPLE_THRESHOLD}: using line plot for performance.")
+            plot_type = 'line'
+
         fig, axes = mpf.plot(
             chart_data,
-            type='candle',
+            type=plot_type,
             style=chart_style,
             title=f'{ticker} - Price Chart',
             ylabel='Price',
@@ -702,9 +708,15 @@ class TickerCharts:
         chart_path = os.path.join(charts_dir, f'{ticker}.png')
 
         try:
+            # For large datasets prefer a line plot to keep image readable and performant
+            plot_type = 'candle'
+            if len(chart_data) > AUTO_RESAMPLE_THRESHOLD:
+                logger.info(f"Large dataset ({len(chart_data)} rows) > {AUTO_RESAMPLE_THRESHOLD}: using line plot for performance.")
+                plot_type = 'line'
+
             mpf.plot(
                 chart_data,
-                type='candle',
+                type=plot_type,
                 style='charles',
                 title=title,
                 ylabel='Price',
