@@ -403,3 +403,73 @@ def _get_backtest_results_by_dir(result_dir: str, dir_name: str) -> BacktestResu
         ticker_stats=ticker_stats,
         charts=charts,
     )
+
+
+@router.get('/ohlc')
+def get_ohlc(ticker: str, range: Optional[str] = None, start_date: Optional[str] = None, end_date: Optional[str] = None):
+    """Return OHLCV data for a given ticker and date range.
+
+    Query params:
+    - ticker: required ticker symbol
+    - range: optional year string (e.g., '2023') or 'ALL'
+    - start_date, end_date: optional explicit dates (YYYY-MM-DD)
+
+    Returns JSON: { data: [{ time: 'YYYY-MM-DD', open, high, low, close, volume }, ...] }
+    """
+    # Determine date range
+    if range and not (start_date and end_date):
+        r = range.strip()
+        if r.upper() == 'ALL':
+            # default to last 365 days
+            from datetime import datetime, timedelta
+            end = datetime.utcnow().date()
+            start = end - timedelta(days=365)
+            start_date = start.isoformat()
+            end_date = end.isoformat()
+        elif len(r) == 4 and r.isdigit():
+            start_date = f"{r}-01-01"
+            end_date = f"{r}-12-31"
+        else:
+            # unknown range, fallback to last 365 days
+            from datetime import datetime, timedelta
+            end = datetime.utcnow().date()
+            start = end - timedelta(days=365)
+            start_date = start.isoformat()
+            end_date = end.isoformat()
+
+    if not start_date or not end_date:
+        raise HTTPException(status_code=400, detail='start_date and end_date or range (year) must be provided')
+
+    # Use python.backtest.ticker_charts to fetch via yfinance when available
+    try:
+        import sys
+        from pathlib import Path as _Path
+        _repo_root = str(_Path(__file__).resolve().parents[2])
+        if _repo_root not in sys.path:
+            sys.path.insert(0, _repo_root)
+        from python.backtest import ticker_charts as tc
+        if not getattr(tc, 'YFINANCE_AVAILABLE', False):
+            raise RuntimeError('yfinance not available in environment')
+        # fetch
+        stock = tc.yf.Ticker(ticker)
+        df = stock.history(start=start_date, end=end_date)
+        if df is None or df.empty:
+            return { 'data': [] }
+        # normalize index and columns
+        df.reset_index(inplace=True)
+        df['Date'] = df['Date'].dt.strftime('%Y-%m-%d')
+        data = []
+        for _, row in df.iterrows():
+            data.append({
+                'time': row['Date'],
+                'open': None if pd.isna(row.get('Open')) else float(row.get('Open')),
+                'high': None if pd.isna(row.get('High')) else float(row.get('High')),
+                'low': None if pd.isna(row.get('Low')) else float(row.get('Low')),
+                'close': None if pd.isna(row.get('Close')) else float(row.get('Close')),
+                'volume': None if pd.isna(row.get('Volume')) else int(row.get('Volume')),
+            })
+        return {'data': data}
+    except Exception as e:
+        logger.error(f'Failed to fetch OHLC for {ticker}: {e}')
+        raise HTTPException(status_code=503, detail=str(e))
+
