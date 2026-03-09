@@ -10,6 +10,8 @@
 - [QUALITY_SCORE.md](../QUALITY_SCORE.md) — QUALITY_SCORE — コード品質指標・テスト基準 — 目的
 
 ## docs/ tree
+- `docs/decision-log/`
+  - [index.md](../decision-log/index.md) — decision-log — 目的
 - `docs/design-docs/`
   - [STRATEGY.md](../design-docs/STRATEGY.md) — STRATEGY.md — Invest プロジェクト 戦略仕様書
   - [core-beliefs.md](../design-docs/core-beliefs.md) — Core Beliefs (コア設計原則) — 1. 再現性優先
@@ -26,10 +28,20 @@
     - [doc-freshness-governance.md](../exec-plans/completed/doc-freshness-governance.md) — 実装計画: ドキュメント整合性監査と鮮度維持の自動化 — - タイトル: ドキュメント整合性監査と鮮度維持の自動化
     - [foundation-improvements.md](../exec-plans/completed/foundation-improvements.md) — foundation-improvements — - タイトル: 基盤改善一式の実装
     - [improvement-round-1.md](../exec-plans/completed/improvement-round-1.md) — 変更・削除・作成するファイル — - frontend/src/pages/BacktestDashboard.test.tsx ほか frontend テスト群
+    - [improvement-round-2.md](../exec-plans/completed/improvement-round-2.md) — 変更・削除・作成するファイル — - frontend/src/pages/BacktestDashboard.tsx と関連テスト
+    - [working-memory-governance.md](../exec-plans/completed/working-memory-governance.md) — 実装計画: 長期記憶・文脈維持ルールの文書整理 — - タイトル: 長期記憶・文脈維持ルールの文書整理
 - `docs/product-specs/`
   - [index.md](../product-specs/index.md) — product-specs — 目的
 - `docs/references/`
   - [design-ref-llms.md](../references/design-ref-llms.md) — Design Ref Llms — Design system reference (LLM 向け要約)
+- `docs/working-memory/`
+  - [index.md](../working-memory/index.md) — working-memory — 目的
+  - `docs/working-memory/session-logs/`
+    - [index.md](../working-memory/session-logs/index.md) — session-logs — 目的
+  - `docs/working-memory/summaries-lv1/`
+    - [index.md](../working-memory/summaries-lv1/index.md) — summaries-lv1 — 目的
+  - `docs/working-memory/summaries-lv2/`
+    - [index.md](../working-memory/summaries-lv2/index.md) — summaries-lv2 — 目的
 
 ## Generated docs
 - [db-schema.md](db-schema.md) — DB Schema (自動生成) — 注意: generated ディレクトリ内のファイルは自動生成を想定しています。手動編集は避けてください。

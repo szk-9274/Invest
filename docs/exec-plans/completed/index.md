@@ -10,4 +10,6 @@
 - [doc-freshness-governance.md](doc-freshness-governance.md) — 実装計画: ドキュメント整合性監査と鮮度維持の自動化 — - タイトル: ドキュメント整合性監査と鮮度維持の自動化
 - [foundation-improvements.md](foundation-improvements.md) — foundation-improvements — - タイトル: 基盤改善一式の実装
 - [improvement-round-1.md](improvement-round-1.md) — 変更・削除・作成するファイル — - frontend/src/pages/BacktestDashboard.test.tsx ほか frontend テスト群
+- [improvement-round-2.md](improvement-round-2.md) — 変更・削除・作成するファイル — - frontend/src/pages/BacktestDashboard.tsx と関連テスト
+- [working-memory-governance.md](working-memory-governance.md) — 実装計画: 長期記憶・文脈維持ルールの文書整理 — - タイトル: 長期記憶・文脈維持ルールの文書整理
 <!-- END AUTO-GENERATED DOC LIST -->
