@@ -64,7 +64,7 @@ Repository Root
 │  │  ├─ index.md               # 仕様索引
 │  │
 │  ├─ references/               # 外部ライブラリ・LLM参照資料
-│  │  ├─ design-ref.txt         # デザイン参考資料記載用
+│  │  ├─ design-ref-llms.md         # デザイン参考資料記載用
 │  │
 │  └─ generated/                # 自動生成ドキュメント・CIなど
 │     ├─ db-schema.md           # DBスキーマ(現時点では未使用)
