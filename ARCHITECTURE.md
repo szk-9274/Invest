@@ -59,5 +59,3 @@
 - backend/api/backtest.py — フロントとの契約を定義する場所。
 - python/backtest/ticker_charts.py — PNG を生成するロジック。
 - backend/services/result_loader.py — output を API 用に変換する責務。
-
-このファイルはチームでの共通理解を目的とします。実装や運用で疑義が生じた場合は本ドキュメントを起点に議論してください。
