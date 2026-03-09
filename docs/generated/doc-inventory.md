@@ -20,6 +20,7 @@
   - [tech-debt-tracker.md](../exec-plans/tech-debt-tracker.md) — tech-debt-tracker — 目的: 技術的負債の一覧と優先度管理
   - `docs/exec-plans/active/`
     - [index.md](../exec-plans/active/index.md) — exec-plans/active — ここには現在進行中の実行計画を置きます。
+    - [dashboard-improvement-batch-1.md](../exec-plans/active/dashboard-improvement-batch-1.md) — 実装計画: ダッシュボード改善バッチ 1 — - タイトル: ダッシュボード改善バッチ 1
   - `docs/exec-plans/completed/`
     - [index.md](../exec-plans/completed/index.md) — exec-plans/completed — 完了した実行計画の記録を置きます。
     - [backtest-dashboard-renewal.md](../exec-plans/completed/backtest-dashboard-renewal.md) — 実装計画: バックテスト・ダッシュボード改善 — - タイトル: バックテスト・ダッシュボード改善

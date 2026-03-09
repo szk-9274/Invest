@@ -240,6 +240,7 @@ describe('BacktestDashboard', () => {
           && (message.includes('not wrapped in act') || message.includes('suspended resource finished loading')),
       ),
     ).toEqual([])
+    vi.unstubAllGlobals()
     consoleErrorSpy.mockRestore()
     vi.useRealTimers()
   })
@@ -300,6 +301,7 @@ describe('BacktestDashboard', () => {
   }, 10000)
 
   it('renders analysis route with summary, charts, and trades together', async () => {
+    vi.stubGlobal('IntersectionObserver', undefined)
     renderDashboard('/dashboard/analysis')
 
     expect(await screen.findByTestId('summary-view')).toHaveTextContent('2')

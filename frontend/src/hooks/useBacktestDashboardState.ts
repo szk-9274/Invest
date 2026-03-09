@@ -7,14 +7,8 @@ import {
   type BacktestMetadata,
   type BacktestResults,
 } from '../api/backtest'
-import {
-  cancelJob,
-  createJob,
-  getJob,
-  getJobLogs,
-  type JobCreateRequest,
-  type JobResponse,
-} from '../api/jobs'
+import { type JobCreateRequest, type JobResponse } from '../api/jobs'
+import { useBacktestJobManagement } from './useBacktestJobManagement'
 
 export interface UseBacktestDashboardStateResult {
   results: BacktestResults | null
@@ -39,9 +33,6 @@ export function useBacktestDashboardState(): UseBacktestDashboardStateResult {
   const [selectedTimestamp, setSelectedTimestamp] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [activeJob, setActiveJob] = useState<JobResponse | null>(null)
-  const [jobLogs, setJobLogs] = useState<string[]>([])
-  const [runError, setRunError] = useState<string | null>(null)
 
   useEffect(() => {
     const loadBacktests = async () => {
@@ -92,54 +83,15 @@ export function useBacktestDashboardState(): UseBacktestDashboardStateResult {
     }
   }, [t])
 
-  const refreshJobLogs = async (jobId: string) => {
-    const logs = await getJobLogs(jobId, 300)
-    setJobLogs(logs.lines)
-  }
-
-  const handleRunCommand = async (request: JobCreateRequest) => {
-    setRunError(null)
-    try {
-      const job = await createJob(request)
-      setActiveJob(job)
-      setJobLogs([])
-      await refreshJobLogs(job.job_id)
-    } catch (err) {
-      setRunError(t('dashboard.startCommandError', { error: String(err) }))
-    }
-  }
-
-  const handleCancelCommand = async () => {
-    if (!activeJob) return
-    try {
-      const cancelled = await cancelJob(activeJob.job_id)
-      setActiveJob(cancelled)
-      await refreshJobLogs(cancelled.job_id)
-    } catch (err) {
-      setRunError(t('dashboard.cancelCommandError', { error: String(err) }))
-    }
-  }
-
-  useEffect(() => {
-    if (!activeJob) return
-    if (activeJob.status !== 'queued' && activeJob.status !== 'running') return
-
-    const timer = window.setInterval(async () => {
-      try {
-        const latest = await getJob(activeJob.job_id)
-        setActiveJob(latest)
-        await refreshJobLogs(latest.job_id)
-
-        if (latest.status === 'succeeded') {
-          await handleLoadLatest()
-        }
-      } catch (err) {
-        setRunError(t('dashboard.pollJobStatusError', { error: String(err) }))
-      }
-    }, 2000)
-
-    return () => window.clearInterval(timer)
-  }, [activeJob?.job_id, activeJob?.status, handleLoadLatest, t])
+  const {
+    activeJob,
+    jobLogs,
+    runError,
+    handleRunCommand,
+    handleCancelCommand,
+  } = useBacktestJobManagement({
+    onJobSucceeded: handleLoadLatest,
+  })
 
   return {
     results,

@@ -353,7 +353,7 @@ export function CandlestickChart({
 
   let layoutWithImage: any = layout as any
 
-  // If no per-ticker background image is available, generate a static PNG from Plotly traces/layout
+  // If no per-ticker background image is available, generate a static canvas fallback.
   React.useEffect(() => {
     let cancelled = false
     async function generateImageFromPlot() {
@@ -361,44 +361,6 @@ export function CandlestickChart({
         if (bgImage) return
         if (typeof document === 'undefined') return
         if (typeof navigator !== 'undefined' && navigator.userAgent.includes('jsdom')) return
-
-        const hasCandlestick = (traces || []).some((t: any) => t && t.type === 'candlestick')
-        if (hasCandlestick) {
-          try {
-            const Plotly = await import('plotly.js-dist-min')
-            // Create offscreen div
-            const div = document.createElement('div')
-            div.style.position = 'fixed'
-            div.style.left = '-9999px'
-            div.style.top = '-9999px'
-            document.body.appendChild(div)
-
-            // Use layoutWithImage but hide images to avoid recursive background
-            const layoutForImage = { ...layoutWithImage }
-            if (layoutForImage.images) layoutForImage.images = []
-            const width = (layoutForImage && layoutForImage.width) || 1200
-            const height = (layoutForImage && layoutForImage.height) || 700
-
-            // Render and export
-            // @ts-ignore
-            await Plotly.newPlot(div, traces as any, layoutForImage as any)
-            // @ts-ignore
-            const imgData = await Plotly.toImage(div, { format: 'png', width, height, scale: 1 })
-            // Cleanup
-            // @ts-ignore
-            Plotly.purge(div)
-            document.body.removeChild(div)
-
-            if (!cancelled && imgData) {
-              setBgImage(imgData)
-              return
-            }
-          } catch (err) {
-            // fall through to canvas fallback
-            // eslint-disable-next-line no-console
-            console.warn('Plotly image generation failed, falling back to canvas', err)
-          }
-        }
 
         // Canvas fallback: synthesize a TradingView-like background and plot markers on it.
         // This helps when no OHLC data exists but markers are present.

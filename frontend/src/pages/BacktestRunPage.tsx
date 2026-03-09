@@ -2,6 +2,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { RunPanel } from '../components/RunPanel'
 import { useBacktestDashboardContext } from './BacktestDashboard'
+import '../styles/dashboard-cards.css'
 
 export const BacktestRunPage: React.FC = () => {
   const { t } = useTranslation()
@@ -17,9 +18,9 @@ export const BacktestRunPage: React.FC = () => {
   } = useBacktestDashboardContext()
 
   return (
-    <div className="run-page">
-      <section className="run-card">
-        <div className="section-heading">
+    <div className="dashboard-page-grid dashboard-page-grid--run">
+      <section className="dashboard-card">
+        <div className="dashboard-section-heading">
           <div>
             <h2>{t('dashboard.runRoute', 'Run & Manage')}</h2>
             <p>{t('dashboard.runRouteHint', 'Manage command execution, pinned annual results, and live logs from one screen.')}</p>
@@ -34,8 +35,8 @@ export const BacktestRunPage: React.FC = () => {
         />
       </section>
 
-      <section className="run-card">
-        <div className="section-heading">
+      <section className="dashboard-card">
+        <div className="dashboard-section-heading">
           <div>
             <h2>{t('dashboard.availableTests')}</h2>
             <p>{t('dashboard.pinnedHint')}</p>
@@ -75,98 +76,6 @@ export const BacktestRunPage: React.FC = () => {
           )}
         </div>
       </section>
-
-      <style>{`
-        .run-page {
-          display: grid;
-          grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
-          gap: 20px;
-        }
-
-        .run-card {
-          background: #ffffff;
-          border: 1px solid #e2e8f0;
-          border-radius: 16px;
-          padding: 20px;
-          box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
-        }
-
-        .section-heading {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          gap: 12px;
-          margin-bottom: 16px;
-        }
-
-        .section-heading h2 {
-          margin: 0;
-          font-size: 18px;
-          color: #0f172a;
-        }
-
-        .section-heading p {
-          margin: 4px 0 0;
-          color: #64748b;
-          font-size: 13px;
-        }
-
-        .backtest-list {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-        }
-
-        .backtest-item {
-          width: 100%;
-          text-align: left;
-          border: 1px solid #dbe4f0;
-          border-radius: 12px;
-          padding: 14px 16px;
-          background: #f8fafc;
-          cursor: pointer;
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-        }
-
-        .backtest-item.active {
-          border-color: #3b82f6;
-          background: #eff6ff;
-        }
-
-        .item-period,
-        .item-details {
-          display: flex;
-          justify-content: space-between;
-          gap: 8px;
-          align-items: center;
-        }
-
-        .backtest-badge {
-          display: inline-flex;
-          align-items: center;
-          padding: 2px 8px;
-          border-radius: 999px;
-          background: #dbeafe;
-          color: #1d4ed8;
-          font-size: 12px;
-          font-weight: 700;
-        }
-
-        .item-details,
-        .item-timestamp,
-        .empty-list {
-          color: #64748b;
-          font-size: 13px;
-        }
-
-        @media (max-width: 900px) {
-          .run-page {
-            grid-template-columns: 1fr;
-          }
-        }
-      `}</style>
     </div>
   )
 }

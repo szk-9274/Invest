@@ -14,18 +14,6 @@ interface TradeTableProps {
 type SortField = keyof TradeRecord
 type SortDirection = 'asc' | 'desc'
 
-const EXIT_REASON_KEYS: Record<string, string> = {
-  target: 'takeProfit',
-  take_profit: 'takeProfit',
-  target_reached: 'takeProfit',
-  stop: 'stopLoss',
-  stop_loss: 'stopLoss',
-  timeout: 'timeout',
-  end_of_backtest: 'backtestEnd',
-  rule: 'ruleExit',
-  ma50_break: 'ma50Break',
-}
-
 function humanizeExitReason(reason: string) {
   return reason
     .replace(/_/g, ' ')
@@ -33,7 +21,7 @@ function humanizeExitReason(reason: string) {
 }
 
 export const TradeTable: React.FC<TradeTableProps> = ({ trades, loading = false }) => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [page, setPage] = useState(0)
   const [sortField, setSortField] = useState<SortField>('exit_date')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
@@ -86,11 +74,11 @@ export const TradeTable: React.FC<TradeTableProps> = ({ trades, loading = false 
 
   const formatExitReason = (reason: string | null | undefined) => {
     if (!reason) return '-'
-    const normalized = reason.toLowerCase()
-    const mappedKey = EXIT_REASON_KEYS[normalized] ?? normalized
-    return t(`tradeTable.exitReasons.${mappedKey}`, {
-      defaultValue: humanizeExitReason(normalized),
-    })
+    const normalized = reason.trim().toLowerCase().replace(/[^\w]+/g, '_')
+    if (i18n.exists(`tradeTable.exitReasons.${normalized}`)) {
+      return t(`tradeTable.exitReasons.${normalized}`)
+    }
+    return humanizeExitReason(normalized)
   }
 
   if (loading) {

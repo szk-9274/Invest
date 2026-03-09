@@ -25,9 +25,8 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         output: {
           manualChunks(id) {
-            if (id.includes('react-plotly.js/factory')) return 'plotly-react-factory'
-            if (id.includes('plotly.js-dist-min')) return 'plotly-core'
-            if (id.includes('TopBottomPurchaseCharts')) return 'top-bottom-chart';
+            if (id.includes('lightweight-charts')) return 'lightweight-chart-core'
+            if (id.includes('TopBottomPurchaseCharts')) return 'top-bottom-chart'
           },
         },
       },
