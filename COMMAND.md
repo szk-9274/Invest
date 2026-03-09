@@ -8,9 +8,9 @@ Invest プロジェクト — 実行コマンド集
 
 ```
 wsl
-cd $HOME/code/Invest/Python
-source python/.venv/bin/activate
-cd $HOME/code/Invest
+cd ~/code/Invest/python
+source ./.venv/bin/activate
+cd ~/code/Invest
 just dev
 ```
 

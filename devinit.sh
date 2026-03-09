@@ -98,7 +98,7 @@ start_commands() {
 
   backend_cmd="cd ${PYTHON_DIR} && source ${VENV_ACTIVATE} && cd ${BACKEND_DIR} && while true; do python -m uvicorn app:app --reload --host 0.0.0.0 --port 8000 2>&1 | tee -a ${LOG_FILE}; echo \"backend crashed. restarting...\"; sleep 2; done"
   frontend_cmd="cd ${PYTHON_DIR} && source ${VENV_ACTIVATE} && cd ${FRONTEND_DIR} && while true; do npm run dev -- --host 0.0.0.0 --port 3000 --strictPort 2>&1 | tee -a ${FRONTEND_LOG_FILE}; echo \"frontend crashed. restarting...\"; sleep 2; done"
-  copilot_cmd="cd $(escape "${PYTHON_DIR}") && source $(escape "${VENV_ACTIVATE}") && cd $(escape "${ROOT_DIR}") && copilot --autopilot --yolo --allow-all --add-github-mcp-toolset all --add-dir ~/code/Invest"
+  copilot_cmd="cd $(escape "${PYTHON_DIR}") && source $(escape "${VENV_ACTIVATE}") && cd $(escape "${ROOT_DIR}") && copilot --yolo --add-github-mcp-toolset all --add-dir ~/code/Invest"
   gh auth status >/dev/null 2>&1 || gh auth login --hostname github.com --git-protocol ssh --web
   logs_cmd="cd ${ROOT_DIR} && multitail ${LOG_FILE} ${FRONTEND_LOG_FILE}"
   git_cmd="cd ${ROOT_DIR} && echo 'Launching lazygit...' && lazygit"
