@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Home } from './Home'
 
 const { runBacktestMock, getTopBottomTickersMock } = vi.hoisted(() => ({
@@ -25,7 +25,9 @@ vi.mock('../components/BacktestForm', () => ({
       type="button"
       data-testid="backtest-form-submit"
       disabled={Boolean(isLoading)}
-      onClick={() => void onSubmit('2024-01-01', '2024-01-31')}
+      onClick={async () => {
+        await onSubmit('2024-01-01', '2024-01-31')
+      }}
     >
       Run mocked backtest
     </button>
@@ -57,11 +59,38 @@ vi.mock('../components/TickerList', () => ({
 }))
 
 describe('Home', () => {
+  let consoleErrorSpy: {
+    mock: { calls: unknown[][] }
+    mockRestore: () => void
+  }
+
+  async function flushAsyncUpdates() {
+    await Promise.resolve()
+    await Promise.resolve()
+  }
+
+  async function clickAndFlush(user: ReturnType<typeof userEvent.setup>, target: Element) {
+    await act(async () => {
+      await user.click(target)
+      await flushAsyncUpdates()
+    })
+  }
+
   beforeEach(() => {
+    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined)
     runBacktestMock.mockReset()
     getTopBottomTickersMock.mockReset()
     runBacktestMock.mockResolvedValue({ message: 'Backtest started' })
     getTopBottomTickersMock.mockResolvedValue({ top: [], bottom: [] })
+  })
+
+  afterEach(() => {
+    expect(
+      consoleErrorSpy.mock.calls.filter(
+        ([message]) => typeof message === 'string' && message.includes('not wrapped in act'),
+      ),
+    ).toEqual([])
+    consoleErrorSpy.mockRestore()
   })
 
   it('loads top and bottom tickers on mount', async () => {
@@ -85,7 +114,7 @@ describe('Home', () => {
     render(<Home />)
 
     await waitFor(() => expect(getTopBottomTickersMock).toHaveBeenCalledTimes(1))
-    await user.click(screen.getByTestId('backtest-form-submit'))
+    await clickAndFlush(user, screen.getByTestId('backtest-form-submit'))
 
     await waitFor(() =>
       expect(runBacktestMock).toHaveBeenCalledWith({
@@ -105,7 +134,7 @@ describe('Home', () => {
     render(<Home />)
 
     await waitFor(() => expect(getTopBottomTickersMock).toHaveBeenCalledTimes(1))
-    await user.click(screen.getByTestId('backtest-form-submit'))
+    await clickAndFlush(user, screen.getByTestId('backtest-form-submit'))
 
     expect(await screen.findByTestId('status-message')).toHaveTextContent(
       'Backtest failed. Please try again.',
@@ -134,7 +163,7 @@ describe('Home', () => {
     render(<Home onNavigateToChart={onNavigateToChart} />)
 
     await waitFor(() => expect(getTopBottomTickersMock).toHaveBeenCalledTimes(1))
-    await user.click(screen.getByRole('button', { name: 'AAPL' }))
+    await clickAndFlush(user, screen.getByRole('button', { name: 'AAPL' }))
 
     expect(onNavigateToChart).toHaveBeenCalledWith('AAPL')
   })
@@ -149,7 +178,7 @@ describe('Home', () => {
     render(<Home />)
 
     await waitFor(() => expect(getTopBottomTickersMock).toHaveBeenCalledTimes(1))
-    await user.click(screen.getByRole('button', { name: 'AAPL' }))
+    await clickAndFlush(user, screen.getByRole('button', { name: 'AAPL' }))
 
     expect(screen.getByTestId('home-page')).toBeInTheDocument()
   })

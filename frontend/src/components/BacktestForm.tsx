@@ -7,7 +7,7 @@ import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 interface BacktestFormProps {
-  onSubmit: (startDate: string, endDate: string) => void
+  onSubmit: (startDate: string, endDate: string) => Promise<void> | void
   isLoading?: boolean
 }
 
@@ -16,10 +16,10 @@ export function BacktestForm({ onSubmit, isLoading = false }: BacktestFormProps)
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (startDate && endDate) {
-      onSubmit(startDate, endDate)
+      await onSubmit(startDate, endDate)
     }
   }
 

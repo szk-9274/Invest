@@ -234,8 +234,6 @@ export function CandlestickChart({
   const layout = buildChartLayout(ticker, width, height)
 
   const [showModal, setShowModal] = React.useState(false)
-  const { PlotComponent, plotError } = useLazyPlotComponent()
-
   // Period selector state (1M/3M/6M/1Y/ALL). Defaults to ALL.
   const [period, setPeriod] = React.useState<'1M' | '3M' | '6M' | '1Y' | 'ALL'>('ALL')
   // Year quick selector (used to request pre-generated backtests like 2022/2023/2024/2025)
@@ -314,6 +312,8 @@ export function CandlestickChart({
 
   // Modal view mode: initially show enlarged image, user can switch to interactive plot
   const [modalMode, setModalMode] = React.useState<'image' | 'plot'>('image')
+  const shouldLoadInteractivePlot = showModal && modalMode === 'plot'
+  const { PlotComponent, plotError } = useLazyPlotComponent(shouldLoadInteractivePlot)
   // Zoom and pan temporarily disabled
   // const [zoomScale, setZoomScale] = React.useState<number>(1)
   const zoomStep = 0.25
@@ -696,43 +696,26 @@ export function CandlestickChart({
               <img src={bgImage} alt={`${ticker} price chart`} style={{ width: '100%', display: 'block' }} />
             )}
 
-            {/* If Plotly is available, render a small interactive preview (markers over background image)
-                Otherwise fall back to a CSS background preview */}
-            {PlotComponent ? (
-              <div style={{ width: '100%', height: 260 }}>
-                <PlotComponent
-                  data={traces as any}
-                  layout={{ ...layoutWithImage as any, autosize: true, margin: { t: 8, b: 30, l: 40, r: 8 }, height: 260 }}
-                  config={{ responsive: true, displayModeBar: false }}
-                  useResizeHandler
-                  style={{ width: '100%', height: '100%' }}
-                />
-                <div style={{ position: 'absolute', left: 8, top: 8, background: 'rgba(0,0,0,0.45)', padding: 6, borderRadius: 6, color: '#fff' }}>
-                  {ticker}
-                </div>
+            <div
+              style={{
+                outline: 'none',
+                cursor: 'zoom-in',
+                minHeight: 200,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundImage: bgImage ? `url(${bgImage})` : undefined,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                width: '100%',
+                height: 260,
+              }}
+            >
+              <div style={{background: 'rgba(0,0,0,0.45)', padding: 8, borderRadius: 6, color: '#fff'}}>
+                {ticker} • {traces.length} traces
               </div>
-            ) : (
-              <div
-                style={{
-                  outline: 'none',
-                  cursor: 'zoom-in',
-                  minHeight: 200,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundImage: bgImage ? `url(${bgImage})` : undefined,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  backgroundRepeat: 'no-repeat',
-                  width: '100%',
-                  height: 260,
-                }}
-              >
-                <div style={{background: 'rgba(0,0,0,0.45)', padding: 8, borderRadius: 6, color: '#fff'}}>
-                  Chart rendered with {traces.length} traces
-                </div>
-              </div>
-            )}
+            </div>
 
           </div>
 

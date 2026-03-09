@@ -54,4 +54,40 @@ describe('BacktestSummary', () => {
 
     expect(screen.getByText('N/A')).toBeInTheDocument()
   })
+
+  it('renders a negative profit factor when losses outweigh wins', () => {
+    render(
+      <BacktestSummary
+        data={{
+          total_trades: 4,
+          winning_trades: 1,
+          losing_trades: 3,
+          win_rate: 0.25,
+          total_pnl: -120,
+          avg_win: 50,
+          avg_loss: -100,
+        }}
+      />,
+    )
+
+    expect(screen.getByText('0.50')).toHaveClass('metric-negative')
+  })
+
+  it('renders a neutral profit factor when it is between 1.00 and 1.49', () => {
+    render(
+      <BacktestSummary
+        data={{
+          total_trades: 5,
+          winning_trades: 3,
+          losing_trades: 2,
+          win_rate: 0.6,
+          total_pnl: 25,
+          avg_win: 125,
+          avg_loss: -100,
+        }}
+      />,
+    )
+
+    expect(screen.getByText('1.25')).toHaveClass('metric-neutral')
+  })
 })

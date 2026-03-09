@@ -1,12 +1,35 @@
 /**
  * Tests for BacktestForm component
  */
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { BacktestForm } from './BacktestForm'
 
 describe('BacktestForm', () => {
+  let consoleErrorSpy: {
+    mock: { calls: unknown[][] }
+    mockRestore: () => void
+  }
+
+  async function flushAsyncUpdates() {
+    await Promise.resolve()
+    await Promise.resolve()
+  }
+
+  beforeEach(() => {
+    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+  })
+
+  afterEach(() => {
+    expect(
+      consoleErrorSpy.mock.calls.filter(
+        ([message]) => typeof message === 'string' && message.includes('not wrapped in act'),
+      ),
+    ).toEqual([])
+    consoleErrorSpy.mockRestore()
+  })
+
   it('renders start date and end date inputs', () => {
     render(<BacktestForm onSubmit={vi.fn()} />)
     expect(screen.getByLabelText(/start date/i)).toBeInTheDocument()
@@ -37,11 +60,17 @@ describe('BacktestForm', () => {
     const startInput = screen.getByLabelText(/start date/i)
     const endInput = screen.getByLabelText(/end date/i)
 
-    await user.type(startInput, '2024-01-01')
-    await user.type(endInput, '2024-12-31')
+    await act(async () => {
+      await user.type(startInput, '2024-01-01')
+      await user.type(endInput, '2024-12-31')
+      await flushAsyncUpdates()
+    })
 
     const button = screen.getByRole('button', { name: /run backtest/i })
-    await user.click(button)
+    await act(async () => {
+      await user.click(button)
+      await flushAsyncUpdates()
+    })
 
     expect(mockSubmit).toHaveBeenCalledWith('2024-01-01', '2024-12-31')
   })

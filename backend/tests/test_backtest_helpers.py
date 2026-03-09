@@ -164,6 +164,27 @@ def test_get_latest_results_uses_selected_range(monkeypatch):
     assert result.timestamp == 'backtest_2026'
 
 
+def test_get_latest_results_returns_404_for_unknown_selector(monkeypatch):
+    class FakeStore:
+        def __init__(self, *_args, **_kwargs):
+            pass
+
+        def list_runs(self):
+            return [SimpleNamespace(result_dir=Path('/tmp/backtest'), dir_name='backtest_2026')]
+
+        def get_run_by_range(self, requested_range):
+            assert requested_range == 'missing-period'
+            return None
+
+    monkeypatch.setattr(backtest_api, 'ResultStore', FakeStore)
+
+    with pytest.raises(HTTPException) as exc:
+        backtest_api.get_latest_results('missing-period')
+
+    assert exc.value.status_code == 404
+    assert exc.value.detail == 'No backtest results found for selector: missing-period'
+
+
 def test_get_results_by_timestamp_wraps_unexpected_error(monkeypatch):
     class FakeStore:
         def __init__(self, *_args, **_kwargs):
@@ -179,6 +200,23 @@ def test_get_results_by_timestamp_wraps_unexpected_error(monkeypatch):
 
     assert exc.value.status_code == 500
     assert exc.value.detail == 'boom'
+
+
+def test_get_results_by_timestamp_returns_404_for_unknown_timestamp(monkeypatch):
+    class FakeStore:
+        def __init__(self, *_args, **_kwargs):
+            pass
+
+        def get_run_by_timestamp(self, _timestamp):
+            return None
+
+    monkeypatch.setattr(backtest_api, 'ResultStore', FakeStore)
+
+    with pytest.raises(HTTPException) as exc:
+        backtest_api.get_results_by_timestamp('missing-ts')
+
+    assert exc.value.status_code == 404
+    assert exc.value.detail == 'No backtest results found for timestamp: missing-ts'
 
 
 def test_get_backtest_results_by_dir_loads_charts_and_aliases(monkeypatch, tmp_path):

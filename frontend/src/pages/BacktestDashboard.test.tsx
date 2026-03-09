@@ -116,7 +116,7 @@ const sampleBacktests = [
     trade_count: 2,
     dir_name: 'run-2025',
     is_pinned: true,
-    available_runs: 1,
+    available_runs: 3,
   },
   {
     timestamp: 'backtest_2026-01-01_to_2026-01-31_20260131-000000',
@@ -227,6 +227,8 @@ describe('BacktestDashboard', () => {
     expect(await screen.findByRole('heading', { name: 'Backtest Dashboard' })).toBeInTheDocument()
     expect(await screen.findByText('2025-01-01 to 2025-12-31')).toBeInTheDocument()
     expect(screen.getByText('Pinned')).toBeInTheDocument()
+    expect(screen.getByText('Pinned annual results stay visible by default.')).toBeInTheDocument()
+    expect(screen.getByText('3 runs')).toBeInTheDocument()
     expect(await screen.findByTestId('summary-view')).toHaveTextContent('2')
     expect(screen.getByTestId('backtest-status')).toHaveTextContent('idle:0')
   })

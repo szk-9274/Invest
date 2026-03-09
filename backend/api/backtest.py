@@ -86,6 +86,26 @@ def _normalize_trade_records(records: list[dict]) -> list[TradeRecord]:
     return [TradeRecord(**record) for record in records]
 
 
+def _get_store_or_404(output_dir: Optional[str] = None) -> ResultStore:
+    store = ResultStore(output_dir or DEFAULT_OUTPUT_DIR)
+    if not store.list_runs():
+        raise HTTPException(status_code=404, detail="No backtest results found")
+    return store
+
+
+def _resolve_requested_run(store: ResultStore, selector: Optional[str]):
+    chosen = store.get_run_by_range(selector)
+    if chosen is None:
+        normalized = (selector or "").strip()
+        if normalized and normalized.upper() != "ALL":
+            raise HTTPException(
+                status_code=404,
+                detail=f"No backtest results found for selector: {normalized}",
+            )
+        raise HTTPException(status_code=404, detail="No backtest results found")
+    return chosen
+
+
 def load_results(output_dir: Optional[str] = None) -> BacktestArtifactsResponse:
     """
     Load backtest results from output directory.
@@ -173,17 +193,14 @@ def get_latest_results(range: Optional[str] = None) -> BacktestResults:
     """Get the latest backtest results or a range-specific backtest.
 
     Query parameters:
-    - range: optional string used to select a backtest directory. If the string
-      is found as a substring in an existing backtest directory name, that
-      directory will be returned. Special value 'ALL' returns the latest.
+    - range: optional selector used to choose a backtest run. Supports exact
+      directory name, exact timestamp, exact period string ("YYYY-MM-DD to
+      YYYY-MM-DD"), or a four-digit year prefix. Special value 'ALL' returns
+      the latest run.
     """
-    store = ResultStore(DEFAULT_OUTPUT_DIR)
-    if not store.list_runs():
-        raise HTTPException(status_code=404, detail="No backtest results found")
+    store = _get_store_or_404(DEFAULT_OUTPUT_DIR)
     try:
-        chosen = store.get_run_by_range(range)
-        if chosen is None:
-            raise HTTPException(status_code=404, detail="No backtest results found")
+        chosen = _resolve_requested_run(store, range)
         return _get_backtest_results_by_dir(str(chosen.result_dir), chosen.dir_name)
     except HTTPException:
         raise
@@ -424,4 +441,3 @@ def get_ohlc(ticker: str, range: Optional[str] = None, start_date: Optional[str]
     except Exception as e:
         logger.error(f'Failed to fetch OHLC for {ticker}: {e}')
         raise HTTPException(status_code=503, detail=str(e))
-

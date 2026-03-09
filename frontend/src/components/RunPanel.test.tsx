@@ -1,6 +1,6 @@
-import { describe, expect, it, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { RunPanel } from './RunPanel'
 
 const baseProps = {
@@ -12,17 +12,68 @@ const baseProps = {
 }
 
 describe('RunPanel', () => {
+  let consoleErrorSpy: {
+    mock: { calls: unknown[][] }
+    mockRestore: () => void
+  }
+
+  async function flushAsyncUpdates() {
+    await Promise.resolve()
+    await Promise.resolve()
+  }
+
+  async function clickAndFlush(user: ReturnType<typeof userEvent.setup>, target: Element) {
+    await act(async () => {
+      await user.click(target)
+      await flushAsyncUpdates()
+    })
+  }
+
+  async function typeAndFlush(user: ReturnType<typeof userEvent.setup>, target: Element, value: string) {
+    await act(async () => {
+      await user.type(target, value)
+      await flushAsyncUpdates()
+    })
+  }
+
+  async function clearAndTypeAndFlush(user: ReturnType<typeof userEvent.setup>, target: Element, value: string) {
+    await act(async () => {
+      await user.clear(target)
+      await user.type(target, value)
+      await flushAsyncUpdates()
+    })
+  }
+
+  async function selectAndFlush(user: ReturnType<typeof userEvent.setup>, target: Element, value: string) {
+    await act(async () => {
+      await user.selectOptions(target, value)
+      await flushAsyncUpdates()
+    })
+  }
+
+  beforeEach(() => {
+    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+  })
+
+  afterEach(() => {
+    expect(
+      consoleErrorSpy.mock.calls.filter(
+        ([message]) => typeof message === 'string' && message.includes('not wrapped in act'),
+      ),
+    ).toEqual([])
+    consoleErrorSpy.mockRestore()
+  })
+
   it('submits a backtest request with optional parameters', async () => {
     const onRun = vi.fn().mockResolvedValue(undefined)
     const user = userEvent.setup()
 
     render(<RunPanel {...baseProps} onRun={onRun} />)
 
-    await user.type(screen.getByLabelText('Tickers (comma-separated, optional)'), 'AAPL,MSFT')
-    await user.click(screen.getByLabelText('Skip chart generation (--no-charts)'))
-    await user.clear(screen.getByLabelText('Timeout (seconds)'))
-    await user.type(screen.getByLabelText('Timeout (seconds)'), '1800')
-    await user.click(screen.getByRole('button', { name: 'Run Command' }))
+    await typeAndFlush(user, screen.getByLabelText('Tickers (comma-separated, optional)'), 'AAPL,MSFT')
+    await clickAndFlush(user, screen.getByLabelText('Skip chart generation (--no-charts)'))
+    await clearAndTypeAndFlush(user, screen.getByLabelText('Timeout (seconds)'), '1800')
+    await clickAndFlush(user, screen.getByRole('button', { name: 'Run Command' }))
 
     await waitFor(() => {
       expect(onRun).toHaveBeenCalledWith({
@@ -42,20 +93,18 @@ describe('RunPanel', () => {
 
     render(<RunPanel {...baseProps} onRun={onRun} />)
 
-    await user.selectOptions(screen.getByLabelText('Command'), 'stage2')
-    await user.click(screen.getByLabelText('Include fundamentals (--with-fundamentals)'))
-    await user.click(screen.getByRole('button', { name: 'Run Command' }))
+    await selectAndFlush(user, screen.getByLabelText('Command'), 'stage2')
+    await clickAndFlush(user, screen.getByLabelText('Include fundamentals (--with-fundamentals)'))
+    await clickAndFlush(user, screen.getByRole('button', { name: 'Run Command' }))
 
-    await user.selectOptions(screen.getByLabelText('Command'), 'chart')
-    await user.clear(screen.getByLabelText('Ticker'))
-    await user.type(screen.getByLabelText('Ticker'), 'nvda')
-    await user.click(screen.getByRole('button', { name: 'Run Command' }))
+    await selectAndFlush(user, screen.getByLabelText('Command'), 'chart')
+    await clearAndTypeAndFlush(user, screen.getByLabelText('Ticker'), 'nvda')
+    await clickAndFlush(user, screen.getByRole('button', { name: 'Run Command' }))
 
-    await user.selectOptions(screen.getByLabelText('Command'), 'update_tickers')
-    await user.clear(screen.getByLabelText('Min Market Cap'))
-    await user.type(screen.getByLabelText('Min Market Cap'), '1000000')
-    await user.type(screen.getByLabelText('Max Tickers (optional)'), '25')
-    await user.click(screen.getByRole('button', { name: 'Run Command' }))
+    await selectAndFlush(user, screen.getByLabelText('Command'), 'update_tickers')
+    await clearAndTypeAndFlush(user, screen.getByLabelText('Min Market Cap'), '1000000')
+    await typeAndFlush(user, screen.getByLabelText('Max Tickers (optional)'), '25')
+    await clickAndFlush(user, screen.getByRole('button', { name: 'Run Command' }))
 
     await waitFor(() => expect(onRun).toHaveBeenCalledTimes(3))
     expect(onRun.mock.calls[0][0]).toEqual({
@@ -103,7 +152,7 @@ describe('RunPanel', () => {
     expect(screen.getByText(/Job ID:/)).toBeInTheDocument()
     expect(screen.getByText((_, element) => element?.tagName === 'PRE' && element.textContent === 'line 1\nline 2')).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: 'Cancel Running Job' }))
+    await clickAndFlush(user, screen.getByRole('button', { name: 'Cancel Running Job' }))
     expect(onCancel).toHaveBeenCalledTimes(1)
   })
 })

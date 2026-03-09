@@ -104,8 +104,12 @@ class ResultStore:
         return None
 
     def get_run_by_timestamp(self, timestamp: str) -> Optional[BacktestRun]:
+        normalized = timestamp.strip()
+        if not normalized:
+            return None
+
         for run in self.list_runs():
-            if run.timestamp == timestamp or timestamp in run.dir_name:
+            if run.timestamp == normalized or run.dir_name == normalized:
                 return run
         return None
 
@@ -121,7 +125,12 @@ class ResultStore:
             return runs[0]
 
         for run in runs:
-            if normalized in run.dir_name:
+            if run.dir_name == normalized or run.timestamp == normalized:
+                return run
+
+        normalized_period = normalized.replace("_to_", " to ")
+        for run in runs:
+            if run.period == normalized_period:
                 return run
 
         if len(normalized) == 4 and normalized.isdigit():
@@ -129,7 +138,7 @@ class ResultStore:
                 if run.start_date.startswith(normalized):
                     return run
 
-        return runs[0]
+        return None
 
     def _ensure_cache(self) -> None:
         snapshot = self._build_snapshot()

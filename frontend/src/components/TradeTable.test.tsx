@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import { act, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { TradeTable } from './TradeTable'
 import type { TradeRecord } from '../api/backtest'
 
@@ -20,6 +20,36 @@ function buildTrade(index: number, overrides: Partial<TradeRecord> = {}): TradeR
 }
 
 describe('TradeTable', () => {
+  let consoleErrorSpy: {
+    mock: { calls: unknown[][] }
+    mockRestore: () => void
+  }
+
+  async function flushAsyncUpdates() {
+    await Promise.resolve()
+    await Promise.resolve()
+  }
+
+  async function clickAndFlush(user: ReturnType<typeof userEvent.setup>, target: Element) {
+    await act(async () => {
+      await user.click(target)
+      await flushAsyncUpdates()
+    })
+  }
+
+  beforeEach(() => {
+    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+  })
+
+  afterEach(() => {
+    expect(
+      consoleErrorSpy.mock.calls.filter(
+        ([message]) => typeof message === 'string' && message.includes('not wrapped in act'),
+      ),
+    ).toEqual([])
+    consoleErrorSpy.mockRestore()
+  })
+
   it('shows loading and empty states', () => {
     const { rerender } = render(<TradeTable trades={[]} loading />)
     expect(screen.getByText('Loading trades...')).toBeInTheDocument()
@@ -41,19 +71,19 @@ describe('TradeTable', () => {
     expect(screen.getByText('Showing 1 to 20 of 25 trades')).toBeInTheDocument()
     expect(screen.getByText('Page 1 of 2')).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: 'Next →' }))
+    await clickAndFlush(user, screen.getByRole('button', { name: 'Next →' }))
     expect(screen.getByText('Page 2 of 2')).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: '← Previous' }))
+    await clickAndFlush(user, screen.getByRole('button', { name: '← Previous' }))
     expect(screen.getByText('Page 1 of 2')).toBeInTheDocument()
 
-    await user.click(screen.getByText('Ticker').closest('th')!)
+    await clickAndFlush(user, screen.getByText('Ticker').closest('th')!)
     expect(within(screen.getAllByRole('row')[1]).getByText('TICKER-25')).toBeInTheDocument()
 
-    await user.click(screen.getByText('Ticker').closest('th')!)
+    await clickAndFlush(user, screen.getByText('Ticker').closest('th')!)
     expect(within(screen.getAllByRole('row')[1]).getByText('AAA')).toBeInTheDocument()
 
-    await user.click(screen.getByText('Entry Price').closest('th')!)
+    await clickAndFlush(user, screen.getByText('Entry Price').closest('th')!)
     expect(within(screen.getAllByRole('row')[1]).getByText('$125.00')).toBeInTheDocument()
   })
 

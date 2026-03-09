@@ -21,10 +21,12 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       // Split large TopBottomPurchaseCharts into its own chunk to reduce initial bundle size
+      chunkSizeWarningLimit: 2500,
       rollupOptions: {
         output: {
           manualChunks(id) {
-            if (id.includes('react-plotly.js') || id.includes('plotly.js')) return 'plotly-vendor'
+            if (id.includes('react-plotly.js/factory')) return 'plotly-react-factory'
+            if (id.includes('plotly.js-dist-min')) return 'plotly-core'
             if (id.includes('TopBottomPurchaseCharts')) return 'top-bottom-chart';
           },
         },

@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { HomeLanding } from './HomeLanding'
@@ -6,7 +6,7 @@ import { HomeLanding } from './HomeLanding'
 describe('HomeLanding', () => {
   it('renders hero heading and CTA buttons', () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <HomeLanding />
       </MemoryRouter>,
     )
@@ -18,7 +18,7 @@ describe('HomeLanding', () => {
 
   it('renders feature cards and logo section', () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <HomeLanding />
       </MemoryRouter>,
     )

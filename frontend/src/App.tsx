@@ -110,7 +110,7 @@ function AppContent() {
 function App() {
   const { t } = useTranslation()
   return (
-    <BrowserRouter>
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <React.Suspense fallback={<div>{t('common.loading')}</div>}>
         <AppContent />
       </React.Suspense>

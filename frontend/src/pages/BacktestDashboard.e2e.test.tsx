@@ -3,7 +3,7 @@ import fs from 'node:fs'
 import net from 'node:net'
 import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process'
 import { beforeAll, afterAll, describe, expect, it, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 const rootDir = path.resolve(__dirname, '../../..')
@@ -92,6 +92,11 @@ afterAll(async () => {
 })
 
 describe('BacktestDashboard E2E', () => {
+  async function flushAsyncUpdates() {
+    await Promise.resolve()
+    await Promise.resolve()
+  }
+
   it(
     'renders fixture-backed results from the real backend',
     async () => {
@@ -105,7 +110,10 @@ describe('BacktestDashboard E2E', () => {
       expect(await screen.findByText('2026-01-01 to 2026-01-31')).toBeInTheDocument()
       expect(await screen.findByText('backtest_2026-01-01_to_2026-01-31')).toBeInTheDocument()
 
-      await user.click(screen.getByRole('button', { name: 'Trades' }))
+      await act(async () => {
+        await user.click(screen.getByRole('button', { name: 'Trades' }))
+        await flushAsyncUpdates()
+      })
 
       expect(await screen.findByText('AAA')).toBeInTheDocument()
       expect(await screen.findByText('CCC')).toBeInTheDocument()

@@ -80,6 +80,23 @@ def test_result_store_resolves_latest_and_timestamp(tmp_path):
     assert year_match.dir_name.endswith('20250131-000000')
 
 
+def test_result_store_requires_exact_timestamp_and_known_selectors(tmp_path):
+    from services.result_store import ResultStore
+
+    _write_result_set(tmp_path, 'backtest_2025-01-01_to_2025-01-31_20250131-000000')
+    _write_result_set(tmp_path, 'backtest_2025-02-01_to_2025-02-28_20250228-000000')
+
+    store = ResultStore(tmp_path)
+
+    assert store.get_run_by_timestamp('20250131-000000') is not None
+    assert store.get_run_by_timestamp('2025') is None
+
+    exact_period = store.get_run_by_range('2025-02-01 to 2025-02-28')
+    assert exact_period is not None
+    assert exact_period.dir_name.endswith('20250228-000000')
+    assert store.get_run_by_range('does-not-exist') is None
+
+
 def test_result_store_manifest_contains_expected_paths():
     from services.result_store import ResultStore
 

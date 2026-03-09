@@ -184,26 +184,36 @@ export const BacktestDashboard: React.FC = () => {
           )}
 
           <h3>{t('dashboard.availableTests')}</h3>
+          <p className="backtest-list-hint">{t('dashboard.pinnedHint')}</p>
           <div className="backtest-list">
             {backtests.length === 0 ? (
               <p className="empty-list">{t('dashboard.noBacktests')}</p>
             ) : (
-              backtests.map((backtest) => (
-                <div
-                  key={backtest.timestamp}
-                  className={`backtest-item ${selectedTimestamp === backtest.timestamp ? 'active' : ''}`}
-                  onClick={() => setSelectedTimestamp(backtest.timestamp)}
-                >
-                  <div className="item-period">
-                    <span>{backtest.period}</span>
-                    {backtest.is_pinned && <span className="backtest-badge">{t('dashboard.pinnedLabel')}</span>}
+              backtests.map((backtest) => {
+                const availableRunCount = backtest.available_runs ?? 1
+
+                return (
+                  <div
+                    key={backtest.timestamp}
+                    className={`backtest-item ${selectedTimestamp === backtest.timestamp ? 'active' : ''}`}
+                    onClick={() => setSelectedTimestamp(backtest.timestamp)}
+                  >
+                    <div className="item-period">
+                      <span>{backtest.period}</span>
+                      {backtest.is_pinned && <span className="backtest-badge">{t('dashboard.pinnedLabel')}</span>}
+                    </div>
+                    <div className="item-details">
+                      <span>{t('dashboard.tradesCount', { count: backtest.trade_count })}</span>
+                      {availableRunCount > 1 && (
+                        <span title={t('dashboard.availableRunsHint')}>
+                          {t('dashboard.availableRuns', { count: availableRunCount })}
+                        </span>
+                      )}
+                    </div>
+                    <div className="item-timestamp">{backtest.timestamp}</div>
                   </div>
-                  <div className="item-details">
-                    <span>{t('dashboard.tradesCount', { count: backtest.trade_count })}</span>
-                  </div>
-                  <div className="item-timestamp">{backtest.timestamp}</div>
-                </div>
-              ))
+                )
+              })
             )}
           </div>
         </aside>
@@ -514,6 +524,13 @@ export const BacktestDashboard: React.FC = () => {
           display: flex;
           flex-direction: column;
           gap: 6px;
+        }
+
+        .backtest-list-hint {
+          margin: 0 0 12px;
+          font-size: 12px;
+          line-height: 1.5;
+          color: var(--text-muted, #64748b);
         }
 
         .backtest-item {
