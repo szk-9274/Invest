@@ -53,6 +53,7 @@ class BacktestRun:
     rule_profile: Optional[str] = None
     tags: list[str] | None = None
     headline_metrics: dict | None = None
+    has_displayable_results: bool = False
 
 
 class ResultStore:
@@ -71,6 +72,8 @@ class ResultStore:
         regular_runs: list[BacktestRun] = []
 
         for run in self.list_runs():
+            if not run.has_displayable_results:
+                continue
             if run.period in PINNED_BACKTEST_PERIOD_ORDER:
                 pinned_counts[run.period] = pinned_counts.get(run.period, 0) + 1
                 pinned_runs.setdefault(run.period, run)
@@ -111,7 +114,7 @@ class ResultStore:
 
     def get_latest_run(self) -> Optional[BacktestRun]:
         runs = self.list_runs()
-        return runs[0] if runs else None
+        return self._pick_best_run(runs)
 
     def get_run_by_dir_name(self, dir_name: str) -> Optional[BacktestRun]:
         for run in self.list_runs():
@@ -134,25 +137,25 @@ class ResultStore:
         if not runs:
             return None
         if not range_value:
-            return runs[0]
+            return self._pick_best_run(runs)
 
         normalized = range_value.strip()
         if not normalized or normalized.upper() == "ALL":
-            return runs[0]
+            return self._pick_best_run(runs)
 
-        for run in runs:
-            if run.dir_name == normalized or run.timestamp == normalized:
-                return run
+        exact_matches = [run for run in runs if run.dir_name == normalized or run.timestamp == normalized]
+        if exact_matches:
+            return exact_matches[0]
 
         normalized_period = normalized.replace("_to_", " to ")
-        for run in runs:
-            if run.period == normalized_period:
-                return run
+        period_matches = [run for run in runs if run.period == normalized_period]
+        if period_matches:
+            return self._pick_best_run(period_matches)
 
         if len(normalized) == 4 and normalized.isdigit():
-            for run in runs:
-                if run.start_date.startswith(normalized):
-                    return run
+            year_matches = [run for run in runs if run.start_date.startswith(normalized)]
+            if year_matches:
+                return self._pick_best_run(year_matches)
 
         return None
 
@@ -220,9 +223,25 @@ class ResultStore:
                     rule_profile=manifest.get("rule_profile") or spec.get("rule_profile"),
                     tags=manifest.get("tags") or spec.get("tags") or [],
                     headline_metrics=self._build_headline_metrics(metrics, start_date, end_date),
+                    has_displayable_results=(
+                        trades_path.exists()
+                        or trade_log_path.exists()
+                        or ticker_stats_path.exists()
+                        or (charts_dir.exists() and any(charts_dir.iterdir()))
+                        or bool(metrics)
+                    ),
                 )
             )
         return runs
+
+    @staticmethod
+    def _pick_best_run(runs: list[BacktestRun]) -> Optional[BacktestRun]:
+        if not runs:
+            return None
+        for run in runs:
+            if run.has_displayable_results:
+                return run
+        return runs[0]
 
     @staticmethod
     def _build_headline_metrics(metrics: dict, start_date: str, end_date: str) -> dict | None:

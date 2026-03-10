@@ -118,6 +118,20 @@ def test_result_store_resolves_latest_and_timestamp(tmp_path):
     assert year_match.dir_name.endswith('20250131-000000')
 
 
+def test_result_store_latest_run_prefers_displayable_artifacts(tmp_path):
+    from services.result_store import ResultStore
+
+    _write_result_set(tmp_path, 'backtest_2025-01-01_to_2025-01-31_20250131-000000')
+    empty_result_dir = tmp_path / 'backtest_2026-01-01_to_2026-01-31_20260131-000000'
+    (empty_result_dir / 'charts').mkdir(parents=True, exist_ok=True)
+
+    store = ResultStore(tmp_path)
+    latest = store.get_latest_run()
+
+    assert latest is not None
+    assert latest.dir_name.endswith('20250131-000000')
+
+
 def test_result_store_requires_exact_timestamp_and_known_selectors(tmp_path):
     from services.result_store import ResultStore
 
@@ -157,6 +171,7 @@ def test_result_store_pins_target_periods_and_uses_latest_run_per_period(tmp_pat
     _write_result_set(tmp_path, 'backtest_2020-01-01_to_2020-12-31_20201231-000000')
     _write_result_set(tmp_path, 'backtest_2024-01-01_to_2024-12-31_20241231-000000')
     _write_result_set(tmp_path, 'backtest_2024-01-01_to_2024-12-31_20251231-000000')
+    (tmp_path / 'backtest_2024-01-01_to_2024-12-31_20261231-000000').mkdir(parents=True, exist_ok=True)
     _write_result_set(tmp_path, 'backtest_2025-01-01_to_2025-12-31_20251231-235959')
     _write_result_set(tmp_path, 'backtest_2026-01-01_to_2026-12-31_20261231-000000')
 
@@ -175,6 +190,18 @@ def test_result_store_pins_target_periods_and_uses_latest_run_per_period(tmp_pat
     assert backtests[1]['timestamp'] == '20251231-000000'
     assert backtests[3]['period'] == '2026-01-01 to 2026-12-31'
     assert backtests[3]['is_pinned'] is False
+
+
+def test_result_store_skips_periods_with_only_empty_runs(tmp_path):
+    from services.result_store import ResultStore
+
+    (tmp_path / 'backtest_2020-01-01_to_2020-12-31_20201231-000000').mkdir(parents=True, exist_ok=True)
+    _write_result_set(tmp_path, 'backtest_2025-01-01_to_2025-12-31_20251231-235959')
+
+    store = ResultStore(tmp_path)
+    backtests = store.list_backtests()
+
+    assert [backtest['period'] for backtest in backtests] == ['2025-01-01 to 2025-12-31']
 
 
 def test_result_store_reads_run_manifest_metadata(tmp_path):
