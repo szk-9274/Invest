@@ -12,5 +12,6 @@
 - [foundation-improvements.md](foundation-improvements.md) — foundation-improvements — - タイトル: 基盤改善一式の実装
 - [improvement-round-1.md](improvement-round-1.md) — 変更・削除・作成するファイル — - frontend/src/pages/BacktestDashboard.test.tsx ほか frontend テスト群
 - [improvement-round-2.md](improvement-round-2.md) — 変更・削除・作成するファイル — - frontend/src/pages/BacktestDashboard.tsx と関連テスト
+- [qlib-inspired-architecture.md](qlib-inspired-architecture.md) — 実装計画: Qlib inspired architecture adaptation — - タイトル: Qlib inspired architecture adaptation
 - [working-memory-governance.md](working-memory-governance.md) — 実装計画: 長期記憶・文脈維持ルールの文書整理 — - タイトル: 長期記憶・文脈維持ルールの文書整理
 <!-- END AUTO-GENERATED DOC LIST -->

@@ -56,6 +56,8 @@
     "pinnedHint": "Pinned annual results stay visible by default.",
     "availableRuns": "{{count}} runs",
     "availableRunsHint": "Multiple runs exist for this period. The newest run is shown by default.",
+    "benchmarkDisabledShort": "No benchmark",
+    "benchmarkDisabledLabel": "Benchmark disabled",
     "tradesCount": "{{count}} trades",
     "runRoute": "Run & Manage",
     "analysisRoute": "Analysis & Results",

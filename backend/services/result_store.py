@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 from dataclasses import dataclass
 from pathlib import Path
@@ -44,6 +45,13 @@ class BacktestRun:
     trade_log_path: Optional[Path]
     ticker_stats_path: Optional[Path]
     charts_dir: Optional[Path]
+    manifest_path: Optional[Path] = None
+    run_label: Optional[str] = None
+    experiment_name: Optional[str] = None
+    strategy_name: Optional[str] = None
+    benchmark_enabled: Optional[bool] = None
+    rule_profile: Optional[str] = None
+    tags: list[str] | None = None
 
 
 class ResultStore:
@@ -89,6 +97,12 @@ class ResultStore:
                 "dir_name": run.dir_name,
                 "is_pinned": is_pinned,
                 "available_runs": available_runs,
+                "run_label": run.run_label,
+                "experiment_name": run.experiment_name,
+                "strategy_name": run.strategy_name,
+                "benchmark_enabled": run.benchmark_enabled,
+                "rule_profile": run.rule_profile,
+                "tags": run.tags or [],
             }
             for run, is_pinned, available_runs in ordered_runs
         ]
@@ -178,6 +192,9 @@ class ResultStore:
             trades_path = child / "trades.csv"
             trade_log_path = child / "trade_log.csv"
             charts_dir = child / "charts"
+            manifest_path = child / "run_manifest.json"
+            manifest = self._load_manifest(manifest_path)
+            spec = manifest.get("spec", {}) if isinstance(manifest.get("spec"), dict) else {}
 
             runs.append(
                 BacktestRun(
@@ -192,6 +209,13 @@ class ResultStore:
                     trade_log_path=trade_log_path if trade_log_path.exists() else None,
                     ticker_stats_path=ticker_stats_path if ticker_stats_path.exists() else None,
                     charts_dir=charts_dir if charts_dir.exists() else None,
+                    manifest_path=manifest_path if manifest_path.exists() else None,
+                    run_label=manifest.get("run_label") or spec.get("run_label"),
+                    experiment_name=manifest.get("experiment_name") or spec.get("experiment_name"),
+                    strategy_name=manifest.get("strategy_name") or spec.get("strategy_name"),
+                    benchmark_enabled=manifest.get("benchmark_enabled", spec.get("use_benchmark")),
+                    rule_profile=manifest.get("rule_profile") or spec.get("rule_profile"),
+                    tags=manifest.get("tags") or spec.get("tags") or [],
                 )
             )
         return runs
@@ -219,3 +243,13 @@ class ResultStore:
             logger.warning(f"Failed to read ticker stats from {ticker_stats_path}: {exc}")
             return 0
         return len(df.index)
+
+    @staticmethod
+    def _load_manifest(manifest_path: Path) -> dict:
+        if not manifest_path.exists():
+            return {}
+        try:
+            return json.loads(manifest_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError, json.JSONDecodeError) as exc:
+            logger.warning(f"Failed to read run manifest from {manifest_path}: {exc}")
+            return {}

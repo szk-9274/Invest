@@ -56,12 +56,23 @@ class TickerStats(BaseModel):
     win_rate: Optional[float] = None
 
 
+class BacktestRunInfo(BaseModel):
+    run_id: str
+    run_label: Optional[str] = None
+    experiment_name: Optional[str] = None
+    strategy_name: Optional[str] = None
+    benchmark_enabled: Optional[bool] = None
+    rule_profile: Optional[str] = None
+    tags: list[str] = Field(default_factory=list)
+
+
 class BacktestResults(BaseModel):
     timestamp: str
     summary: BacktestSummary
     trades: list[TradeRecord]
     ticker_stats: list[TickerStats]
     charts: dict[str, Optional[str]]
+    run_metadata: Optional[BacktestRunInfo] = None
 
 
 class BacktestArtifactsResponse(BaseModel):
@@ -79,6 +90,12 @@ class BacktestMetadata(BaseModel):
     dir_name: str
     is_pinned: bool = False
     available_runs: int = 1
+    run_label: Optional[str] = None
+    experiment_name: Optional[str] = None
+    strategy_name: Optional[str] = None
+    benchmark_enabled: Optional[bool] = None
+    rule_profile: Optional[str] = None
+    tags: list[str] = Field(default_factory=list)
 
 
 class BacktestListResponse(BaseModel):

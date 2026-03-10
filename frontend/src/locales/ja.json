@@ -56,6 +56,8 @@
     "pinnedHint": "固定した年次結果は常に一覧の上部に表示されます。",
     "availableRuns": "{{count}}件のrun",
     "availableRunsHint": "この期間には複数の run があり、既定では最新 run を表示しています。",
+    "benchmarkDisabledShort": "ベンチマークなし",
+    "benchmarkDisabledLabel": "ベンチマーク無効",
     "tradesCount": "{{count}} 件のトレード",
     "runRoute": "実行・管理",
     "analysisRoute": "解析・結果",

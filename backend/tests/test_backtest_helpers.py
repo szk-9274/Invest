@@ -160,7 +160,7 @@ def test_get_latest_results_uses_selected_range(monkeypatch):
 
     result = backtest_api.get_latest_results('2026')
 
-    loader.assert_called_once_with('/tmp/backtest', 'backtest_2026')
+    loader.assert_called_once_with('/tmp/backtest', 'backtest_2026', run=chosen)
     assert result.timestamp == 'backtest_2026'
 
 
@@ -217,6 +217,27 @@ def test_get_results_by_timestamp_returns_404_for_unknown_timestamp(monkeypatch)
 
     assert exc.value.status_code == 404
     assert exc.value.detail == 'No backtest results found for timestamp: missing-ts'
+
+
+def test_get_results_by_timestamp_passes_resolved_run(monkeypatch):
+    matched = SimpleNamespace(result_dir=Path('/tmp/backtest-ts'), dir_name='backtest_20260131')
+
+    class FakeStore:
+        def __init__(self, *_args, **_kwargs):
+            pass
+
+        def get_run_by_timestamp(self, requested_timestamp):
+            assert requested_timestamp == '20260131-000000'
+            return matched
+
+    loader = Mock(return_value=_sample_results('backtest_20260131'))
+    monkeypatch.setattr(backtest_api, 'ResultStore', FakeStore)
+    monkeypatch.setattr(backtest_api, '_get_backtest_results_by_dir', loader)
+
+    result = backtest_api.get_results_by_timestamp('20260131-000000')
+
+    loader.assert_called_once_with('/tmp/backtest-ts', 'backtest_20260131', run=matched)
+    assert result.timestamp == 'backtest_20260131'
 
 
 def test_get_backtest_results_by_dir_loads_charts_and_aliases(monkeypatch, tmp_path):

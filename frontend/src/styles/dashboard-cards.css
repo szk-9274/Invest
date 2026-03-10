@@ -101,6 +101,22 @@
   align-items: center;
 }
 
+.item-metadata {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  color: #475569;
+  font-size: 12px;
+}
+
+.item-metadata span {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #e2e8f0;
+}
+
 .backtest-badge {
   display: inline-flex;
   align-items: center;

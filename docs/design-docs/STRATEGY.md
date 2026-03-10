@@ -99,12 +99,27 @@ Strictモードでトレードが0件の場合に自動発動。
 
 ---
 
+# パラメータ構造
+
+- `stage`: Universe selection 用の条件群。strict / relaxed と fallback 挙動を含む。
+- `entry`: 日次エントリー判定用の軽量条件群。
+- `exit`: エグジット条件群。
+- `risk`: ポジションサイズ・損失許容。
+- `backtest`: 期間、資金、同時保有数などの実行条件。
+- `experiment`: run label / strategy name / rule profile / tags など、比較検証と保存に使う軽量メタデータ。
+
+これらは `python/config/params.yaml` を正本とし、各 run は `run_manifest.json` に snapshot を保存する。
+
+---
+
 # 出力仕様
 
 - screening_results.csv
 - trades.csv
 - trade_log.csv
 - ticker_stats.csv
+- run_manifest.json
+- registry.json
 - equity_curve.png
 - drawdown.png
 - monthly_returns.png

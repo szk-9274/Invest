@@ -102,6 +102,16 @@ backtest:
   slippage: 0.001                    # 0.1% slippage
   enable_detailed_log: true          # Enable detailed trade logging
 
+# Experiment / recorder-like metadata
+experiment:
+  name: "minervini-stage2-baseline"
+  strategy_name: "rule-based-stage2"
+  rule_profile: "strict-auto-fallback"
+  tags:
+    - "baseline"
+    - "cpu-friendly"
+    - "qlib-inspired"
+
 # Output settings
 output:
   csv_path: "output/screening_results.csv"

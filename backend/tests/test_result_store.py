@@ -38,6 +38,41 @@ def _write_result_set(base_dir: Path, dir_name: str) -> Path:
     return result_dir
 
 
+def _write_manifest(
+    result_dir: Path,
+    *,
+    run_label: str = 'baseline-run',
+    experiment_name: str = 'minervini-stage2-baseline',
+    strategy_name: str = 'stage2-rule-stack',
+    benchmark_enabled: bool = True,
+) -> None:
+    import json
+
+    manifest = {
+        'run_id': result_dir.name,
+        'run_label': run_label,
+        'experiment_name': experiment_name,
+        'strategy_name': strategy_name,
+        'benchmark_enabled': benchmark_enabled,
+        'rule_profile': 'strict-auto-fallback',
+        'tags': ['baseline', 'qlib-inspired'],
+        'artifacts': {
+            'trades_csv': 'trades.csv',
+            'trade_log_csv': 'trade_log.csv',
+            'ticker_stats_csv': 'ticker_stats.csv',
+        },
+        'metrics': {
+            'total_trades': 1,
+            'win_rate': 1.0,
+            'total_pnl': 2.0,
+        },
+    }
+    (result_dir / 'run_manifest.json').write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2),
+        encoding='utf-8',
+    )
+
+
 def test_get_backtest_output_dir_uses_env_override(monkeypatch, tmp_path):
     from services.result_store import get_backtest_output_dir
 
@@ -137,3 +172,34 @@ def test_result_store_pins_target_periods_and_uses_latest_run_per_period(tmp_pat
     assert backtests[1]['timestamp'] == '20251231-000000'
     assert backtests[3]['period'] == '2026-01-01 to 2026-12-31'
     assert backtests[3]['is_pinned'] is False
+
+
+def test_result_store_reads_run_manifest_metadata(tmp_path):
+    from services.result_store import ResultStore
+
+    result_dir = _write_result_set(tmp_path, 'backtest_2026-01-01_to_2026-01-31_20260131-000000')
+    _write_manifest(
+        result_dir,
+        run_label='comparison-a',
+        experiment_name='qlib-inspired',
+        strategy_name='rule-based-stage2',
+        benchmark_enabled=False,
+    )
+
+    store = ResultStore(tmp_path)
+    run = store.get_latest_run()
+    backtests = store.list_backtests()
+
+    assert run is not None
+    assert run.manifest_path is not None
+    assert run.manifest_path.name == 'run_manifest.json'
+    assert run.run_label == 'comparison-a'
+    assert run.experiment_name == 'qlib-inspired'
+    assert run.strategy_name == 'rule-based-stage2'
+    assert run.benchmark_enabled is False
+    assert run.tags == ['baseline', 'qlib-inspired']
+
+    assert backtests[0]['run_label'] == 'comparison-a'
+    assert backtests[0]['experiment_name'] == 'qlib-inspired'
+    assert backtests[0]['strategy_name'] == 'rule-based-stage2'
+    assert backtests[0]['benchmark_enabled'] is False

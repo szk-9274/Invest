@@ -20,6 +20,12 @@ export type BacktestMetadata = {
   dir_name: string;
   is_pinned?: boolean;
   available_runs?: number;
+  run_label?: string | null;
+  experiment_name?: string | null;
+  strategy_name?: string | null;
+  benchmark_enabled?: boolean | null;
+  rule_profile?: string | null;
+  tags?: Array<string>;
 }
 
 export type BacktestRequest = {
@@ -39,6 +45,17 @@ export type BacktestResults = {
   trades: Array<TradeRecord>;
   ticker_stats: Array<TickerStats>;
   charts: Record<string, string | null>;
+  run_metadata?: BacktestRunInfo | null;
+}
+
+export type BacktestRunInfo = {
+  run_id: string;
+  run_label?: string | null;
+  experiment_name?: string | null;
+  strategy_name?: string | null;
+  benchmark_enabled?: boolean | null;
+  rule_profile?: string | null;
+  tags?: Array<string>;
 }
 
 export type BacktestSummary = {

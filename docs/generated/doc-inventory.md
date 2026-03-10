@@ -11,6 +11,8 @@
 
 ## docs/ tree
 - `docs/decision-log/`
+  - [2026-03-09-docs-centralization.md](../decision-log/2026-03-09-docs-centralization.md) — 決定: docs の正本化 — DOCUMENTATION_SYSTEM.md を長期記憶の正本に指定 — 日付: 2026-03-09
+  - [qlib-inspired-local-manifest.md](../decision-log/qlib-inspired-local-manifest.md) — Decision log: local manifest based experiment tracking — - Status: accepted
   - [index.md](../decision-log/index.md) — decision-log — 目的
 - `docs/design-docs/`
   - [STRATEGY.md](../design-docs/STRATEGY.md) — STRATEGY.md — Invest プロジェクト 戦略仕様書
@@ -21,6 +23,7 @@
   - `docs/exec-plans/active/`
     - [index.md](../exec-plans/active/index.md) — exec-plans/active — ここには現在進行中の実行計画を置きます。
     - [dashboard-improvement-batch-1.md](../exec-plans/active/dashboard-improvement-batch-1.md) — 実装計画: ダッシュボード改善バッチ 1 — - タイトル: ダッシュボード改善バッチ 1
+    - [qlib-phase1-release-and-frontend-visualization.md](../exec-plans/active/qlib-phase1-release-and-frontend-visualization.md) — 実装計画: qlib phase-1 リリース整理と localhost 可視化初回イテレーション — - タイトル: qlib phase-1 リリース整理と localhost 可視化初回イテレーション
   - `docs/exec-plans/completed/`
     - [index.md](../exec-plans/completed/index.md) — exec-plans/completed — 完了した実行計画の記録を置きます。
     - [backtest-dashboard-renewal.md](../exec-plans/completed/backtest-dashboard-renewal.md) — 実装計画: バックテスト・ダッシュボード改善 — - タイトル: バックテスト・ダッシュボード改善
@@ -31,15 +34,18 @@
     - [foundation-improvements.md](../exec-plans/completed/foundation-improvements.md) — foundation-improvements — - タイトル: 基盤改善一式の実装
     - [improvement-round-1.md](../exec-plans/completed/improvement-round-1.md) — 変更・削除・作成するファイル — - frontend/src/pages/BacktestDashboard.test.tsx ほか frontend テスト群
     - [improvement-round-2.md](../exec-plans/completed/improvement-round-2.md) — 変更・削除・作成するファイル — - frontend/src/pages/BacktestDashboard.tsx と関連テスト
+    - [qlib-inspired-architecture.md](../exec-plans/completed/qlib-inspired-architecture.md) — 実装計画: Qlib inspired architecture adaptation — - タイトル: Qlib inspired architecture adaptation
     - [working-memory-governance.md](../exec-plans/completed/working-memory-governance.md) — 実装計画: 長期記憶・文脈維持ルールの文書整理 — - タイトル: 長期記憶・文脈維持ルールの文書整理
 - `docs/product-specs/`
   - [index.md](../product-specs/index.md) — product-specs — 目的
 - `docs/references/`
-  - [design-ref-llms.md](../references/design-ref-llms.md) — Design Ref Llms — Design system reference (LLM 向け要約)
+  - [design-ref-llms.md](../references/design-ref-llms.md) — 1. Qlib repository — - URL: https://github.com/microsoft/qlib
 - `docs/working-memory/`
   - [index.md](../working-memory/index.md) — working-memory — 目的
   - `docs/working-memory/session-logs/`
     - [index.md](../working-memory/session-logs/index.md) — session-logs — 目的
+    - [2026-03-09T16-11-18Z-session-summary.md](../working-memory/session-logs/2026-03-09T16-11-18Z-session-summary.md) — セッションログ: ダッシュボード改善バッチ1 とドキュメント再編 — 保存日時: 2026-03-09T16:11:18Z
+    - [2026-03-10T02-02-49Z-session-summary.md](../working-memory/session-logs/2026-03-10T02-02-49Z-session-summary.md) — セッションログ: Qlib inspired architecture adaptation — 保存日時: 2026-03-10T02:02:49Z
   - `docs/working-memory/summaries-lv1/`
     - [index.md](../working-memory/summaries-lv1/index.md) — summaries-lv1 — 目的
   - `docs/working-memory/summaries-lv2/`

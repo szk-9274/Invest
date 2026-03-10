@@ -61,6 +61,17 @@ export const BacktestRunPage: React.FC = () => {
                     <span>{backtest.period}</span>
                     {backtest.is_pinned && <span className="backtest-badge">{t('dashboard.pinnedLabel')}</span>}
                   </div>
+                  {(backtest.run_label || backtest.experiment_name || backtest.strategy_name || backtest.rule_profile) && (
+                    <div className="item-metadata">
+                      {backtest.run_label ? <span>{backtest.run_label}</span> : null}
+                      {backtest.experiment_name ? <span>{backtest.experiment_name}</span> : null}
+                      {backtest.strategy_name ? <span>{backtest.strategy_name}</span> : null}
+                      {backtest.rule_profile ? <span>{backtest.rule_profile}</span> : null}
+                      {backtest.benchmark_enabled === false ? (
+                        <span>{t('dashboard.benchmarkDisabledShort', 'No benchmark')}</span>
+                      ) : null}
+                    </div>
+                  )}
                   <div className="item-details">
                     <span>{t('dashboard.tradesCount', { count: backtest.trade_count })}</span>
                     {availableRunCount > 1 && (

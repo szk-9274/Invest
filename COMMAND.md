@@ -65,10 +65,13 @@ cd ~/code/Invest/python
 source .venv/bin/activate
 python main.py --mode backtest
 python main.py --mode backtest --start 2023-01-01 --end 2023-12-31
+python main.py --mode backtest --start 2023-01-01 --end 2023-12-31 --run-label baseline-2023
 python main.py --mode backtest --no-charts
 python main.py --mode chart --ticker AAPL --start 2023-01-01 --end 2023-12-31
 python scripts/update_tickers_extended.py --min-market-cap 5000000000
 ```
+
+バックテスト実行後は `python/output/backtest/<run>/run_manifest.json` と `python/output/backtest/registry.json` を見ると、実行条件・主要指標・成果物一覧を確認できます。
 
 ## 5. OpenAPI 契約から frontend 型を再生成
 
@@ -112,6 +115,7 @@ source .venv/bin/activate
 cd ~/code/Invest
 pytest backend/tests -q
 pytest backend/tests --cov=backend --cov-report=term --cov-fail-under=80
+pytest tests -q
 ```
 
 frontend:

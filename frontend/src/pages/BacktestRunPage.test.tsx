@@ -30,6 +30,11 @@ describe('BacktestRunPage', () => {
           trade_count: 12,
           is_pinned: true,
           available_runs: 2,
+          run_label: 'baseline-run',
+          experiment_name: 'qlib-inspired',
+          strategy_name: 'rule-based-stage2',
+          rule_profile: 'strict-auto-fallback',
+          benchmark_enabled: false,
         },
         {
           timestamp: 'run-2026',
@@ -37,6 +42,7 @@ describe('BacktestRunPage', () => {
           trade_count: 8,
           is_pinned: false,
           available_runs: 1,
+          run_label: 'comparison-b',
         },
       ],
       selectedTimestamp: 'run-2025',
@@ -52,6 +58,10 @@ describe('BacktestRunPage', () => {
 
     expect(screen.getByTestId('run-panel')).toHaveTextContent('running:1')
     expect(screen.getByText('Pinned')).toBeInTheDocument()
+    expect(screen.getByText('baseline-run')).toBeInTheDocument()
+    expect(screen.getByText('qlib-inspired')).toBeInTheDocument()
+    expect(screen.getByText('rule-based-stage2')).toBeInTheDocument()
+    expect(screen.getByText('No benchmark')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /2026 annual/i })).toBeInTheDocument()
 
     await act(async () => {

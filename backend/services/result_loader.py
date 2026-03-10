@@ -4,7 +4,9 @@ Result Loader Service
 Loads backtest results from CSV files (trade_log.csv, ticker_stats.csv)
 and provides data access for the API layer.
 """
+import json
 import os
+from pathlib import Path
 from typing import Dict, List, Optional
 
 import pandas as pd
@@ -311,6 +313,21 @@ def load_backtest_summary(output_dir: str) -> Dict:
 
     summary = {}
     try:
+        manifest_path = os.path.join(output_dir, "run_manifest.json")
+        if os.path.exists(manifest_path):
+            manifest = json.loads(Path(manifest_path).read_text(encoding="utf-8"))
+            metrics = manifest.get("metrics", {})
+            if metrics:
+                return {
+                    "total_trades": metrics.get("total_trades", 0),
+                    "winning_trades": metrics.get("winning_trades", 0),
+                    "losing_trades": metrics.get("losing_trades", 0),
+                    "win_rate": metrics.get("win_rate", 0),
+                    "total_pnl": metrics.get("total_pnl", 0),
+                    "avg_win": metrics.get("avg_win", 0),
+                    "avg_loss": metrics.get("avg_loss", 0),
+                }
+
         # Load trades.csv for gross statistics
         trades_path = os.path.join(output_dir, "trades.csv")
         if os.path.exists(trades_path):

@@ -18,6 +18,7 @@ def test_openapi_contains_expected_contract_schemas():
 
     assert 'BacktestResults' in components
     assert 'BacktestMetadata' in components
+    assert 'BacktestRunInfo' in components
     assert 'TopBottomTickers' in components
     assert 'ChartData' in components
     assert 'TradeMarkers' in components
@@ -40,5 +41,7 @@ def test_contract_export_generates_typescript_definitions(tmp_path):
     assert 'export type BacktestResults' in content
     assert 'export type JobResponse' in content
     assert 'export type TradeMarkers' in content
+    assert 'export type BacktestRunInfo' in content
     assert 'is_pinned?: boolean' in content
     assert 'available_runs?: number' in content
+    assert 'run_metadata?: BacktestRunInfo | null' in content

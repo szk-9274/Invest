@@ -20,6 +20,10 @@ export const BacktestAnalysisPage: React.FC = () => {
   const { t } = useTranslation()
   const { results, loading } = useBacktestDashboardContext()
   const { isVisible: isChartsVisible, targetRef: chartsAnchorRef } = useDeferredVisibility<HTMLDivElement>()
+  const runMetadata = results?.run_metadata
+  const metadataLabel = [runMetadata?.experiment_name, runMetadata?.strategy_name, runMetadata?.rule_profile]
+    .filter(Boolean)
+    .join(' / ')
 
   if (!results) {
     return <div className="dashboard-empty-panel">{loading ? t('common.loading') : t('dashboard.selectBacktest')}</div>
@@ -31,7 +35,11 @@ export const BacktestAnalysisPage: React.FC = () => {
         <div className="dashboard-section-heading">
           <div>
             <h2>{t('dashboard.analysisRoute', 'Analysis & Results')}</h2>
-            <p>{formatTimestampLabel(results.timestamp)}</p>
+            <p>{runMetadata?.run_label ?? formatTimestampLabel(results.timestamp)}</p>
+            {metadataLabel ? <p>{metadataLabel}</p> : null}
+            {runMetadata?.benchmark_enabled === false ? (
+              <p>{t('dashboard.benchmarkDisabledLabel', 'Benchmark disabled')}</p>
+            ) : null}
           </div>
         </div>
         <BacktestSummary data={results.summary} loading={loading} />

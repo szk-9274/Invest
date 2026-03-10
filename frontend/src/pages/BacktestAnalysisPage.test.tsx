@@ -33,6 +33,15 @@ const sampleResults = {
   trades: [{ ticker: 'AAA' }, { ticker: 'BBB' }],
   ticker_stats: [{ ticker: 'AAA', total_pnl: 10, trade_count: 1 }],
   charts: {},
+  run_metadata: {
+    run_id: 'backtest_2025-01-01_to_2025-12-31_20251231-235959',
+    run_label: 'baseline-run',
+    experiment_name: 'qlib-inspired',
+    strategy_name: 'rule-based-stage2',
+    rule_profile: 'strict-auto-fallback',
+    benchmark_enabled: false,
+    tags: ['baseline'],
+  },
 }
 
 describe('BacktestAnalysisPage', () => {
@@ -71,6 +80,9 @@ describe('BacktestAnalysisPage', () => {
 
     expect(screen.getByTestId('summary-view')).toHaveTextContent('summary:2')
     expect(screen.getByTestId('trades-view')).toHaveTextContent('trades:2')
+    expect(screen.getByText('baseline-run')).toBeInTheDocument()
+    expect(screen.getByText('qlib-inspired / rule-based-stage2 / strict-auto-fallback')).toBeInTheDocument()
+    expect(screen.getByText('Benchmark disabled')).toBeInTheDocument()
     expect(screen.queryByTestId('charts-view')).not.toBeInTheDocument()
     expect(screen.getByTestId('analysis-charts-placeholder')).toBeInTheDocument()
 

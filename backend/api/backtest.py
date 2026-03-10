@@ -32,6 +32,7 @@ from schemas.backtest import (
     BacktestRequest,
     BacktestResponse,
     BacktestResults,
+    BacktestRunInfo,
     BacktestSummary,
     TickerStats,
     TopBottomTickers,
@@ -201,7 +202,7 @@ def get_latest_results(range: Optional[str] = None) -> BacktestResults:
     store = _get_store_or_404(DEFAULT_OUTPUT_DIR)
     try:
         chosen = _resolve_requested_run(store, range)
-        return _get_backtest_results_by_dir(str(chosen.result_dir), chosen.dir_name)
+        return _get_backtest_results_by_dir(str(chosen.result_dir), chosen.dir_name, run=chosen)
     except HTTPException:
         raise
     except Exception as e:
@@ -217,7 +218,7 @@ def get_results_by_timestamp(timestamp: str) -> BacktestResults:
         matched = store.get_run_by_timestamp(timestamp)
         if matched is None:
             raise HTTPException(status_code=404, detail=f"No backtest results found for timestamp: {timestamp}")
-        return _get_backtest_results_by_dir(str(matched.result_dir), matched.dir_name)
+        return _get_backtest_results_by_dir(str(matched.result_dir), matched.dir_name, run=matched)
     except HTTPException:
         raise
     except Exception as e:
@@ -225,10 +226,27 @@ def get_results_by_timestamp(timestamp: str) -> BacktestResults:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-def _get_backtest_results_by_dir(result_dir: str, dir_name: str) -> BacktestResults:
+def _build_run_metadata(run) -> BacktestRunInfo | None:
+    if run is None:
+        return None
+    return BacktestRunInfo(
+        run_id=getattr(run, "dir_name", ""),
+        run_label=getattr(run, "run_label", None),
+        experiment_name=getattr(run, "experiment_name", None),
+        strategy_name=getattr(run, "strategy_name", None),
+        benchmark_enabled=getattr(run, "benchmark_enabled", None),
+        rule_profile=getattr(run, "rule_profile", None),
+        tags=getattr(run, "tags", None) or [],
+    )
+
+
+def _get_backtest_results_by_dir(result_dir: str, dir_name: str, run=None) -> BacktestResults:
     """Helper function to load backtest results from a directory."""
     if not os.path.exists(result_dir):
         raise HTTPException(status_code=404, detail=f"Backtest directory not found: {dir_name}")
+
+    if run is None:
+        run = ResultStore(DEFAULT_OUTPUT_DIR).get_run_by_timestamp(dir_name)
     
     # Load summary metrics
     summary = BacktestSummary(**load_backtest_summary(result_dir))
@@ -363,6 +381,7 @@ def _get_backtest_results_by_dir(result_dir: str, dir_name: str) -> BacktestResu
         trades=trades,
         ticker_stats=ticker_stats,
         charts=charts,
+        run_metadata=_build_run_metadata(run),
     )
 
 

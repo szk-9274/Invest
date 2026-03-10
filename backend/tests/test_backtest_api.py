@@ -159,3 +159,56 @@ class TestTickersEndpoint:
             assert "bottom" in data
             assert len(data["top"]) == 2
             assert len(data["bottom"]) == 2
+
+
+class TestBacktestRunMetadata:
+    def test_get_results_by_timestamp_includes_run_metadata(self, tmp_path):
+        import json
+
+        from app import app
+        from fastapi.testclient import TestClient
+
+        result_dir = tmp_path / "backtest_2026-01-01_to_2026-01-31_20260131-000000"
+        result_dir.mkdir(parents=True, exist_ok=True)
+        pd.DataFrame(
+            [
+                {
+                    "ticker": "AAA",
+                    "entry_date": "2026-01-01",
+                    "entry_price": 10,
+                    "exit_date": "2026-01-05",
+                    "exit_price": 12,
+                    "exit_reason": "rule",
+                    "shares": 1,
+                    "pnl": 2,
+                    "pnl_pct": 20,
+                }
+            ]
+        ).to_csv(result_dir / "trades.csv", index=False)
+        pd.DataFrame(
+            [{"ticker": "AAA", "total_pnl": 2, "trade_count": 1, "num_trades": 1, "win_rate": 1.0}]
+        ).to_csv(result_dir / "ticker_stats.csv", index=False)
+        (result_dir / "run_manifest.json").write_text(
+            json.dumps(
+                {
+                    "run_id": result_dir.name,
+                    "run_label": "baseline-run",
+                    "experiment_name": "qlib-inspired",
+                    "strategy_name": "rule-based-stage2",
+                    "benchmark_enabled": True,
+                    "rule_profile": "strict-auto-fallback",
+                    "tags": ["baseline"],
+                }
+            ),
+            encoding="utf-8",
+        )
+
+        client = TestClient(app)
+        with patch("api.backtest.DEFAULT_OUTPUT_DIR", str(tmp_path)):
+            response = client.get("/api/backtest/results/20260131-000000")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["run_metadata"]["run_label"] == "baseline-run"
+        assert data["run_metadata"]["experiment_name"] == "qlib-inspired"
+        assert data["run_metadata"]["strategy_name"] == "rule-based-stage2"

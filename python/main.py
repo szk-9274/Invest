@@ -18,6 +18,8 @@ from screening.screener import Screener
 from utils.logger import setup_logger
 from backtest.engine import BacktestEngine, print_backtest_report
 from backtest.performance import calculate_cagr
+from backtest.result_artifacts import save_trade_records
+from experiments import BacktestRunManifest, ExperimentStore, RunArtifacts, RunMetrics, RunSpec
 
 try:
     from backtest.visualization import visualize_backtest_results
@@ -47,6 +49,92 @@ def load_tickers(tickers_path: str = "config/tickers.csv") -> list:
     tickers_file = Path(__file__).parent / tickers_path
     df = pd.read_csv(tickers_file)
     return df['ticker'].tolist()
+
+
+def _get_experiment_settings(config: dict) -> dict:
+    experiment = config.get('experiment', {})
+    return {
+        'name': experiment.get('name', 'minervini-stage2-baseline'),
+        'strategy_name': experiment.get('strategy_name', 'rule-based-stage2'),
+        'rule_profile': experiment.get('rule_profile', 'strict-auto-fallback'),
+        'tags': list(experiment.get('tags', ['cpu-friendly', 'qlib-inspired', 'rule-based'])),
+    }
+
+
+def _extract_parameter_snapshot(config: dict, args) -> dict:
+    sections = {}
+    for key in ('benchmark', 'stage', 'entry', 'exit', 'risk', 'backtest', 'experiment'):
+        if key in config:
+            sections[key] = config[key]
+    sections['cli'] = {
+        'start': args.start,
+        'end': args.end,
+        'tickers': args.tickers,
+        'no_charts': args.no_charts,
+        'use_benchmark': not args.no_benchmark,
+        'run_label': getattr(args, 'run_label', None),
+    }
+    return sections
+
+
+def _build_run_metrics(result) -> RunMetrics:
+    return RunMetrics(
+        total_trades=result.total_trades,
+        win_rate=result.win_rate,
+        total_pnl=result.total_return,
+        winning_trades=result.winning_trades,
+        losing_trades=result.losing_trades,
+        avg_win=result.avg_win,
+        avg_loss=result.avg_loss,
+        final_capital=result.final_capital,
+        total_return_pct=result.total_return_pct,
+        max_drawdown_pct=result.max_drawdown_pct,
+        sharpe_ratio=result.sharpe_ratio,
+    )
+
+
+def _write_run_manifest(
+    *,
+    config: dict,
+    args,
+    tickers: list[str],
+    start_date: str,
+    end_date: str,
+    output_dir: Path,
+    use_benchmark: bool,
+    result,
+    diagnostics: dict,
+) -> None:
+    experiment_settings = _get_experiment_settings(config)
+    run_label = getattr(args, 'run_label', None) or output_dir.name
+    spec = RunSpec(
+        mode='backtest',
+        run_id=output_dir.name,
+        run_label=run_label,
+        start_date=start_date,
+        end_date=end_date,
+        use_benchmark=use_benchmark,
+        ticker_count=len(tickers),
+        tickers=list(tickers),
+        config_path='config/params.yaml',
+        rule_profile=experiment_settings['rule_profile'],
+        experiment_name=experiment_settings['name'],
+        strategy_name=experiment_settings['strategy_name'],
+        tags=experiment_settings['tags'],
+        no_charts=args.no_charts,
+    )
+    manifest = BacktestRunManifest(
+        spec=spec,
+        metrics=_build_run_metrics(result),
+        artifacts=RunArtifacts(),
+        diagnostics=dict(diagnostics),
+        parameter_snapshot=_extract_parameter_snapshot(config, args),
+    )
+    store = ExperimentStore(output_dir.parent)
+    manifest_path = store.save_manifest(output_dir, manifest)
+    registry_path = store.update_registry(manifest)
+    logger.info(f"Run manifest saved to: {manifest_path}")
+    logger.info(f"Run registry updated at: {registry_path}")
 
 
 def run_backtest_mode(config: dict, tickers: list, args):
@@ -138,26 +226,7 @@ def run_backtest_mode(config: dict, tickers: list, args):
     # Save results in the timestamped output directory
     engine.set_output_directory(output_dir)
     logger.info(f"Results saved to: {output_dir}")
-
-    # Save trade details
-    if result.trades:
-        trades_df = pd.DataFrame([
-            {
-                'ticker': t.ticker,
-                'entry_date': t.entry_date.strftime('%Y-%m-%d') if t.entry_date else None,
-                'entry_price': round(t.entry_price, 2),
-                'exit_date': t.exit_date.strftime('%Y-%m-%d') if t.exit_date else None,
-                'exit_price': round(t.exit_price, 2) if t.exit_price else None,
-                'exit_reason': t.exit_reason,
-                'shares': t.shares,
-                'pnl': round(t.pnl, 2),
-                'pnl_pct': round(t.pnl_pct * 100, 2)
-            }
-            for t in result.trades
-        ])
-        trades_file = output_dir / "trades.csv"
-        trades_df.to_csv(trades_file, index=False)
-        logger.info(f"Trade details saved to: {trades_file}")
+    save_trade_records(result.trades, output_dir)
 
     # ========== AUTO CHART GENERATION (Phase 2) ==========
     # Generate top/bottom P&L charts with IN/OUT markers
@@ -167,6 +236,18 @@ def run_backtest_mode(config: dict, tickers: list, args):
         logger.info("Chart generation skipped (--no-charts flag)")
     else:
         logger.warning("Chart generation not available (mplfinance/yfinance not installed)")
+
+    _write_run_manifest(
+        config=config,
+        args=args,
+        tickers=tickers,
+        start_date=start_date,
+        end_date=end_date,
+        output_dir=output_dir,
+        use_benchmark=use_benchmark,
+        result=result,
+        diagnostics=engine.diagnostics,
+    )
 
 
 def _generate_backtest_charts(output_dir: Path, start_date: str, end_date: str):
@@ -528,6 +609,11 @@ def main():
         action='store_true',
         default=False,
         help='Skip automatic chart generation after backtest'
+    )
+    parser.add_argument(
+        '--run-label',
+        type=str,
+        help='Optional label recorded in the backtest manifest for comparison'
     )
 
     # Benchmark options (mutually exclusive)
