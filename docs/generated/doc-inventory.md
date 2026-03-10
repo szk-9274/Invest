@@ -17,6 +17,7 @@
 - `docs/design-docs/`
   - [STRATEGY.md](../design-docs/STRATEGY.md) — STRATEGY.md — Invest プロジェクト 戦略仕様書
   - [core-beliefs.md](../design-docs/core-beliefs.md) — Core Beliefs (コア設計原則) — 1. 再現性優先
+  - [localhost-visualization-improvements.md](../design-docs/localhost-visualization-improvements.md) — 目的 — localhost 可視化の初回イテレーションで追加したダッシュボード/詳細チャートを次の反復で改善するため、観点別の候補を整理する。
   - [index.md](../design-docs/index.md) — design-docs — 目的
 - `docs/exec-plans/`
   - [tech-debt-tracker.md](../exec-plans/tech-debt-tracker.md) — tech-debt-tracker — 目的: 技術的負債の一覧と優先度管理

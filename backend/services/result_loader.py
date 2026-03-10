@@ -318,6 +318,9 @@ def load_backtest_summary(output_dir: str) -> Dict:
             manifest = json.loads(Path(manifest_path).read_text(encoding="utf-8"))
             metrics = manifest.get("metrics", {})
             if metrics:
+                information_ratio = metrics.get("information_ratio")
+                if information_ratio is None:
+                    information_ratio = metrics.get("sharpe_ratio") or 0
                 return {
                     "total_trades": metrics.get("total_trades", 0),
                     "winning_trades": metrics.get("winning_trades", 0),
@@ -326,6 +329,12 @@ def load_backtest_summary(output_dir: str) -> Dict:
                     "total_pnl": metrics.get("total_pnl", 0),
                     "avg_win": metrics.get("avg_win", 0),
                     "avg_loss": metrics.get("avg_loss", 0),
+                    "final_capital": metrics.get("final_capital", 0),
+                    "total_return_pct": metrics.get("total_return_pct", 0),
+                    "annual_return_pct": metrics.get("annual_return_pct", 0),
+                    "information_ratio": information_ratio,
+                    "max_drawdown_pct": metrics.get("max_drawdown_pct", 0),
+                    "sharpe_ratio": metrics.get("sharpe_ratio", 0),
                 }
 
         # Load trades.csv for gross statistics

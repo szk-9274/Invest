@@ -37,6 +37,32 @@ describe('BacktestSummary', () => {
     expect(screen.getByText('3.00')).toBeInTheDocument()
   })
 
+  it('renders advanced headline metrics when available', () => {
+    render(
+      <BacktestSummary
+        data={{
+          total_trades: 12,
+          winning_trades: 7,
+          losing_trades: 5,
+          win_rate: 0.5833,
+          total_pnl: 1500,
+          avg_win: 300,
+          avg_loss: -100,
+          final_capital: 101500,
+          annual_return_pct: 0.18,
+          information_ratio: 1.25,
+          max_drawdown_pct: -0.08,
+        }}
+      />,
+    )
+
+    expect(screen.getByText('Annual Return')).toBeInTheDocument()
+    expect(screen.getByText('18.00%')).toBeInTheDocument()
+    expect(screen.getByText('Information Ratio')).toBeInTheDocument()
+    expect(screen.getByText('-8.00%')).toBeInTheDocument()
+    expect(screen.getByText('$101,500.00')).toBeInTheDocument()
+  })
+
   it('falls back to N/A when profit factor cannot be calculated', () => {
     render(
       <BacktestSummary

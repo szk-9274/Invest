@@ -1,4 +1,5 @@
 import importlib.util
+import json
 import sys
 from pathlib import Path
 from types import ModuleType, SimpleNamespace
@@ -271,6 +272,30 @@ def test_get_backtest_results_by_dir_raises_for_missing_directory():
         backtest_api._get_backtest_results_by_dir('/tmp/does-not-exist', 'missing')
 
     assert exc.value.status_code == 404
+
+
+def test_load_backtest_summary_falls_back_to_zero_when_ratios_are_none(tmp_path):
+    from services.result_loader import load_backtest_summary
+
+    result_dir = tmp_path / 'backtest_2026-01-01_to_2026-01-31_20260131-000000'
+    result_dir.mkdir(parents=True, exist_ok=True)
+    (result_dir / 'run_manifest.json').write_text(
+        json.dumps(
+            {
+                'metrics': {
+                    'total_trades': 1,
+                    'total_pnl': 2.0,
+                    'information_ratio': None,
+                    'sharpe_ratio': None,
+                },
+            }
+        ),
+        encoding='utf-8',
+    )
+
+    summary = load_backtest_summary(str(result_dir))
+
+    assert summary['information_ratio'] == 0
 
 
 def test_get_ohlc_builds_response_from_yfinance_module(monkeypatch):

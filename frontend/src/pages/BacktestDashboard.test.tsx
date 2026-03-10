@@ -250,9 +250,9 @@ describe('BacktestDashboard', () => {
 
     expect(await screen.findByRole('heading', { name: 'Backtest Dashboard' })).toBeInTheDocument()
     expect(screen.getByTestId('location-display')).toHaveTextContent('/dashboard/run')
-    expect(await screen.findByText('2025-01-01 to 2025-12-31')).toBeInTheDocument()
+    expect((await screen.findAllByText('2025-01-01 to 2025-12-31')).length).toBeGreaterThan(0)
     expect(screen.getByText('Pinned')).toBeInTheDocument()
-    expect(screen.getByText('Pinned annual results stay visible by default.')).toBeInTheDocument()
+    expect(screen.getByText(/Pinned annual results stay visible by default\./)).toBeInTheDocument()
     expect(screen.getByText('3 runs')).toBeInTheDocument()
     expect(await screen.findByTestId('run-panel')).toBeInTheDocument()
     expect(screen.getByTestId('backtest-status')).toHaveTextContent('idle:0')

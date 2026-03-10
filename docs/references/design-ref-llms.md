@@ -55,3 +55,30 @@
 - このプロジェクトにどう活かしたか: 今回は学習機能は入れず、将来 `strategy_name` / `rule_profile` に加えて scorer を差し替えやすい metadata 構造だけ先に入れた。
 - 採用したもの: config で比較条件を明文化する発想。
 - 採用しなかったもの: LightGBM 学習自体の本格導入。
+
+## 8. Metaplanet corporate site
+
+- URL: https://metaplanet.jp/jp
+- 参考にした理由: localhost 可視化のホーム/ダッシュボード導線で、暗い背景に強いタイポと大きめの CTA を置くトーンを揃えるため。
+- このプロジェクトにどう活かしたか: コーポレートのヒーロー構成をそのまま写さず、`HomeLanding` のヒーローセクション、濃紺ベースの配色、丸い CTA、カード境界の見せ方として再解釈した。
+- 採用したもの: ダークヒーロー、強い見出し、青/オレンジ系アクセント、カード境界の見せ方。
+- 採用しなかったもの: 実画像やブランド固有アセット、IR 専用の導線や文言。
+- 実装に反映した箇所: `frontend/src/pages/HomeLanding.tsx`
+
+## 9. Metaplanet Analytics home
+
+- URL: https://analytics.metaplanet.jp/?lang=ja&tab=home
+- 参考にした理由: 実験一覧、主要 KPI、比較カードを 1 画面で俯瞰する情報階層が今回の localhost ダッシュボード要件に近かったため。
+- このプロジェクトにどう活かしたか: 上部に KPI 概要、その下に比較パネルと実験一覧テーブルを置く構成へ落とし込み、既存の `/dashboard/run` を overview 兼 run 管理画面として再構成した。
+- 採用したもの: KPI カードの先頭配置、比較ビューの横並び、テーブル中心の experiment browsing。
+- 採用しなかったもの: 既存 SaaS のタブ構成そのもの、固有のブランド KPI やバックエンド依存導線。
+- 実装に反映した箇所: `frontend/src/pages/BacktestRunPage.tsx`, `frontend/src/components/BacktestSummary.tsx`, `frontend/src/components/ConditionComparisonPanel.tsx`, `frontend/src/components/ExperimentListTable.tsx`
+
+## 10. Metaplanet Analytics charts
+
+- URL: https://analytics.metaplanet.jp/?lang=ja&tab=charts
+- 参考にした理由: エクイティ、ドローダウン、シグナルのような複数系列をカード状に分けて詳細確認する構成の参考にしたため。
+- このプロジェクトにどう活かしたか: 1 枚の巨大チャートに寄せず、`BacktestVisualizationPanel` で equity / drawdown / signal events を分割し、既存ギャラリーや trade table と並べても読みやすい構成へ再解釈した。
+- 採用したもの: 詳細チャートをカードごとに分ける構成、指標と詳細チャートの上下分離、マーカーによる entry / exit の見せ方。
+- 採用しなかったもの: 実データ固有の注釈、サイト固有の UI コンポーネントやブランド文脈。
+- 実装に反映した箇所: `frontend/src/pages/BacktestAnalysisPage.tsx`, `frontend/src/components/BacktestVisualizationPanel.tsx`

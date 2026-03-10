@@ -7,6 +7,15 @@ export type BacktestArtifactsResponse = {
   has_results: boolean;
 }
 
+export type BacktestHeadlineMetrics = {
+  total_trades?: number;
+  total_pnl?: number;
+  win_rate?: number;
+  annual_return_pct?: number;
+  information_ratio?: number;
+  max_drawdown_pct?: number;
+}
+
 export type BacktestListResponse = {
   backtests: Array<BacktestMetadata>;
 }
@@ -26,6 +35,7 @@ export type BacktestMetadata = {
   benchmark_enabled?: boolean | null;
   rule_profile?: string | null;
   tags?: Array<string>;
+  headline_metrics?: BacktestHeadlineMetrics | null;
 }
 
 export type BacktestRequest = {
@@ -46,6 +56,7 @@ export type BacktestResults = {
   ticker_stats: Array<TickerStats>;
   charts: Record<string, string | null>;
   run_metadata?: BacktestRunInfo | null;
+  visualization?: BacktestVisualization;
 }
 
 export type BacktestRunInfo = {
@@ -66,6 +77,18 @@ export type BacktestSummary = {
   total_pnl?: number;
   avg_win?: number;
   avg_loss?: number;
+  final_capital?: number;
+  total_return_pct?: number;
+  annual_return_pct?: number;
+  information_ratio?: number;
+  max_drawdown_pct?: number;
+  sharpe_ratio?: number;
+}
+
+export type BacktestVisualization = {
+  equity_curve?: Array<TimeSeriesPoint>;
+  drawdown?: Array<TimeSeriesPoint>;
+  signal_events?: Array<SignalEventPoint>;
 }
 
 export type ChartData = {
@@ -130,12 +153,27 @@ export type OhlcResponse = {
   data?: Array<OhlcPoint>;
 }
 
+export type SignalEventPoint = {
+  time: string;
+  action: string;
+  signal: number;
+  ticker: string;
+  price: number;
+  pnl?: number | null;
+  label?: string | null;
+}
+
 export type TickerStats = {
   ticker: string;
   total_pnl: number;
   trade_count?: number | null;
   num_trades?: number | null;
   win_rate?: number | null;
+}
+
+export type TimeSeriesPoint = {
+  time: string;
+  value: number;
 }
 
 export type TopBottomTickers = {

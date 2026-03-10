@@ -202,8 +202,31 @@ npm --prefix frontend run dev -- --host 0.0.0.0 --port 3000 --strictPort
 
 - `/` - バックテスト実行と上位/下位銘柄のホーム画面
 - `/home` - ホーム画面の別ルート
-- `/dashboard` - サマリ、チャート、トレード一覧、ジョブ状態を表示するダッシュボード
+- `/dashboard` - KPI 概要、条件比較、実験一覧テーブル、ジョブ状態を表示するダッシュボード
+- `/dashboard/analysis` - エクイティカーブ、ドローダウン、シグナルイベント、チャートギャラリー、トレード一覧を表示する詳細画面
 - `/chart/:ticker` - 個別銘柄チャート
+
+localhost 可視化で使うデータ I/O 契約:
+
+- 実験メタデータ: `GET /api/backtest/list`
+  - `timestamp`, `period`, `run_label`, `experiment_name`, `strategy_name`, `rule_profile`, `headline_metrics`
+- 結果概要と詳細: `GET /api/backtest/latest`, `GET /api/backtest/results/{timestamp}`
+  - `summary`: 総トレード数、勝率、年率、IR、MDD、最終資産など
+  - `visualization`: `equity_curve`, `drawdown`, `signal_events`
+- 画像成果物: `charts` フィールドから PNG を参照
+
+保存先とパス規約:
+
+```text
+python/output/backtest/{run_id}/
+├── run_manifest.json      # 実験ID、期間、条件名、評価指標、成果物一覧
+├── trades.csv             # 約定サマリ
+├── trade_log.csv          # ENTRY / EXIT イベント時系列
+├── ticker_stats.csv       # 銘柄別集計
+└── charts/*.png           # 補助画像チャート
+```
+
+初回イテレーションでは backend が `run_manifest.json` / CSV を読み、frontend が直接描画しやすい JSON（`headline_metrics`, `visualization`）へ整形して返します。ローカルで fixture や別の成果物を読みたい場合は `INVEST_OUTPUT_DIR` で参照先を切り替えてください。
 
 ビルドとテスト:
 

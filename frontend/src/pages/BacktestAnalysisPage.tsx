@@ -1,5 +1,6 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
+import { BacktestVisualizationPanel } from '../components/BacktestVisualizationPanel'
 import { BacktestSummary } from '../components/BacktestSummary'
 import { TradeTable } from '../components/TradeTable'
 import { useDeferredVisibility } from '../hooks/useDeferredVisibility'
@@ -43,6 +44,16 @@ export const BacktestAnalysisPage: React.FC = () => {
           </div>
         </div>
         <BacktestSummary data={results.summary} loading={loading} />
+      </section>
+
+      <section className="dashboard-card">
+        <div className="dashboard-section-heading">
+          <div>
+            <h2>{t('dashboard.detailedTimeSeries')}</h2>
+            <p>{t('dashboard.detailedTimeSeriesHint')}</p>
+          </div>
+        </div>
+        <BacktestVisualizationPanel visualization={results.visualization} />
       </section>
 
       <section className="dashboard-card">

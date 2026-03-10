@@ -1,14 +1,28 @@
 import { buildApiUrl } from './base'
 import type {
+  BacktestHeadlineMetrics,
   BacktestListResponse,
   BacktestMetadata,
   BacktestResults,
   BacktestSummary,
+  BacktestVisualization,
   TickerStats,
+  TimeSeriesPoint,
+  SignalEventPoint,
   TradeRecord,
 } from './generated/contracts'
 
-export type { BacktestMetadata, BacktestResults, BacktestSummary, TickerStats, TradeRecord }
+export type {
+  BacktestHeadlineMetrics,
+  BacktestMetadata,
+  BacktestResults,
+  BacktestSummary,
+  BacktestVisualization,
+  SignalEventPoint,
+  TickerStats,
+  TimeSeriesPoint,
+  TradeRecord,
+}
 
 /**
  * Fetch latest backtest results

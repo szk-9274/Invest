@@ -41,6 +41,10 @@ export const BacktestSummary: React.FC<BacktestSummaryProps> = ({ data, loading 
     total_pnl: data.total_pnl ?? 0,
     avg_win: data.avg_win ?? 0,
     avg_loss: data.avg_loss ?? 0,
+    final_capital: data.final_capital ?? 0,
+    annual_return_pct: data.annual_return_pct ?? 0,
+    information_ratio: data.information_ratio ?? 0,
+    max_drawdown_pct: data.max_drawdown_pct ?? 0,
   }
 
   const formatCurrency = (value: number) =>
@@ -64,6 +68,21 @@ export const BacktestSummary: React.FC<BacktestSummaryProps> = ({ data, loading 
           label={t('summary.totalPnl')}
           value={formatCurrency(summary.total_pnl)}
           trend={summary.total_pnl >= 0 ? 'positive' : 'negative'}
+        />
+        <MetricCard
+          label={t('summary.annualReturn')}
+          value={formatPercent(summary.annual_return_pct)}
+          trend={summary.annual_return_pct >= 0 ? 'positive' : 'negative'}
+        />
+        <MetricCard
+          label={t('summary.informationRatio')}
+          value={summary.information_ratio.toFixed(2)}
+          trend={summary.information_ratio >= 1 ? 'positive' : summary.information_ratio < 0 ? 'negative' : 'neutral'}
+        />
+        <MetricCard
+          label={t('summary.maxDrawdown')}
+          value={formatPercent(summary.max_drawdown_pct)}
+          trend={summary.max_drawdown_pct >= -0.1 ? 'neutral' : 'negative'}
         />
         <MetricCard
           label={t('summary.totalTrades')}
@@ -98,6 +117,11 @@ export const BacktestSummary: React.FC<BacktestSummaryProps> = ({ data, loading 
               ? 'negative'
               : 'neutral'
           }
+        />
+        <MetricCard
+          label={t('summary.finalCapital')}
+          value={formatCurrency(summary.final_capital)}
+          trend={summary.final_capital >= 0 ? 'positive' : 'negative'}
         />
       </div>
 

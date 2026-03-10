@@ -27,6 +27,14 @@ vi.mock('../components/TopBottomPurchaseCharts', () => ({
   TopBottomPurchaseCharts: (props: { trades: unknown[] }) => chartsMock(props),
 }))
 
+vi.mock('../components/BacktestVisualizationPanel', () => ({
+  BacktestVisualizationPanel: ({ visualization }: { visualization: { equity_curve?: unknown[]; signal_events?: unknown[] } }) => (
+    <div data-testid="visualization-panel">
+      visualization:{visualization.equity_curve?.length ?? 0}:{visualization.signal_events?.length ?? 0}
+    </div>
+  ),
+}))
+
 const sampleResults = {
   timestamp: 'backtest_2025-01-01_to_2025-12-31_20251231-235959',
   summary: { total_trades: 2 },
@@ -41,6 +49,20 @@ const sampleResults = {
     rule_profile: 'strict-auto-fallback',
     benchmark_enabled: false,
     tags: ['baseline'],
+  },
+  visualization: {
+    equity_curve: [
+      { time: '2026-01-01', value: 100000 },
+      { time: '2026-01-05', value: 100002 },
+    ],
+    drawdown: [
+      { time: '2026-01-01', value: 0 },
+      { time: '2026-01-05', value: 0 },
+    ],
+    signal_events: [
+      { time: '2026-01-01', action: 'ENTRY', signal: 1, ticker: 'AAA', price: 10, pnl: 0 },
+      { time: '2026-01-05', action: 'EXIT', signal: -1, ticker: 'AAA', price: 12, pnl: 2 },
+    ],
   },
 }
 
@@ -83,6 +105,8 @@ describe('BacktestAnalysisPage', () => {
     expect(screen.getByText('baseline-run')).toBeInTheDocument()
     expect(screen.getByText('qlib-inspired / rule-based-stage2 / strict-auto-fallback')).toBeInTheDocument()
     expect(screen.getByText('Benchmark disabled')).toBeInTheDocument()
+    expect(screen.getByText('Detailed Time Series')).toBeInTheDocument()
+    expect(screen.getByTestId('visualization-panel')).toHaveTextContent('visualization:2:2')
     expect(screen.queryByTestId('charts-view')).not.toBeInTheDocument()
     expect(screen.getByTestId('analysis-charts-placeholder')).toBeInTheDocument()
 

@@ -9,6 +9,7 @@ Provides REST API for:
 import os
 from typing import Dict, Optional
 from pathlib import Path
+import json
 
 from fastapi import APIRouter, HTTPException
 from loguru import logger
@@ -34,7 +35,10 @@ from schemas.backtest import (
     BacktestResults,
     BacktestRunInfo,
     BacktestSummary,
+    BacktestVisualization,
+    SignalEventPoint,
     TickerStats,
+    TimeSeriesPoint,
     TopBottomTickers,
     TradeLogEvent,
     TradeRecord,
@@ -240,6 +244,113 @@ def _build_run_metadata(run) -> BacktestRunInfo | None:
     )
 
 
+def _load_run_manifest(result_dir: str) -> dict:
+    manifest_path = Path(result_dir) / "run_manifest.json"
+    if not manifest_path.exists():
+        return {}
+    try:
+        return json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        logger.warning(f"Failed to load run manifest from {manifest_path}: {exc}")
+        return {}
+
+
+def _build_visualization(result_dir: str, trades: list[TradeRecord]) -> BacktestVisualization:
+    manifest = _load_run_manifest(result_dir)
+    metrics = manifest.get("metrics", {}) if isinstance(manifest.get("metrics"), dict) else {}
+    initial_capital = metrics.get("initial_capital")
+    final_capital = metrics.get("final_capital")
+    total_pnl = metrics.get("total_pnl", 0)
+
+    if initial_capital is None and final_capital is not None:
+        try:
+            initial_capital = float(final_capital) - float(total_pnl or 0)
+        except (TypeError, ValueError):
+            initial_capital = None
+
+    trade_log_path = Path(result_dir) / "trade_log.csv"
+    raw_events: list[dict] = []
+    if trade_log_path.exists():
+        raw_events = load_trade_log(str(trade_log_path))
+
+    if not raw_events:
+        for trade in trades:
+            if trade.entry_date and trade.entry_price is not None:
+                raw_events.append(
+                    {
+                        "date": trade.entry_date,
+                        "action": "ENTRY",
+                        "ticker": trade.ticker,
+                        "price": trade.entry_price,
+                        "pnl": 0,
+                    }
+                )
+            if trade.exit_date and trade.exit_price is not None:
+                raw_events.append(
+                    {
+                        "date": trade.exit_date,
+                        "action": "EXIT",
+                        "ticker": trade.ticker,
+                        "price": trade.exit_price,
+                        "pnl": trade.pnl or 0,
+                    }
+                )
+
+    if not raw_events:
+        return BacktestVisualization()
+
+    events_df = pd.DataFrame(raw_events)
+    if events_df.empty or "date" not in events_df.columns:
+        return BacktestVisualization()
+
+    events_df["date"] = pd.to_datetime(events_df["date"], errors="coerce")
+    events_df = events_df.dropna(subset=["date"]).sort_values(["date", "ticker", "action"])
+    if events_df.empty:
+        return BacktestVisualization()
+
+    events_df["time"] = events_df["date"].dt.strftime("%Y-%m-%d")
+    events_df["pnl"] = pd.to_numeric(events_df.get("pnl"), errors="coerce").fillna(0.0)
+    events_df["price"] = pd.to_numeric(events_df.get("price"), errors="coerce")
+
+    signal_events = [
+        SignalEventPoint(
+            time=row.time,
+            action=str(row.action or ""),
+            signal=1 if str(row.action).upper() == "ENTRY" else -1 if str(row.action).upper() == "EXIT" else 0,
+            ticker=str(row.ticker or ""),
+            price=float(row.price) if not pd.isna(row.price) else 0.0,
+            pnl=float(row.pnl) if not pd.isna(row.pnl) else None,
+            label=f"{str(row.action or '').upper()} {str(row.ticker or '').upper()}".strip(),
+        )
+        for row in events_df.itertuples(index=False)
+    ]
+
+    base_equity = float(initial_capital or 0.0)
+    daily_realized_pnl = events_df.groupby("time", sort=True)["pnl"].sum()
+    equity_curve: list[TimeSeriesPoint] = []
+    current_equity = base_equity
+    for time, pnl in daily_realized_pnl.items():
+        current_equity += float(pnl)
+        equity_curve.append(TimeSeriesPoint(time=time, value=current_equity))
+
+    if not equity_curve and final_capital is not None:
+        last_time = events_df["time"].iloc[-1]
+        equity_curve.append(TimeSeriesPoint(time=last_time, value=float(final_capital)))
+
+    rolling_peak = None
+    drawdown: list[TimeSeriesPoint] = []
+    for point in equity_curve:
+        rolling_peak = point.value if rolling_peak is None else max(rolling_peak, point.value)
+        drawdown_value = 0.0 if not rolling_peak else (point.value / rolling_peak) - 1
+        drawdown.append(TimeSeriesPoint(time=point.time, value=drawdown_value))
+
+    return BacktestVisualization(
+        equity_curve=equity_curve,
+        drawdown=drawdown,
+        signal_events=signal_events,
+    )
+
+
 def _get_backtest_results_by_dir(result_dir: str, dir_name: str, run=None) -> BacktestResults:
     """Helper function to load backtest results from a directory."""
     if not os.path.exists(result_dir):
@@ -382,6 +493,7 @@ def _get_backtest_results_by_dir(result_dir: str, dir_name: str, run=None) -> Ba
         ticker_stats=ticker_stats,
         charts=charts,
         run_metadata=_build_run_metadata(run),
+        visualization=_build_visualization(result_dir, trades),
     )
 
 

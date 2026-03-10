@@ -13,4 +13,5 @@
 <!-- BEGIN AUTO-GENERATED DOC LIST -->
 - [STRATEGY.md](STRATEGY.md) — STRATEGY.md — Invest プロジェクト 戦略仕様書
 - [core-beliefs.md](core-beliefs.md) — Core Beliefs (コア設計原則) — 1. 再現性優先
+- [localhost-visualization-improvements.md](localhost-visualization-improvements.md) — 目的 — localhost 可視化の初回イテレーションで追加したダッシュボード/詳細チャートを次の反復で改善するため、観点別の候補を整理する。
 <!-- END AUTO-GENERATED DOC LIST -->

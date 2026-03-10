@@ -35,6 +35,13 @@ describe('BacktestRunPage', () => {
           strategy_name: 'rule-based-stage2',
           rule_profile: 'strict-auto-fallback',
           benchmark_enabled: false,
+          headline_metrics: {
+            annual_return_pct: 0.18,
+            information_ratio: 1.25,
+            max_drawdown_pct: -0.08,
+            total_pnl: 4200,
+            win_rate: 0.58,
+          },
         },
         {
           timestamp: 'run-2026',
@@ -43,8 +50,27 @@ describe('BacktestRunPage', () => {
           is_pinned: false,
           available_runs: 1,
           run_label: 'comparison-b',
+          headline_metrics: {
+            annual_return_pct: 0.09,
+            information_ratio: 0.82,
+            max_drawdown_pct: -0.12,
+            total_pnl: 1800,
+            win_rate: 0.51,
+          },
         },
       ],
+      results: {
+        summary: {
+          total_trades: 12,
+          total_pnl: 4200,
+          annual_return_pct: 0.18,
+          information_ratio: 1.25,
+          max_drawdown_pct: -0.08,
+          final_capital: 104200,
+          win_rate: 0.58,
+        },
+      },
+      loading: false,
       selectedTimestamp: 'run-2025',
       setSelectedTimestamp,
       activeJob: { status: 'running' },
@@ -58,10 +84,15 @@ describe('BacktestRunPage', () => {
 
     expect(screen.getByTestId('run-panel')).toHaveTextContent('running:1')
     expect(screen.getByText('Pinned')).toBeInTheDocument()
-    expect(screen.getByText('baseline-run')).toBeInTheDocument()
-    expect(screen.getByText('qlib-inspired')).toBeInTheDocument()
-    expect(screen.getByText('rule-based-stage2')).toBeInTheDocument()
-    expect(screen.getByText('No benchmark')).toBeInTheDocument()
+    expect(screen.getAllByText('baseline-run').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('qlib-inspired').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('rule-based-stage2').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('No benchmark').length).toBeGreaterThan(0)
+    expect(screen.getByText('Experiment List')).toBeInTheDocument()
+    expect(screen.getByText('Condition Comparison')).toBeInTheDocument()
+    expect(screen.getAllByText('Annual Return').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('18.00%').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('1.25').length).toBeGreaterThan(0)
     expect(screen.getByRole('button', { name: /2026 annual/i })).toBeInTheDocument()
 
     await act(async () => {
@@ -74,6 +105,8 @@ describe('BacktestRunPage', () => {
   it('shows an empty state when no runs are available', () => {
     contextMock.mockReturnValue({
       backtests: [],
+      results: null,
+      loading: false,
       selectedTimestamp: null,
       setSelectedTimestamp: vi.fn(),
       activeJob: null,
@@ -85,6 +118,6 @@ describe('BacktestRunPage', () => {
 
     render(<BacktestRunPage />)
 
-    expect(screen.getByText('No backtests found')).toBeInTheDocument()
+    expect(screen.getAllByText('No backtests found').length).toBeGreaterThan(0)
   })
 })
