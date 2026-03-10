@@ -108,6 +108,13 @@ start_commands() {
   tmux send-keys -t "${SESSION_NAME}:0.3" "${copilot_cmd}" C-m
   tmux send-keys -t "${SESSION_NAME}:0.1" "${logs_cmd}" C-m
   tmux send-keys -t "${SESSION_NAME}:0.4" "${git_cmd}" C-m
+  
+  # Copilot CLI 起動を少し待ってから、pane を拡大して reasoning 表示を折りたたむ
+  sleep 5
+  tmux select-pane -t "${SESSION_NAME}:0.3"
+  tmux resize-pane -Z -t "${SESSION_NAME}:0.3"
+  sleep 1
+  tmux send-keys -t "${SESSION_NAME}:0.3" C-t
 }
 
 main() {
