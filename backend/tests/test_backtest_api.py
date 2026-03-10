@@ -186,6 +186,12 @@ class TestBacktestRunMetadata:
             ]
         ).to_csv(result_dir / "trades.csv", index=False)
         pd.DataFrame(
+            [
+                {"date": "2026-01-01", "action": "ENTRY", "ticker": "AAA", "price": 10, "shares": 1, "pnl": 0},
+                {"date": "2026-01-05", "action": "EXIT", "ticker": "AAA", "price": 12, "shares": 1, "pnl": 2},
+            ]
+        ).to_csv(result_dir / "trade_log.csv", index=False)
+        pd.DataFrame(
             [{"ticker": "AAA", "total_pnl": 2, "trade_count": 1, "num_trades": 1, "win_rate": 1.0}]
         ).to_csv(result_dir / "ticker_stats.csv", index=False)
         (result_dir / "run_manifest.json").write_text(
@@ -198,6 +204,24 @@ class TestBacktestRunMetadata:
                     "benchmark_enabled": True,
                     "rule_profile": "strict-auto-fallback",
                     "tags": ["baseline"],
+                    "spec": {
+                        "start_date": "2026-01-01",
+                        "end_date": "2026-01-31",
+                    },
+                    "metrics": {
+                        "total_trades": 1,
+                        "winning_trades": 1,
+                        "losing_trades": 0,
+                        "win_rate": 1.0,
+                        "total_pnl": 2.0,
+                        "avg_win": 2.0,
+                        "avg_loss": 0.0,
+                        "final_capital": 100002.0,
+                        "total_return_pct": 0.00002,
+                        "annual_return_pct": 0.18,
+                        "information_ratio": 1.25,
+                        "max_drawdown_pct": -0.08,
+                    },
                 }
             ),
             encoding="utf-8",
@@ -212,3 +236,10 @@ class TestBacktestRunMetadata:
         assert data["run_metadata"]["run_label"] == "baseline-run"
         assert data["run_metadata"]["experiment_name"] == "qlib-inspired"
         assert data["run_metadata"]["strategy_name"] == "rule-based-stage2"
+        assert data["summary"]["annual_return_pct"] == 0.18
+        assert data["summary"]["information_ratio"] == 1.25
+        assert data["summary"]["max_drawdown_pct"] == -0.08
+        assert data["visualization"]["equity_curve"][0]["time"] == "2026-01-01"
+        assert data["visualization"]["equity_curve"][-1]["value"] == 100002.0
+        assert data["visualization"]["signal_events"][0]["action"] == "ENTRY"
+        assert data["visualization"]["signal_events"][-1]["action"] == "EXIT"

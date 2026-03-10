@@ -22,6 +22,12 @@ class BacktestSummary(BaseModel):
     total_pnl: float = 0
     avg_win: float = 0
     avg_loss: float = 0
+    final_capital: float = 0
+    total_return_pct: float = 0
+    annual_return_pct: float = 0
+    information_ratio: float = 0
+    max_drawdown_pct: float = 0
+    sharpe_ratio: float = 0
 
 
 class TradeRecord(BaseModel):
@@ -66,6 +72,36 @@ class BacktestRunInfo(BaseModel):
     tags: list[str] = Field(default_factory=list)
 
 
+class BacktestHeadlineMetrics(BaseModel):
+    total_trades: int = 0
+    total_pnl: float = 0
+    win_rate: float = 0
+    annual_return_pct: float = 0
+    information_ratio: float = 0
+    max_drawdown_pct: float = 0
+
+
+class TimeSeriesPoint(BaseModel):
+    time: str
+    value: float
+
+
+class SignalEventPoint(BaseModel):
+    time: str
+    action: str
+    signal: int
+    ticker: str
+    price: float
+    pnl: Optional[float] = None
+    label: Optional[str] = None
+
+
+class BacktestVisualization(BaseModel):
+    equity_curve: list[TimeSeriesPoint] = Field(default_factory=list)
+    drawdown: list[TimeSeriesPoint] = Field(default_factory=list)
+    signal_events: list[SignalEventPoint] = Field(default_factory=list)
+
+
 class BacktestResults(BaseModel):
     timestamp: str
     summary: BacktestSummary
@@ -73,6 +109,7 @@ class BacktestResults(BaseModel):
     ticker_stats: list[TickerStats]
     charts: dict[str, Optional[str]]
     run_metadata: Optional[BacktestRunInfo] = None
+    visualization: BacktestVisualization = Field(default_factory=BacktestVisualization)
 
 
 class BacktestArtifactsResponse(BaseModel):
@@ -96,6 +133,7 @@ class BacktestMetadata(BaseModel):
     benchmark_enabled: Optional[bool] = None
     rule_profile: Optional[str] = None
     tags: list[str] = Field(default_factory=list)
+    headline_metrics: Optional[BacktestHeadlineMetrics] = None
 
 
 class BacktestListResponse(BaseModel):

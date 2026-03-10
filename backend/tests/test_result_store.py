@@ -65,6 +65,9 @@ def _write_manifest(
             'total_trades': 1,
             'win_rate': 1.0,
             'total_pnl': 2.0,
+            'annual_return_pct': 0.18,
+            'information_ratio': 1.25,
+            'max_drawdown_pct': -0.08,
         },
     }
     (result_dir / 'run_manifest.json').write_text(
@@ -203,3 +206,6 @@ def test_result_store_reads_run_manifest_metadata(tmp_path):
     assert backtests[0]['experiment_name'] == 'qlib-inspired'
     assert backtests[0]['strategy_name'] == 'rule-based-stage2'
     assert backtests[0]['benchmark_enabled'] is False
+    assert backtests[0]['headline_metrics']['annual_return_pct'] == 0.18
+    assert backtests[0]['headline_metrics']['information_ratio'] == 1.25
+    assert backtests[0]['headline_metrics']['max_drawdown_pct'] == -0.08

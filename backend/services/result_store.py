@@ -52,6 +52,7 @@ class BacktestRun:
     benchmark_enabled: Optional[bool] = None
     rule_profile: Optional[str] = None
     tags: list[str] | None = None
+    headline_metrics: dict | None = None
 
 
 class ResultStore:
@@ -103,6 +104,7 @@ class ResultStore:
                 "benchmark_enabled": run.benchmark_enabled,
                 "rule_profile": run.rule_profile,
                 "tags": run.tags or [],
+                "headline_metrics": run.headline_metrics,
             }
             for run, is_pinned, available_runs in ordered_runs
         ]
@@ -195,6 +197,7 @@ class ResultStore:
             manifest_path = child / "run_manifest.json"
             manifest = self._load_manifest(manifest_path)
             spec = manifest.get("spec", {}) if isinstance(manifest.get("spec"), dict) else {}
+            metrics = manifest.get("metrics", {}) if isinstance(manifest.get("metrics"), dict) else {}
 
             runs.append(
                 BacktestRun(
@@ -216,9 +219,51 @@ class ResultStore:
                     benchmark_enabled=manifest.get("benchmark_enabled", spec.get("use_benchmark")),
                     rule_profile=manifest.get("rule_profile") or spec.get("rule_profile"),
                     tags=manifest.get("tags") or spec.get("tags") or [],
+                    headline_metrics=self._build_headline_metrics(metrics, start_date, end_date),
                 )
             )
         return runs
+
+    @staticmethod
+    def _build_headline_metrics(metrics: dict, start_date: str, end_date: str) -> dict | None:
+        if not metrics:
+            return None
+
+        total_return_pct = float(metrics.get("total_return_pct", 0) or 0)
+        annual_return_pct = metrics.get("annual_return_pct")
+        if annual_return_pct is None:
+            annual_return_pct = ResultStore._annualize_return(total_return_pct, start_date, end_date)
+
+        information_ratio = metrics.get("information_ratio")
+        if information_ratio is None:
+            information_ratio = metrics.get("sharpe_ratio", 0)
+
+        return {
+            "total_trades": int(metrics.get("total_trades", 0) or 0),
+            "total_pnl": float(metrics.get("total_pnl", 0) or 0),
+            "win_rate": float(metrics.get("win_rate", 0) or 0),
+            "annual_return_pct": float(annual_return_pct or 0),
+            "information_ratio": float(information_ratio or 0),
+            "max_drawdown_pct": float(metrics.get("max_drawdown_pct", 0) or 0),
+        }
+
+    @staticmethod
+    def _annualize_return(total_return_pct: float, start_date: str, end_date: str) -> float:
+        try:
+            start = pd.Timestamp(start_date)
+            end = pd.Timestamp(end_date)
+        except (TypeError, ValueError):
+            return total_return_pct
+
+        days = max((end - start).days, 0)
+        if days == 0 or total_return_pct <= -1:
+            return total_return_pct
+
+        years = days / 365.25
+        if years <= 0:
+            return total_return_pct
+
+        return (1 + total_return_pct) ** (1 / years) - 1
 
     @staticmethod
     def _parse_dir_name(dir_name: str) -> Optional[tuple[str, str, str]]:
