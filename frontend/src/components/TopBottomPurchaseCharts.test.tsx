@@ -97,9 +97,9 @@ describe('TopBottomPurchaseCharts', () => {
     render(<TopBottomPurchaseCharts trades={trades} tickerStats={stats} limit={1} />)
 
     await act(async () => {
-      await user.click(screen.getAllByRole('button', { name: /expand AAA chart/i })[0])
+      await user.click(screen.getAllByRole('button', { name: /expand chart/i })[0])
     })
 
-    expect(screen.getByRole('dialog', { name: /AAA chart lightbox/i })).toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: /expand chart/i })).toBeInTheDocument()
   })
 })

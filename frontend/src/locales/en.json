@@ -5,10 +5,15 @@
     "backtest": "Backtest",
     "dashboard": "Backtest Dashboard",
     "langEn": "EN",
-    "langJa": "JA"
+    "langJa": "JA",
+    "openMenu": "Open navigation menu",
+    "closeMenu": "Close navigation menu",
+    "menu": "Menu",
+    "close": "Close"
   },
   "common": {
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "applicationError": "Application Error"
   },
   "home": {
     "title": "Invest Backtest",
@@ -40,7 +45,12 @@
         "description": "Inspect top and bottom performance with interactive charts."
       }
     ],
-    "logos": ["METAPLANET", "BITCOIN.JP", "BM JAPAN", "PLANET GEAR"]
+    "logos": [
+      "METAPLANET",
+      "BITCOIN.JP",
+      "BM JAPAN",
+      "PLANET GEAR"
+    ]
   },
   "chart": {
     "back": "Back",
@@ -72,7 +82,7 @@
     "tradesColumn": "Trades",
     "noBacktests": "No backtests found",
     "pinnedLabel": "Pinned",
-    "pinnedHint": "Pinned annual results stay visible by default.",
+    "pinnedHint": "Pinned annual benchmark runs stay near the top of the experiment list.",
     "availableRuns": "{{count}} runs",
     "availableRunsHint": "Multiple runs exist for this period. The newest run is shown by default.",
     "benchmarkDisabledShort": "No benchmark",
@@ -81,7 +91,7 @@
     "runRoute": "Run & Manage",
     "analysisRoute": "Analysis & Results",
     "routeNavigation": "Backtest sections",
-    "runRouteHint": "Manage command execution, pinned annual results, and live logs from one screen.",
+    "runRouteHint": "Manage command execution, pinned annual benchmark runs inside the experiment list, and live logs from one screen.",
     "chartsDeferredHint": "Scroll to load the chart gallery.",
     "chartsRouteHint": "Review the standard-size chart gallery for top and bottom performers.",
     "tradesRouteHint": "Review trade outcomes with compact mobile cards and translated exit reasons.",
@@ -123,7 +133,20 @@
     "loadLatestError": "Failed to load latest backtest: {{error}}",
     "startCommandError": "Failed to start command: {{error}}",
     "cancelCommandError": "Failed to cancel command: {{error}}",
-    "pollJobStatusError": "Failed to poll job status: {{error}}"
+    "pollJobStatusError": "Failed to poll job status: {{error}}",
+    "reloadLatestAria": "Reload latest results",
+    "chromeStatus": "Status: {{status}}",
+    "statusLoading": "Loading",
+    "statusIdle": "Idle",
+    "statusQueued": "Queued",
+    "statusRunning": "Running",
+    "statusSucceeded": "Succeeded",
+    "statusFailed": "Failed",
+    "statusCancelled": "Cancelled",
+    "statusNoLogs": "No recent logs",
+    "statusLogsAvailable": "Recent logs available",
+    "savedFiltersLabel": "Saved filters",
+    "resetRunFilters": "Reset filters"
   },
   "runPanel": {
     "title": "Python Command Runner",
@@ -214,7 +237,14 @@
     "otherCharts": "Other Charts",
     "closeLightbox": "Close enlarged chart",
     "zoomIn": "Zoom in",
-    "zoomOut": "Zoom out"
+    "zoomOut": "Zoom out",
+    "chartRendererUnavailable": "Chart renderer unavailable: {{error}}",
+    "noPurchaseData": "No purchase data available",
+    "expandChart": "Expand chart",
+    "topPerformerDetail": "Top performer detail",
+    "bottomPerformerDetail": "Bottom performer detail",
+    "topShort": "TOP",
+    "bottomShort": "BOTTOM"
   },
   "tickerList": {
     "noData": "No data available"

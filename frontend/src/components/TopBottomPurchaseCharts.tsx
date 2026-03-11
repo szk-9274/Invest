@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { CandlestickChart } from './CandlestickChart'
 import { TradeRecord, TickerStats } from '../api/backtest'
 
@@ -108,6 +109,7 @@ export const TopBottomPurchaseCharts: React.FC<TopBottomPurchaseChartsProps> = (
   loading = false,
   limit = 5,
 }) => {
+  const { t } = useTranslation()
   const [expandedTicker, setExpandedTicker] = React.useState<PurchaseChartItem | null>(null)
 
   React.useEffect(() => {
@@ -124,7 +126,7 @@ export const TopBottomPurchaseCharts: React.FC<TopBottomPurchaseChartsProps> = (
   }, [expandedTicker])
 
   if (loading) {
-    return <div className="purchase-charts loading">Loading charts...</div>
+    return <div className="purchase-charts loading">{t('chartGallery.loadingCharts')}</div>
   }
 
   const items = React.useMemo(
@@ -133,7 +135,7 @@ export const TopBottomPurchaseCharts: React.FC<TopBottomPurchaseChartsProps> = (
   )
   const visibleItems = items.filter((item) => item.purchases.length > 0)
   if (visibleItems.length === 0) {
-    return <div className="purchase-charts empty">No purchase data available</div>
+    return <div className="purchase-charts empty">{t('chartGallery.noPurchaseData')}</div>
   }
 
   return (
@@ -144,21 +146,21 @@ export const TopBottomPurchaseCharts: React.FC<TopBottomPurchaseChartsProps> = (
             <div className="purchase-card-title">
               <span>{item.ticker}</span>
               <div className="purchase-card-actions">
-                <span className={`badge ${item.group}`}>{item.group === 'top' ? 'TOP' : 'BOTTOM'}</span>
+                <span className={`badge ${item.group}`}>{item.group === 'top' ? t('chartGallery.topShort') : t('chartGallery.bottomShort')}</span>
                 <button
                   type="button"
                   className="purchase-expand-button"
-                  aria-label={`Expand ${item.ticker} chart`}
+                  aria-label={t('chartGallery.expandChart')}
                   onClick={() => setExpandedTicker(item)}
                 >
-                  Expand
+                  {t('chartGallery.expandChart')}
                 </button>
               </div>
             </div>
             <button
               type="button"
               className="purchase-chart-button"
-              aria-label={`Expand ${item.ticker} chart`}
+              aria-label={t('chartGallery.expandChart')}
               onClick={() => setExpandedTicker(item)}
             >
               <CandlestickChart
@@ -178,17 +180,17 @@ export const TopBottomPurchaseCharts: React.FC<TopBottomPurchaseChartsProps> = (
           className="purchase-lightbox"
           role="dialog"
           aria-modal="true"
-          aria-label={`${expandedTicker.ticker} chart lightbox`}
+          aria-label={t('chartGallery.expandChart')}
           onClick={() => setExpandedTicker(null)}
         >
           <div className="purchase-lightbox-content" onClick={(event) => event.stopPropagation()}>
             <div className="purchase-lightbox-header">
               <div>
                 <strong>{expandedTicker.ticker}</strong>
-                <p>{expandedTicker.group === 'top' ? 'Top performer detail' : 'Bottom performer detail'}</p>
+                <p>{expandedTicker.group === 'top' ? t('chartGallery.topPerformerDetail') : t('chartGallery.bottomPerformerDetail')}</p>
               </div>
               <button type="button" className="purchase-expand-button" onClick={() => setExpandedTicker(null)}>
-                Close
+                {t('nav.close')}
               </button>
             </div>
             <CandlestickChart

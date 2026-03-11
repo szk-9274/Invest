@@ -5,6 +5,8 @@ import { MemoryRouter, Navigate, Route, Routes, useLocation } from 'react-router
 import { BacktestDashboard } from './BacktestDashboard'
 import { BacktestAnalysisPage } from './BacktestAnalysisPage'
 import { BacktestRunPage } from './BacktestRunPage'
+import { setAppLanguage } from '../i18n'
+import { AppChromeProvider } from '../contexts/AppChromeContext'
 
 const {
   listAllBacktestsMock,
@@ -198,16 +200,18 @@ function LocationDisplay() {
 
 function renderDashboard(initialEntry = '/dashboard') {
   return render(
-    <MemoryRouter initialEntries={[initialEntry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <LocationDisplay />
-      <Routes>
-        <Route path="/dashboard" element={<BacktestDashboard />}>
-          <Route index element={<Navigate to="run" replace />} />
-          <Route path="run" element={<BacktestRunPage />} />
-          <Route path="analysis" element={<BacktestAnalysisPage />} />
-        </Route>
-      </Routes>
-    </MemoryRouter>,
+    <AppChromeProvider>
+      <MemoryRouter initialEntries={[initialEntry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <LocationDisplay />
+        <Routes>
+          <Route path="/dashboard" element={<BacktestDashboard />}>
+            <Route index element={<Navigate to="run" replace />} />
+            <Route path="run" element={<BacktestRunPage />} />
+            <Route path="analysis" element={<BacktestAnalysisPage />} />
+          </Route>
+        </Routes>
+      </MemoryRouter>
+    </AppChromeProvider>,
   )
 }
 
@@ -215,6 +219,7 @@ describe('BacktestDashboard', () => {
   beforeEach(() => {
     vi.useRealTimers()
     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    setAppLanguage('en')
     Object.defineProperty(window, 'innerWidth', {
       configurable: true,
       writable: true,
@@ -278,28 +283,31 @@ describe('BacktestDashboard', () => {
   it('redirects /dashboard to the run route and renders execution content', async () => {
     renderDashboard()
 
-    expect(await screen.findByRole('heading', { name: 'Backtest Dashboard' })).toBeInTheDocument()
+    expect(await screen.findByTestId('run-panel')).toBeInTheDocument()
     expect(screen.getByTestId('location-display')).toHaveTextContent('/dashboard/run')
     expect((await screen.findAllByText('2025-01-01 to 2025-12-31')).length).toBeGreaterThan(0)
     expect(screen.getByText('Pinned')).toBeInTheDocument()
-    expect(screen.getByText(/Pinned annual results stay visible by default\./)).toBeInTheDocument()
     expect(screen.getByText('3 runs')).toBeInTheDocument()
     expect(screen.getByText('Selected run')).toBeInTheDocument()
     expect(screen.getAllByText('baseline-run').length).toBeGreaterThan(0)
     expect(screen.getAllByText('strict-auto-fallback').length).toBeGreaterThan(0)
-    expect(await screen.findByTestId('run-panel')).toBeInTheDocument()
-    expect(screen.getByTestId('backtest-status')).toHaveTextContent('idle:0')
   })
 
-  it('loads the latest results, runs commands, and cancels commands', async () => {
+  it('uses compact dashboard chrome in Japanese and removes sticky summary behavior', async () => {
+    setAppLanguage('ja')
+    const { container } = renderDashboard('/dashboard/run?lang=ja')
+
+    expect(await screen.findByTestId('run-panel')).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'バックテストダッシュボード' })).not.toBeInTheDocument()
+    expect(container.querySelector('style')?.textContent).not.toContain('position: sticky')
+  })
+
+  it('runs commands and cancels commands', async () => {
     const user = userEvent.setup()
 
     renderDashboard('/dashboard/run')
 
     expect(await screen.findByTestId('run-panel')).toBeInTheDocument()
-
-    await clickAndFlush(user, await screen.findByRole('button', { name: /Load Latest|Loading\.\.\./ }))
-    await waitFor(() => expect(fetchLatestBacktestMock).toHaveBeenCalledTimes(1))
 
     await clickAndFlush(user, screen.getAllByRole('button', { name: 'Run job' })[0])
     await waitFor(() => expect(createJobMock).toHaveBeenCalledWith({

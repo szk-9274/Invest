@@ -4,7 +4,6 @@ import net from 'node:net'
 import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process'
 import { beforeAll, afterAll, describe, expect, it, vi } from 'vitest'
 import { act, render, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Navigate, Route, Routes } from 'react-router-dom'
 
 const rootDir = path.resolve(__dirname, '../../..')
@@ -102,23 +101,25 @@ describe('BacktestDashboard E2E', () => {
     'renders fixture-backed results from the real backend',
     async () => {
       vi.resetModules()
+      const { AppChromeProvider } = await import('../contexts/AppChromeContext')
       const { BacktestDashboard } = await import('./BacktestDashboard')
       const { BacktestRunPage } = await import('./BacktestRunPage')
       const { BacktestAnalysisPage } = await import('./BacktestAnalysisPage')
 
       render(
-        <MemoryRouter initialEntries={['/dashboard/analysis']}>
-          <Routes>
-            <Route path="/dashboard" element={<BacktestDashboard />}>
-              <Route index element={<Navigate to="run" replace />} />
-              <Route path="run" element={<BacktestRunPage />} />
-              <Route path="analysis" element={<BacktestAnalysisPage />} />
-            </Route>
-          </Routes>
-        </MemoryRouter>,
+        <AppChromeProvider>
+          <MemoryRouter initialEntries={['/dashboard/analysis']}>
+            <Routes>
+              <Route path="/dashboard" element={<BacktestDashboard />}>
+                <Route index element={<Navigate to="run" replace />} />
+                <Route path="run" element={<BacktestRunPage />} />
+                <Route path="analysis" element={<BacktestAnalysisPage />} />
+              </Route>
+            </Routes>
+          </MemoryRouter>
+        </AppChromeProvider>,
       )
 
-      expect(await screen.findByRole('heading', { name: 'Backtest Dashboard' })).toBeInTheDocument()
       expect(await screen.findByText('Analysis & Results')).toBeInTheDocument()
       expect(await screen.findByText('backtest_2026-01-01_to_2026-01-31')).toBeInTheDocument()
 

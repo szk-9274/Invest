@@ -5,10 +5,15 @@
     "backtest": "バックテスト",
     "dashboard": "バックテストダッシュボード",
     "langEn": "EN",
-    "langJa": "JA"
+    "langJa": "JA",
+    "openMenu": "メニューを開く",
+    "closeMenu": "メニューを閉じる",
+    "menu": "メニュー",
+    "close": "閉じる"
   },
   "common": {
-    "loading": "読み込み中..."
+    "loading": "読み込み中...",
+    "applicationError": "アプリケーションエラー"
   },
   "home": {
     "title": "Invest バックテスト",
@@ -40,7 +45,12 @@
         "description": "上位・下位のパフォーマンスをインタラクティブに確認。"
       }
     ],
-    "logos": ["METAPLANET", "BITCOIN.JP", "BM JAPAN", "PLANET GEAR"]
+    "logos": [
+      "METAPLANET",
+      "BITCOIN.JP",
+      "BM JAPAN",
+      "PLANET GEAR"
+    ]
   },
   "chart": {
     "back": "戻る",
@@ -53,11 +63,11 @@
     "overviewTitle": "概要",
     "overviewHint": "主要 KPI を先に確認し、実験一覧と詳細チャートへ掘り下げます。",
     "availableTests": "利用可能なテスト",
-    "experimentList": "Experiment List",
+    "experimentList": "実行結果一覧",
     "experimentListHint": "利用可能な実験をテーブルで確認し、比較対象を切り替えます。",
-    "conditionComparison": "Condition Comparison",
+    "conditionComparison": "条件比較",
     "conditionComparisonHint": "年率、IR、ドローダウンを最新 run 間で横比較します。",
-    "detailedTimeSeries": "Detailed Time Series",
+    "detailedTimeSeries": "詳細時系列",
     "detailedTimeSeriesHint": "現在の run について、エクイティ、ドローダウン、売買マーカーを確認します。",
     "equityCurveTitle": "エクイティカーブ",
     "drawdownTitle": "ドローダウン",
@@ -72,7 +82,7 @@
     "tradesColumn": "件数",
     "noBacktests": "バックテスト結果がありません",
     "pinnedLabel": "固定",
-    "pinnedHint": "固定した年次結果は常に一覧の上部に表示されます。",
+    "pinnedHint": "固定した年次結果は実行結果一覧の上部に表示されます。",
     "availableRuns": "{{count}}件のrun",
     "availableRunsHint": "この期間には複数の run があり、既定では最新 run を表示しています。",
     "benchmarkDisabledShort": "ベンチマークなし",
@@ -81,11 +91,11 @@
     "runRoute": "実行・管理",
     "analysisRoute": "解析・結果",
     "routeNavigation": "バックテスト画面切り替え",
-    "runRouteHint": "コマンド実行、固定した年次結果、実行ログを 1 画面で管理します。",
+    "runRouteHint": "コマンド実行、実行結果一覧内の固定年次結果、実行ログを 1 画面で管理します。",
     "chartsDeferredHint": "スクロールするとチャートギャラリーを読み込みます。",
     "chartsRouteHint": "上位・下位銘柄の標準サイズチャートを確認します。",
     "tradesRouteHint": "終了理由を日本語化し、モバイル向けカード表示でも確認できます。",
-    "traderStrategiesRoute": "著名トレーダー・ストラテジー",
+    "traderStrategiesRoute": "著名トレーダー戦略",
     "traderStrategiesHint": "著名トレーダーに着想を得た独立バックテストを、モバイルでも比較しやすい形で表示します。",
     "traderStrategyRunsHint": "選択中のトレーダー戦略に対応する最新 run を表示します。",
     "pinnedAnnualResults": "固定年次結果",
@@ -123,7 +133,20 @@
     "loadLatestError": "最新バックテストの取得に失敗: {{error}}",
     "startCommandError": "コマンド開始に失敗: {{error}}",
     "cancelCommandError": "コマンド停止に失敗: {{error}}",
-    "pollJobStatusError": "ジョブ状態監視に失敗: {{error}}"
+    "pollJobStatusError": "ジョブ状態監視に失敗: {{error}}",
+    "reloadLatestAria": "最新データを再読み込み",
+    "chromeStatus": "状態：{{status}}",
+    "statusLoading": "読み込み中",
+    "statusIdle": "待機中",
+    "statusQueued": "実行待ち",
+    "statusRunning": "実行中",
+    "statusSucceeded": "完了",
+    "statusFailed": "失敗",
+    "statusCancelled": "キャンセル済み",
+    "statusNoLogs": "最新ログなし",
+    "statusLogsAvailable": "最新ログあり",
+    "savedFiltersLabel": "保存済み条件",
+    "resetRunFilters": "条件をリセット"
   },
   "runPanel": {
     "title": "Python コマンドランナー",
@@ -162,9 +185,9 @@
     "loadingMetrics": "指標を読み込み中...",
     "noData": "データがありません",
     "totalPnl": "合計損益",
-    "annualReturn": "Annual Return",
-    "informationRatio": "Information Ratio",
-    "maxDrawdown": "Max Drawdown",
+    "annualReturn": "年率リターン",
+    "informationRatio": "情報比率",
+    "maxDrawdown": "最大ドローダウン",
     "finalCapital": "最終資産",
     "totalTrades": "総トレード数",
     "winRate": "勝率",
@@ -214,7 +237,14 @@
     "otherCharts": "その他チャート",
     "closeLightbox": "拡大チャートを閉じる",
     "zoomIn": "拡大",
-    "zoomOut": "縮小"
+    "zoomOut": "縮小",
+    "chartRendererUnavailable": "チャート描画を利用できません: {{error}}",
+    "noPurchaseData": "購入データがありません",
+    "expandChart": "チャートを拡大",
+    "topPerformerDetail": "上位銘柄の詳細",
+    "bottomPerformerDetail": "下位銘柄の詳細",
+    "topShort": "上位",
+    "bottomShort": "下位"
   },
   "tickerList": {
     "noData": "データがありません"

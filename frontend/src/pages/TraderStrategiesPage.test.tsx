@@ -80,12 +80,14 @@ describe('TraderStrategiesPage', () => {
   it('renders strategy profiles and loads the selected trader result', async () => {
     render(<TraderStrategiesPage />)
 
-    expect(screen.getByRole('button', { name: /Warren Buffett/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /George Soros/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /ウォーレン・バフェット/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /ジョージ・ソロス/i })).toBeInTheDocument()
 
     await waitFor(() => expect(listAllBacktestsMock).toHaveBeenCalledWith('buffett-quality'))
     expect(fetchBacktestByRangeMock).toHaveBeenCalledWith('ALL', 'buffett-quality')
     expect(await screen.findByTestId('trader-summary')).toHaveTextContent('5')
-    expect(screen.getAllByText(/quality compounders/i).length).toBeGreaterThan(0)
+    expect(screen.getAllByText('優良企業の複利成長').length).toBeGreaterThan(0)
+    expect(screen.getByText('持続的な競争優位を持つ企業を探します。')).toBeInTheDocument()
+    expect(screen.queryByText('Warren Buffett')).not.toBeInTheDocument()
   })
 })

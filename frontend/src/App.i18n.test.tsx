@@ -51,6 +51,22 @@ describe('App language toggle', () => {
     })
   })
 
+  it('switches the brand label to the dashboard title only on dashboard routes', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await clickAndFlush(user, screen.getByRole('button', { name: 'JA' }))
+    expect(screen.getByRole('link', { name: '株式スクリーニング' })).toBeInTheDocument()
+
+    await clickAndFlush(user, screen.getByRole('link', { name: 'バックテストダッシュボード' }))
+
+    await waitFor(() => {
+      expect(screen.queryByRole('link', { name: '株式スクリーニング' })).not.toBeInTheDocument()
+      expect(screen.getAllByRole('link', { name: 'バックテストダッシュボード' }).length).toBeGreaterThan(1)
+      expect(screen.getByRole('button', { name: '最新データを再読み込み' })).toBeInTheDocument()
+    })
+  })
+
   it('toggles mobile navigation menu state and closes after navigation click', async () => {
     const user = userEvent.setup()
     render(<App />)

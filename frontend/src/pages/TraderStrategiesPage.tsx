@@ -1,24 +1,19 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BacktestSummary } from '../components/BacktestSummary'
+import { TraderAvatar } from '../components/TraderAvatar'
 import { fetchBacktestByRange, listAllBacktests, type BacktestMetadata, type BacktestResults } from '../api/backtest'
 import { useBacktestDashboardContext } from './BacktestDashboard'
+import { localizeStrategyProfile } from '../utils/strategyProfileLocalization'
 import '../styles/dashboard-cards.css'
-
-const ICON_BY_KEY: Record<string, string> = {
-  brain: '🧠',
-  bolt: '⚡',
-  chart: '📈',
-  target: '🎯',
-  balance: '⚖️',
-  layers: '🧪',
-}
 
 export const TraderStrategiesPage: React.FC = () => {
   const { t } = useTranslation()
   const { setSelectedTimestamp, strategyProfiles } = useBacktestDashboardContext()
   const traderProfiles = useMemo(
-    () => strategyProfiles.filter((profile) => profile.is_trader_strategy),
+    () => strategyProfiles
+      .filter((profile) => profile.is_trader_strategy)
+      .map(localizeStrategyProfile),
     [strategyProfiles],
   )
   const [selectedTraderId, setSelectedTraderId] = useState('')
@@ -111,7 +106,9 @@ export const TraderStrategiesPage: React.FC = () => {
               className={`trader-profile-button ${profile.strategy_name === selectedTrader.strategy_name ? 'active' : ''}`}
               onClick={() => setSelectedTraderId(profile.strategy_name)}
             >
-              <span className="trader-profile-emoji" aria-hidden="true">{ICON_BY_KEY[profile.icon_key ?? ''] ?? '🧩'}</span>
+              <span className="trader-profile-avatar">
+                <TraderAvatar traderKey={profile.strategy_name} label={profile.display_name} />
+              </span>
               <span className="trader-profile-name">{profile.display_name}</span>
               <span className="trader-profile-short">{profile.title}</span>
             </button>
@@ -149,11 +146,11 @@ export const TraderStrategiesPage: React.FC = () => {
               >
                 <div className="item-period">
                   <strong>{backtest.period}</strong>
-                  <span>{backtest.trade_count} trades</span>
+                  <span>{t('dashboard.tradesCount', { count: backtest.trade_count })}</span>
                 </div>
                 <div className="item-metadata">
-                  <span>{backtest.strategy_name ?? selectedTrader.strategy_name}</span>
-                  {backtest.rule_profile ? <span>{backtest.rule_profile}</span> : null}
+                  <span>{selectedTrader.display_name}</span>
+                  <span>{selectedTrader.title}</span>
                 </div>
               </button>
             ))}
@@ -189,8 +186,10 @@ export const TraderStrategiesPage: React.FC = () => {
           box-shadow: 0 10px 20px rgba(59, 130, 246, 0.12);
         }
 
-        .trader-profile-emoji {
-          font-size: 28px;
+        .trader-profile-avatar {
+          display: inline-flex;
+          width: 64px;
+          height: 64px;
         }
 
         .trader-profile-name {

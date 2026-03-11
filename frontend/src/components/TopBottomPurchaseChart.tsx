@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { useLazyPlotComponent } from './useLazyPlotComponent'
 
 export default function TopBottomPurchaseChart({
@@ -12,6 +13,7 @@ export default function TopBottomPurchaseChart({
   width?: number
   height?: number
 }) {
+  const { t } = useTranslation()
   const { PlotComponent, plotError } = useLazyPlotComponent()
   const x = data.map((d) => d.timestamp)
   const y = data.map((d) => d.price)
@@ -23,7 +25,7 @@ export default function TopBottomPurchaseChart({
         <span>{title}</span>
       </div>
       {plotError ? (
-        <div data-testid="plotly-error">Chart renderer unavailable: {plotError}</div>
+        <div data-testid="plotly-error">{t('chartGallery.chartRendererUnavailable', { error: plotError })}</div>
       ) : PlotComponent ? (
         <PlotComponent
           data={[
@@ -41,7 +43,7 @@ export default function TopBottomPurchaseChart({
           style={{ width: '100%' }}
         />
       ) : (
-        <div data-testid="plotly-loading">Loading chart...</div>
+        <div data-testid="plotly-loading">{t('chartGallery.loadingCharts')}</div>
       )}
     </div>
   )

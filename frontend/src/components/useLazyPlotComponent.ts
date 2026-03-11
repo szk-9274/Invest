@@ -19,16 +19,18 @@ function toErrorMessage(error: unknown): string {
 function loadPlotComponent(): Promise<PlotComponentType> {
   if (!plotComponentPromise) {
     plotComponentPromise = Promise.all([
-      import('react-plotly.js/factory'),
-      import('plotly.js/lib/core'),
-      import('plotly.js/lib/scatter'),
-    ]).then(([factoryModule, plotlyCoreModule, scatterModule]) => {
+      import('react-plotly.js/factory.js'),
+      import('plotly.js-dist-min'),
+    ])
+      .then(([factoryModule, plotlyModule]) => {
       const createPlotComponent = (factoryModule.default ?? factoryModule) as PlotComponentFactory
-      const plotlyCore = (plotlyCoreModule.default ?? plotlyCoreModule) as PlotlyCore
-      const scatter = scatterModule.default ?? scatterModule
-      plotlyCore.register?.([scatter])
-      return createPlotComponent(plotlyCore)
+      const plotly = (plotlyModule.default ?? plotlyModule) as PlotlyCore
+      return createPlotComponent(plotly)
     })
+      .catch((error: unknown) => {
+        plotComponentPromise = null
+        throw error
+      })
   }
 
   return plotComponentPromise

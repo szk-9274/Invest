@@ -11,3 +11,10 @@ declare module 'react-plotly.js/factory' {
   const createPlotlyComponent: (plotly: unknown) => ComponentType<any>
   export default createPlotlyComponent
 }
+
+declare module 'react-plotly.js/factory.js' {
+  import { ComponentType } from 'react'
+
+  const createPlotlyComponent: (plotly: unknown) => ComponentType<any>
+  export default createPlotlyComponent
+}

@@ -26,7 +26,7 @@ export default defineConfig(({ mode }) => {
         output: {
           manualChunks(id) {
             if (id.includes('lightweight-charts')) return 'lightweight-chart-core'
-            if (id.includes('react-plotly.js') || id.includes('plotly.js/lib/')) return 'plotly-core'
+            if (id.includes('react-plotly.js') || id.includes('plotly.js-dist-min')) return 'plotly-core'
             if (id.includes('TopBottomPurchaseCharts')) return 'top-bottom-chart'
           },
         },

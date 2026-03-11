@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { BacktestStatus } from './BacktestStatus'
 import type { JobResponse } from '../api/jobs'
+import { setAppLanguage } from '../i18n'
 
 const baseJob: JobResponse = {
   job_id: 'job-1',
@@ -20,17 +21,18 @@ describe('BacktestStatus', () => {
   beforeEach(() => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2024-01-01T10:05:30Z'))
+    setAppLanguage('ja')
   })
 
   afterEach(() => {
     vi.useRealTimers()
+    setAppLanguage('en')
   })
 
   it('shows idle state and empty logs when no job is active', () => {
     const { container } = render(<BacktestStatus activeJob={null} logs={[]} />)
 
-    expect(screen.getByText('IDLE')).toBeInTheDocument()
-    expect(screen.getByText('No recent logs')).toBeInTheDocument()
+    expect(screen.getByText('状態：最新ログなし')).toBeInTheDocument()
     expect(container.querySelector('.status-dot')).toHaveStyle({ background: '#6b7280' })
   })
 
@@ -43,8 +45,8 @@ describe('BacktestStatus', () => {
       />,
     )
 
-    expect(screen.getByText('RUNNING')).toBeInTheDocument()
-    expect(screen.getByText('1h 5m 30s')).toBeInTheDocument()
+    expect(screen.getByText('状態：実行中')).toBeInTheDocument()
+    expect(screen.getByText('1時間 5分 30秒')).toBeInTheDocument()
     expect(screen.queryByText('line-1')).not.toBeInTheDocument()
     expect(screen.getByText(/line-2/)).toBeInTheDocument()
     expect(screen.getByText(/line-3/)).toBeInTheDocument()

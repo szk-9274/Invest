@@ -5,6 +5,7 @@
 
 <!-- BEGIN AUTO-GENERATED DOC LIST -->
 - [backtest-dashboard-renewal.md](backtest-dashboard-renewal.md) — 実装計画: バックテスト・ダッシュボード改善 — - タイトル: バックテスト・ダッシュボード改善
+- [backtest-dashboard-ui-improvement-batch-3.md](backtest-dashboard-ui-improvement-batch-3.md) — 実装計画: バックテストダッシュボード UI 改善バッチ 3 — - フェーズ: localhost 可視化改善 Phase 4
 - [backtest-retention.md](backtest-retention.md) — 変更・削除・作成するファイル — - backend/services/result_store.py
 - [ci-automation.md](ci-automation.md) — ci-automation — - タイトル: Docker / 契約生成の CI 自動検証
 - [create-root-readme.md](create-root-readme.md) — create-root-readme — - タイトル: ルート README.md の新規作成と改善提案整理

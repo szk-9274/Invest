@@ -14,23 +14,18 @@ import { BacktestRunPage } from './pages/BacktestRunPage'
 import { BacktestAnalysisPage } from './pages/BacktestAnalysisPage'
 import { TraderStrategiesPage } from './pages/TraderStrategiesPage'
 import { AppLanguage, setAppLanguage } from './i18n'
+import { AppChromeProvider, useAppChrome } from './contexts/AppChromeContext'
 import './App.css'
-
-function ErrorFallback({ error }: { error: Error | null }) {
-  if (!error) return null
-  return (
-    <div style={{ padding: 20, color: '#800' }}>
-      <h3>Application Error</h3>
-      <pre style={{ whiteSpace: 'pre-wrap', background: '#fff', padding: 10, borderRadius: 6 }}>{String(error && error.stack)}</pre>
-    </div>
-  )
-}
 
 function AppContent() {
   const { t, i18n } = useTranslation()
   const location = useLocation()
+  const { chrome } = useAppChrome()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const currentLanguage: AppLanguage = i18n.resolvedLanguage === 'ja' ? 'ja' : 'en'
+  const brandLabel = chrome.brandLabel ?? t('nav.brand')
+  const brandLink = chrome.brandLabel ? chrome.brandLink : '/'
+  const chromeState = chrome.statusLabel ?? null
 
   useEffect(() => {
     setIsMobileMenuOpen(false)
@@ -50,20 +45,38 @@ function AppContent() {
   }
 
   return (
-    <>
-      <nav className="app-nav">
-        <div className="nav-brand">
-          <Link to="/" onClick={closeMobileMenu}>{t('nav.brand')}</Link>
+      <>
+        <nav className="app-nav">
+        <div className="nav-brand-group">
+          <div className="nav-brand">
+            <Link to={brandLink} onClick={closeMobileMenu}>{brandLabel}</Link>
+          </div>
+          {chromeState ? <span className="nav-status-chip">{chromeState}</span> : null}
+          {chrome.onReload ? (
+            <button
+              type="button"
+              className="nav-reload-button"
+              aria-label={chrome.reloadLabel ?? t('dashboard.reloadLatestAria')}
+              title={chrome.reloadLabel ?? t('dashboard.reloadLatestAria')}
+              disabled={chrome.reloadDisabled}
+              onClick={() => {
+                void chrome.onReload?.()
+                closeMobileMenu()
+              }}
+            >
+              ↻
+            </button>
+          ) : null}
         </div>
         <button
           type="button"
           className={`menu-toggle ${isMobileMenuOpen ? 'active' : ''}`}
-          aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+          aria-label={isMobileMenuOpen ? t('nav.closeMenu') : t('nav.openMenu')}
           aria-controls="app-nav-links"
           aria-expanded={isMobileMenuOpen}
           onClick={handleMobileMenuToggle}
         >
-          {isMobileMenuOpen ? 'Close' : 'Menu'}
+          {isMobileMenuOpen ? t('nav.close') : t('nav.menu')}
         </button>
         <div
           id="app-nav-links"
@@ -119,9 +132,11 @@ function App() {
   const { t } = useTranslation()
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <React.Suspense fallback={<div>{t('common.loading')}</div>}>
-        <AppContent />
-      </React.Suspense>
+      <AppChromeProvider>
+        <React.Suspense fallback={<div>{t('common.loading')}</div>}>
+          <AppContent />
+        </React.Suspense>
+      </AppChromeProvider>
     </BrowserRouter>
   )
 }

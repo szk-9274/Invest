@@ -18,6 +18,10 @@ vi.mock('../components/RunPanel', () => ({
   ),
 }))
 
+vi.mock('../components/BacktestSummary', () => ({
+  BacktestSummary: () => <div data-testid="summary-view">summary-view</div>,
+}))
+
 const setSelectedTimestamp = vi.fn()
 
 function renderPage() {
@@ -29,10 +33,26 @@ function renderPage() {
 }
 
 describe('BacktestRunPage', () => {
-  it('renders pinned runs and allows selecting another run', async () => {
+  it('keeps annual benchmark runs inside Experiment List and removes duplicate summary panels', async () => {
     const user = userEvent.setup()
     contextMock.mockReturnValue({
       backtests: [
+        {
+          timestamp: 'run-2020',
+          period: '2020 annual',
+          trade_count: 6,
+          is_pinned: true,
+          available_runs: 1,
+          run_label: 'annual-2020',
+          experiment_name: 'annual-pinned-2020',
+          strategy_name: 'rule-based-stage2',
+          rule_profile: 'strict-auto-fallback',
+          headline_metrics: {
+            annual_return_pct: 0.14,
+            information_ratio: 0.9,
+            max_drawdown_pct: -0.07,
+          },
+        },
         {
           timestamp: 'run-2025',
           period: '2025 annual',
@@ -71,40 +91,12 @@ describe('BacktestRunPage', () => {
       results: {
         summary: {
           total_trades: 12,
-          total_pnl: 4200,
-          annual_return_pct: 0.18,
-          information_ratio: 1.25,
-          max_drawdown_pct: -0.08,
-          final_capital: 104200,
-          win_rate: 0.58,
         },
       },
       loading: false,
+      strategyProfiles: [],
       selectedTimestamp: 'run-2025',
       setSelectedTimestamp,
-      pinnedAnnualResults: [
-        {
-          period: '2020-01-01 to 2020-12-31',
-          result: {
-            timestamp: 'run-2020',
-            summary: {
-              total_trades: 6,
-              total_pnl: 1200,
-              annual_return_pct: 0.14,
-              information_ratio: 0.9,
-              max_drawdown_pct: -0.07,
-              final_capital: 101200,
-              win_rate: 0.55,
-            },
-          },
-          error: null,
-        },
-        {
-          period: '2021-01-01 to 2021-12-31',
-          result: null,
-          error: 'Missing charts',
-        },
-      ],
       activeJob: { status: 'running' },
       jobLogs: ['line-a'],
       runError: null,
@@ -115,11 +107,11 @@ describe('BacktestRunPage', () => {
     renderPage()
 
     expect(screen.getByTestId('run-panel')).toHaveTextContent('running:1')
-    expect(screen.getByText('Pinned Annual Results')).toBeInTheDocument()
-    expect(screen.getByText('2020-01-01 to 2020-12-31')).toBeInTheDocument()
-    expect(screen.getByText('2021-01-01 to 2021-12-31')).toBeInTheDocument()
-    expect(screen.getByText('Missing charts')).toBeInTheDocument()
-    expect(screen.getByText('Pinned')).toBeInTheDocument()
+    expect(screen.queryByTestId('summary-view')).not.toBeInTheDocument()
+    expect(screen.queryByText('Overview')).not.toBeInTheDocument()
+    expect(screen.queryByText('Pinned Annual Results')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /2020 annual/i })).toBeInTheDocument()
+    expect(screen.getAllByText('Pinned').length).toBeGreaterThan(0)
     expect(screen.getAllByText('baseline-run').length).toBeGreaterThan(0)
     expect(screen.getAllByText('qlib-inspired').length).toBeGreaterThan(0)
     expect(screen.getAllByText('rule-based-stage2').length).toBeGreaterThan(0)
@@ -143,6 +135,7 @@ describe('BacktestRunPage', () => {
       backtests: [],
       results: null,
       loading: false,
+      strategyProfiles: [],
       selectedTimestamp: null,
       setSelectedTimestamp: vi.fn(),
       activeJob: null,

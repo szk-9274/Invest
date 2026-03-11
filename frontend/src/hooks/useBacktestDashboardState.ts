@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } 
 import { useTranslation } from 'react-i18next'
 import {
   fetchLatestBacktest,
-  fetchBacktestByRange,
   fetchBacktestResults,
   listAllBacktests,
   listStrategyProfiles,
@@ -12,16 +11,12 @@ import {
 } from '../api/backtest'
 import { type JobCreateRequest, type JobResponse } from '../api/jobs'
 import { useBacktestJobManagement } from './useBacktestJobManagement'
+import { localizeStrategyProfile } from '../utils/strategyProfileLocalization'
 
 export interface UseBacktestDashboardStateResult {
   results: BacktestResults | null
   backtests: BacktestMetadata[]
   strategyProfiles: StrategyProfile[]
-  pinnedAnnualResults: Array<{
-    period: string
-    result: BacktestResults | null
-    error: string | null
-  }>
   selectedTimestamp: string | null
   setSelectedTimestamp: Dispatch<SetStateAction<string | null>>
   loading: boolean
@@ -35,19 +30,11 @@ export interface UseBacktestDashboardStateResult {
   handleCancelCommand: () => Promise<void>
 }
 
-const PINNED_ANNUAL_PERIODS = [
-  '2020-01-01 to 2020-12-31',
-  '2021-01-01 to 2021-12-31',
-]
-
 export function useBacktestDashboardState(): UseBacktestDashboardStateResult {
   const { t } = useTranslation()
   const [results, setResults] = useState<BacktestResults | null>(null)
   const [backtests, setBacktests] = useState<BacktestMetadata[]>([])
   const [strategyProfiles, setStrategyProfiles] = useState<StrategyProfile[]>([])
-  const [pinnedAnnualResults, setPinnedAnnualResults] = useState<
-    Array<{ period: string; result: BacktestResults | null; error: string | null }>
-  >([])
   const [selectedTimestamp, setSelectedTimestamp] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -62,38 +49,21 @@ export function useBacktestDashboardState(): UseBacktestDashboardStateResult {
 
   const loadStrategyMetadata = useCallback(async () => {
     const data = await listStrategyProfiles()
-    setStrategyProfiles(data)
-  }, [])
-
-  const loadPinnedAnnualResults = useCallback(async () => {
-    const entries = await Promise.all(
-      PINNED_ANNUAL_PERIODS.map(async (period) => {
-        try {
-          const result = await fetchBacktestByRange(period)
-          return { period, result, error: null }
-        } catch (err) {
-          return {
-            period,
-            result: null,
-            error: err instanceof Error ? err.message : String(err),
-          }
-        }
-      }),
-    )
-    setPinnedAnnualResults(entries)
+    const localizedProfiles = data.map(localizeStrategyProfile)
+    setStrategyProfiles(localizedProfiles)
   }, [])
 
   useEffect(() => {
     const loadInitialState = async () => {
       try {
-        await Promise.all([loadBacktests(), loadPinnedAnnualResults(), loadStrategyMetadata()])
+        await Promise.all([loadBacktests(), loadStrategyMetadata()])
       } catch (err) {
         setError(t('dashboard.loadBacktestListError', { error: String(err) }))
       }
     }
 
     void loadInitialState()
-  }, [loadBacktests, loadPinnedAnnualResults, loadStrategyMetadata, t])
+  }, [loadBacktests, loadStrategyMetadata, t])
 
   useEffect(() => {
     if (!selectedTimestamp) return
@@ -121,13 +91,13 @@ export function useBacktestDashboardState(): UseBacktestDashboardStateResult {
       const data = await fetchLatestBacktest()
       setResults(data)
       setSelectedTimestamp(data.timestamp)
-      await Promise.all([loadBacktests(), loadPinnedAnnualResults()])
+      await loadBacktests()
     } catch (err) {
       setError(t('dashboard.loadLatestError', { error: String(err) }))
     } finally {
       setLoading(false)
     }
-  }, [loadBacktests, loadPinnedAnnualResults, t])
+  }, [loadBacktests, t])
 
   const {
     activeJob,
@@ -143,7 +113,6 @@ export function useBacktestDashboardState(): UseBacktestDashboardStateResult {
     results,
     backtests,
     strategyProfiles,
-    pinnedAnnualResults,
     selectedTimestamp,
     setSelectedTimestamp,
     loading,
