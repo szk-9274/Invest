@@ -90,7 +90,11 @@ export const TradeTable: React.FC<TradeTableProps> = ({ trades, loading = false 
   }
 
   const SortableHeader = ({ field, label }: { field: SortField; label: string }) => (
-    <th onClick={() => handleSort(field)} style={{ cursor: 'pointer' }}>
+    <th
+      onClick={() => handleSort(field)}
+      style={{ cursor: 'pointer' }}
+      className="trade-table-cell trade-table-cell--center"
+    >
       {label}
       {sortField === field && (
         <span style={{ marginLeft: '5px' }}>{sortDirection === 'asc' ? '↑' : '↓'}</span>
@@ -128,19 +132,19 @@ export const TradeTable: React.FC<TradeTableProps> = ({ trades, loading = false 
           <tbody>
             {paginatedTrades.map((trade, idx) => (
               <tr key={idx}>
-                <td className="ticker">{trade.ticker}</td>
-                <td>{trade.entry_date ?? '-'}</td>
-                <td className="number">{formatCurrency(trade.entry_price)}</td>
-                <td>{trade.exit_date ?? '-'}</td>
-                <td className="number">{formatCurrency(trade.exit_price)}</td>
-                <td className="number">{trade.shares ?? '-'}</td>
-                <td className={`number ${(trade.pnl ?? 0) >= 0 ? 'positive' : 'negative'}`}>
+                <td className="trade-table-cell trade-table-cell--center ticker">{trade.ticker}</td>
+                <td className="trade-table-cell trade-table-cell--center">{trade.entry_date ?? '-'}</td>
+                <td className="trade-table-cell trade-table-cell--center number">{formatCurrency(trade.entry_price)}</td>
+                <td className="trade-table-cell trade-table-cell--center">{trade.exit_date ?? '-'}</td>
+                <td className="trade-table-cell trade-table-cell--center number">{formatCurrency(trade.exit_price)}</td>
+                <td className="trade-table-cell trade-table-cell--center number">{trade.shares ?? '-'}</td>
+                <td className={`trade-table-cell trade-table-cell--center number ${(trade.pnl ?? 0) >= 0 ? 'positive' : 'negative'}`}>
                   {formatCurrency(trade.pnl)}
                 </td>
-                <td className={`number ${(trade.pnl_pct ?? 0) >= 0 ? 'positive' : 'negative'}`}>
+                <td className={`trade-table-cell trade-table-cell--center number ${(trade.pnl_pct ?? 0) >= 0 ? 'positive' : 'negative'}`}>
                   {((trade.pnl_pct ?? 0) * 100).toFixed(2)}%
                 </td>
-                <td className="reason">{formatExitReason(trade.exit_reason)}</td>
+                <td className="trade-table-cell trade-table-cell--center reason">{formatExitReason(trade.exit_reason)}</td>
               </tr>
             ))}
           </tbody>
@@ -249,7 +253,6 @@ export const TradeTable: React.FC<TradeTableProps> = ({ trades, loading = false 
 
         th {
           padding: 12px;
-          text-align: left;
           font-weight: 600;
           color: #333;
           border-bottom: 2px solid #ddd;
@@ -262,6 +265,11 @@ export const TradeTable: React.FC<TradeTableProps> = ({ trades, loading = false 
           font-size: 13px;
         }
 
+        .trade-table-cell--center {
+          text-align: center;
+          vertical-align: middle;
+        }
+
         tbody tr:hover {
           background: #f9f9f9;
         }
@@ -272,7 +280,6 @@ export const TradeTable: React.FC<TradeTableProps> = ({ trades, loading = false 
         }
 
         .number {
-          text-align: right;
           font-family: 'Monaco', 'Courier New', monospace;
         }
 

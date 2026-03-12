@@ -89,6 +89,9 @@ describe('TopBottomPurchaseCharts', () => {
     expect(screen.getByTestId('purchase-charts')).toBeInTheDocument()
     expect(screen.getAllByTestId('purchase-chart-card')).toHaveLength(2)
     expect(screen.getAllByTestId('candlestick-chart')).toHaveLength(2)
+    expect(screen.getByText('Top1')).toBeInTheDocument()
+    expect(screen.queryByText('Expand chart')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /expand chart for aaa/i })).toBeInTheDocument()
   })
 
   it('opens an expanded lightbox when a chart is selected', async () => {

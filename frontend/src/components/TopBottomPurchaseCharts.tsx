@@ -26,6 +26,29 @@ interface TopBottomPurchaseChartsProps {
 const MIN_MARKER_SIZE = 6
 const MAX_MARKER_SIZE = 28
 
+function ExpandIcon() {
+  return (
+    <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+      <path
+        d="M4 8V4h4M12 4h4v4M16 12v4h-4M8 16H4v-4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M8 4 4 8M12 4l4 4M4 12l4 4M16 12l-4 4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
 function toFiniteNumber(value: unknown): number | null {
   if (typeof value === 'number' && Number.isFinite(value)) return value
   if (typeof value === 'string' && value.trim() !== '') {
@@ -134,6 +157,21 @@ export const TopBottomPurchaseCharts: React.FC<TopBottomPurchaseChartsProps> = (
     [trades, tickerStats, limit],
   )
   const visibleItems = items.filter((item) => item.purchases.length > 0)
+  const rankByItemKey = React.useMemo(() => {
+    const ranks = new Map<string, number>()
+    let topRank = 0
+    let bottomRank = 0
+    for (const item of visibleItems) {
+      if (item.group === 'top') {
+        topRank += 1
+        ranks.set(`${item.group}-${item.ticker}`, topRank)
+      } else {
+        bottomRank += 1
+        ranks.set(`${item.group}-${item.ticker}`, bottomRank)
+      }
+    }
+    return ranks
+  }, [visibleItems])
   if (visibleItems.length === 0) {
     return <div className="purchase-charts empty">{t('chartGallery.noPurchaseData')}</div>
   }
@@ -147,13 +185,19 @@ export const TopBottomPurchaseCharts: React.FC<TopBottomPurchaseChartsProps> = (
               <span>{item.ticker}</span>
               <div className="purchase-card-actions">
                 <span className={`badge ${item.group}`}>{item.group === 'top' ? t('chartGallery.topShort') : t('chartGallery.bottomShort')}</span>
+                <span className={`rank-badge ${item.group}`}>
+                  {item.group === 'top'
+                    ? t('chartGallery.topRankBadge', { rank: rankByItemKey.get(`${item.group}-${item.ticker}`) ?? 1 })
+                    : t('chartGallery.bottomRankBadge', { rank: rankByItemKey.get(`${item.group}-${item.ticker}`) ?? 1 })}
+                </span>
                 <button
                   type="button"
                   className="purchase-expand-button"
-                  aria-label={t('chartGallery.expandChart')}
+                  aria-label={t('chartGallery.expandChartFor', { ticker: item.ticker })}
+                  title={t('chartGallery.expandChart')}
                   onClick={() => setExpandedTicker(item)}
                 >
-                  {t('chartGallery.expandChart')}
+                  <ExpandIcon />
                 </button>
               </div>
             </div>
@@ -250,14 +294,24 @@ export const TopBottomPurchaseCharts: React.FC<TopBottomPurchaseChartsProps> = (
           cursor: zoom-in;
         }
         .purchase-expand-button {
-          border: none;
+          width: 34px;
+          height: 34px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid #cbd5e1;
           border-radius: 999px;
-          background: #e2e8f0;
+          background: #f8fafc;
           color: #0f172a;
-          font-size: 11px;
-          font-weight: 700;
-          padding: 6px 10px;
           cursor: pointer;
+          box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
+        }
+        .purchase-expand-button svg {
+          width: 18px;
+          height: 18px;
+        }
+        .purchase-expand-button:hover {
+          background: #e2e8f0;
         }
         .badge {
           font-size: 10px;
@@ -265,13 +319,30 @@ export const TopBottomPurchaseCharts: React.FC<TopBottomPurchaseChartsProps> = (
           border-radius: 10px;
           letter-spacing: 0.4px;
         }
+        .rank-badge {
+          min-width: 48px;
+          padding: 4px 8px;
+          border-radius: 999px;
+          font-size: 11px;
+          font-weight: 700;
+          text-align: center;
+          line-height: 1;
+        }
         .badge.top {
           background: #dcfce7;
           color: #166534;
         }
+        .rank-badge.top {
+          background: #dbeafe;
+          color: #1d4ed8;
+        }
         .badge.bottom {
           background: #fee2e2;
           color: #991b1b;
+        }
+        .rank-badge.bottom {
+          background: #fee2e2;
+          color: #b91c1c;
         }
         .purchase-lightbox {
           position: fixed;

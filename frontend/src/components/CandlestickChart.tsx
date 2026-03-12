@@ -232,124 +232,33 @@ export function CandlestickChart({
   const traces = buildCandlestickTraces(data, markers)
   const layout = buildChartLayout(ticker, width, height)
 
-  const [period, setPeriod] = React.useState<'1M' | '3M' | '6M' | '1Y' | 'ALL'>('ALL')
-  const [year, setYear] = React.useState<string | null>(null)
   const [bgImage, setBgImage] = React.useState<string | null>(null)
-  const [ohlcData, setOhlcData] = React.useState<any[] | null>(null)
-  const chartContainerRef = React.useRef<HTMLDivElement | null>(null)
 
-  // Fetch chart image for a specific period (client-side request to backend with optional range query)
-  const fetchChartForPeriod = React.useCallback(async (p: string) => {
+  const fetchChartPreview = React.useCallback(async () => {
     if (typeof window === 'undefined') return
     try {
-      const res = await fetch(buildApiUrl(`/backtest/latest?range=${encodeURIComponent(p)}`))
+      const res = await fetch(buildApiUrl('/backtest/latest'))
       if (!res.ok) return
-      const data = await res.json()
-      const charts = (data && (data as any).charts) || {}
+      const payload = await res.json()
+      const charts = (payload && (payload as any).charts) || {}
       const keys = Object.keys(charts || {})
       let key = keys.find((k) => k === `${ticker}_price_chart`) || keys.find((k) => k === ticker) || keys.find((k) => k.includes(ticker)) || keys.find((k) => k.includes('_price_chart'))
       if (!key && keys.length > 0) key = keys[0]
       if (key && charts[key]) setBgImage(charts[key])
     } catch (e) {
       // eslint-disable-next-line no-console
-      console.warn('Failed to fetch chart for period', e)
-    }
-  }, [ticker])
-
-  // Fetch OHLC JSON for interactive chart when a specific year is selected
-  const fetchOhlcForYear = React.useCallback(async (y: string) => {
-    if (typeof window === 'undefined') return
-    try {
-      const res = await fetch(buildApiUrl(`/backtest/ohlc?ticker=${encodeURIComponent(ticker)}&range=${encodeURIComponent(y)}`))
-      if (!res.ok) {
-        console.warn('OHLC fetch returned', res.status)
-        setOhlcData(null)
-        return
-      }
-      const payload = await res.json()
-      if (payload && Array.isArray(payload.data) && payload.data.length > 0) {
-        // convert to lightweight-charts format: { time, open, high, low, close }
-        const series = payload.data.map((r: any) => ({
-          time: r.time,
-          open: r.open,
-          high: r.high,
-          low: r.low,
-          close: r.close,
-          volume: r.volume,
-        }))
-        setOhlcData(series)
-      } else {
-        setOhlcData(null)
-      }
-    } catch (e) {
-      console.warn('Failed to fetch OHLC', e)
-      setOhlcData(null)
+      console.warn('Failed to fetch chart preview', e)
     }
   }, [ticker])
 
   // Fetch latest backtest charts and pick the one corresponding to this ticker or selected period
   React.useEffect(() => {
-    let mounted = true
-    async function run() {
       try {
-        await fetchChartForPeriod(period)
+        void fetchChartPreview()
       } catch (e) {
-        // eslint-disable-next-line no-console
-        console.warn('fetchChartForPeriod failed', e)
+        console.warn('fetchChartPreview failed', e)
       }
-    }
-
-    run()
-    return () => {
-      mounted = false
-    }
-  }, [ticker, period, fetchChartForPeriod])
-
-  // Zoom and pan temporarily disabled
-  // const [zoomScale, setZoomScale] = React.useState<number>(1)
-  // const [imgOffset, setImgOffset] = React.useState<{x:number,y:number}>({x:0,y:0})
-  // const [isDragging, setIsDragging] = React.useState(false)
-  // const [lastMousePos, setLastMousePos] = React.useState<{x:number,y:number}|null>(null)
-  // const [lastTouchDistance, setLastTouchDistance] = React.useState<number|null>(null)
-  // const [lastTouchCenter, setLastTouchCenter] = React.useState<{x:number,y:number}|null>(null)
-
-  // Render lightweight-charts when OHLC data is available
-  React.useEffect(() => {
-    let chart: any = null
-    let series: any = null
-    let volSeries: any = null
-    let mounted = true
-    const render = async () => {
-      if (!chartContainerRef.current) return
-      if (!ohlcData || ohlcData.length === 0) return
-      try {
-        const lc = await import('lightweight-charts')
-        if (!mounted) return
-        // clear
-        chartContainerRef.current.innerHTML = ''
-        chart = lc.createChart(chartContainerRef.current, {
-          layout: { background: { color: THEME.background }, textColor: THEME.textColor },
-          width: width || 800,
-          height: height || 450,
-          rightPriceScale: { visible: true },
-        })
-        series = chart.addCandlestickSeries({ upColor: THEME.upColor, downColor: THEME.downColor, wickUpColor: THEME.upColor, wickDownColor: THEME.downColor })
-        series.setData(ohlcData)
-        // volume
-        volSeries = chart.addHistogramSeries({ priceFormat: { type: 'volume' }, scaleMargins: { top: 0.8, bottom: 0 } })
-        volSeries.setData(ohlcData.map((d: any) => ({ time: d.time, value: d.volume, color: d.close >= d.open ? THEME.volumeUpColor : THEME.volumeDownColor })))
-      } catch (e) {
-        // If lightweight-charts not available, fall back to image
-        // eslint-disable-next-line no-console
-        console.warn('lightweight-charts failed to load or render', e)
-      }
-    }
-    render()
-    return () => {
-      mounted = false
-      if (chart && chart.remove) chart.remove()
-    }
-  }, [ohlcData, width, height])
+  }, [fetchChartPreview])
 
   let layoutWithImage: any = layout as any
 
@@ -542,65 +451,11 @@ export function CandlestickChart({
 
   return (
     <div data-testid="candlestick-chart" style={{ width: '100%' }}>
-      {/* Period selector (client-side for now). Backend may honor ?range= in future. */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-        <label style={{ color: THEME.textColor }}>Period:</label>
-        <select
-          aria-label="Chart period"
-          value={period}
-          onChange={(e) => {
-            const v = e.target.value as any
-            setPeriod(v)
-          }}
-          style={{ padding: '6px 8px', borderRadius: 6 }}
-        >
-          <option value="1M">1M</option>
-          <option value="3M">3M</option>
-          <option value="6M">6M</option>
-          <option value="1Y">1Y</option>
-          <option value="ALL">All</option>
-        </select>
-
-        {/* Year quick selector for convenient one-click backtests (2020-2025) */}
-        <label style={{ color: THEME.textColor, marginLeft: 6 }}>Year:</label>
-        <div role="group" aria-label="Year selector" style={{ display: 'flex', gap: 6 }}>
-          {['2020', '2021', '2022', '2023', '2024', '2025'].map((y) => (
-            <button
-              key={y}
-              onClick={() => {
-                setYear(y)
-                // keep full-range period when selecting a year
-                setPeriod('ALL')
-                // request backend for that year's pre-generated backtest
-                fetchChartForPeriod(y)
-                // fetch OHLC for interactive chart
-                fetchOhlcForYear(y)
-              }}
-              style={{
-                padding: '6px 8px',
-                borderRadius: 6,
-                background: year === y ? '#243447' : 'transparent',
-                color: THEME.textColor,
-                border: '1px solid rgba(255,255,255,0.06)'
-              }}
-              aria-pressed={year === y}
-            >
-              {y}
-            </button>
-          ))}
-        </div>
-
-        <div style={{ marginLeft: 'auto', color: 'rgba(209,212,220,0.9)' }}>
-          {period === 'ALL' ? (year ? year : 'Full range') : period}
-        </div>
-      </div>
-
-      {(data.dates.length === 0 && !bgImage && (!markers || ((markers.entries?.length||0) === 0 && (markers.exits?.length||0) === 0)) && !ohlcData) ? (
+      {(data.dates.length === 0 && !bgImage && (!markers || ((markers.entries?.length||0) === 0 && (markers.exits?.length||0) === 0))) ? (
         <p data-testid="no-data-message">No chart data available</p>
       ) : (
         <div data-testid="plotly-chart">
           <div
-            ref={chartContainerRef}
             data-testid="chart-rendered"
             data-traces={JSON.stringify(traces.length)}
             data-ticker={ticker}
@@ -614,26 +469,24 @@ export function CandlestickChart({
               width: '100%'
             }}
           >
-            {!ohlcData && (
-              <div
-                style={{
-                  minHeight: 200,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundImage: bgImage ? `url(${bgImage})` : undefined,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  backgroundRepeat: 'no-repeat',
-                  width: '100%',
-                  height: 260,
-                }}
-              >
-                <div style={{background: 'rgba(0,0,0,0.45)', padding: 8, borderRadius: 6, color: '#fff'}}>
-                  {ticker} • {traces.length} traces
-                </div>
+            <div
+              style={{
+                minHeight: 200,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundImage: bgImage ? `url(${bgImage})` : undefined,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                width: '100%',
+                height: 260,
+              }}
+            >
+              <div style={{background: 'rgba(0,0,0,0.45)', padding: 8, borderRadius: 6, color: '#fff'}}>
+                {ticker} • {traces.length} traces
               </div>
-            )}
+            </div>
           </div>
 
         </div>

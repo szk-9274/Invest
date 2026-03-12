@@ -35,7 +35,7 @@ export const BacktestAnalysisPage: React.FC = () => {
       <section className="dashboard-card dashboard-card--summary">
         <div className="dashboard-section-heading">
           <div>
-            <h2>{t('dashboard.analysisRoute', 'Analysis & Results')}</h2>
+            <h2>{t('dashboard.summarySectionTitle', 'Summary')}</h2>
             <p>{runMetadata?.run_label ?? formatTimestampLabel(results.timestamp)}</p>
             {metadataLabel ? <p>{metadataLabel}</p> : null}
             {runMetadata?.benchmark_enabled === false ? (

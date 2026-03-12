@@ -90,6 +90,7 @@
     "tradesCount": "{{count}} trades",
     "runRoute": "Run & Manage",
     "analysisRoute": "Analysis & Results",
+    "summarySectionTitle": "Summary",
     "routeNavigation": "Backtest sections",
     "runRouteHint": "Manage command execution, pinned annual benchmark runs inside the experiment list, and live logs from one screen.",
     "chartsDeferredHint": "Scroll to load the chart gallery.",
@@ -246,10 +247,13 @@
     "chartRendererUnavailable": "Chart renderer unavailable: {{error}}",
     "noPurchaseData": "No purchase data available",
     "expandChart": "Expand chart",
+    "expandChartFor": "Expand chart for {{ticker}}",
     "topPerformerDetail": "Top performer detail",
     "bottomPerformerDetail": "Bottom performer detail",
     "topShort": "TOP",
-    "bottomShort": "BOTTOM"
+    "bottomShort": "BOTTOM",
+    "topRankBadge": "Top{{rank}}",
+    "bottomRankBadge": "Bottom{{rank}}"
   },
   "tickerList": {
     "noData": "No data available"

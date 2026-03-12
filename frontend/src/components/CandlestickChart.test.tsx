@@ -65,6 +65,12 @@ describe('CandlestickChart Component', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /open interactive chart|詳細を開く/i })).not.toBeInTheDocument()
   })
+
+  it('does not render local period or year selectors', () => {
+    render(<CandlestickChart ticker="AAPL" data={mockData} />)
+    expect(screen.queryByLabelText('Chart period')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Year selector')).not.toBeInTheDocument()
+  })
 })
 
 describe('buildCandlestickTraces', () => {

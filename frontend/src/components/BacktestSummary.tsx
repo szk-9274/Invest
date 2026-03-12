@@ -108,6 +108,7 @@ export const BacktestSummary: React.FC<BacktestSummaryProps> = ({ data, loading 
         <MetricCard
           label={t('summary.profitFactor')}
           value={profitFactor}
+          noWrapLabel
           trend={
             profitFactor === 'N/A'
               ? 'neutral'
@@ -160,7 +161,7 @@ export const BacktestSummary: React.FC<BacktestSummaryProps> = ({ data, loading 
 
         .metrics-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(176px, 1fr));
           gap: 16px;
         }
 

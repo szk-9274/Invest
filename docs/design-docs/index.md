@@ -14,4 +14,9 @@
 - [STRATEGY.md](STRATEGY.md) — STRATEGY.md — MinerviLism プロジェクト 戦略仕様書
 - [core-beliefs.md](core-beliefs.md) — Core Beliefs (コア設計原則) — 1. 再現性優先
 - [localhost-visualization-improvements.md](localhost-visualization-improvements.md) — 目的 — localhost 可視化の初回イテレーションで追加したダッシュボード/詳細チャートを次の反復で改善するため、観点別の候補を整理する。
+- [strategy-george-soros.md](strategy-george-soros.md) — strategy-george-soros — Placeholder for future strategy details.
+- [strategy-mark-minervini.md](strategy-mark-minervini.md) — strategy-mark-minervini — Placeholder for future strategy details.
+- [strategy-peter-lynch.md](strategy-peter-lynch.md) — strategy-peter-lynch — Placeholder for future strategy details.
+- [strategy-ray-dalio.md](strategy-ray-dalio.md) — strategy-ray-dalio — Placeholder for future strategy details.
+- [strategy-warren-buffett.md](strategy-warren-buffett.md) — strategy-warren-buffett — Placeholder for future strategy details.
 <!-- END AUTO-GENERATED DOC LIST -->

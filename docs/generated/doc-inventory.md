@@ -18,6 +18,11 @@
   - [STRATEGY.md](../design-docs/STRATEGY.md) — STRATEGY.md — MinerviLism プロジェクト 戦略仕様書
   - [core-beliefs.md](../design-docs/core-beliefs.md) — Core Beliefs (コア設計原則) — 1. 再現性優先
   - [localhost-visualization-improvements.md](../design-docs/localhost-visualization-improvements.md) — 目的 — localhost 可視化の初回イテレーションで追加したダッシュボード/詳細チャートを次の反復で改善するため、観点別の候補を整理する。
+  - [strategy-george-soros.md](../design-docs/strategy-george-soros.md) — strategy-george-soros — Placeholder for future strategy details.
+  - [strategy-mark-minervini.md](../design-docs/strategy-mark-minervini.md) — strategy-mark-minervini — Placeholder for future strategy details.
+  - [strategy-peter-lynch.md](../design-docs/strategy-peter-lynch.md) — strategy-peter-lynch — Placeholder for future strategy details.
+  - [strategy-ray-dalio.md](../design-docs/strategy-ray-dalio.md) — strategy-ray-dalio — Placeholder for future strategy details.
+  - [strategy-warren-buffett.md](../design-docs/strategy-warren-buffett.md) — strategy-warren-buffett — Placeholder for future strategy details.
   - [index.md](../design-docs/index.md) — design-docs — 目的
 - `docs/exec-plans/`
   - [tech-debt-tracker.md](../exec-plans/tech-debt-tracker.md) — tech-debt-tracker — 目的: 技術的負債の一覧と優先度管理
@@ -25,11 +30,13 @@
     - [index.md](../exec-plans/active/index.md) — exec-plans/active — ここには現在進行中の実行計画を置きます。
     - [dashboard-followup-batch-2.md](../exec-plans/active/dashboard-followup-batch-2.md) — 実装計画: ダッシュボード軽量化と保守性改善バッチ 2 — - フェーズ: localhost 可視化改善 Phase 3
     - [dashboard-improvement-batch-1.md](../exec-plans/active/dashboard-improvement-batch-1.md) — 実装計画: ダッシュボード改善バッチ 1 — - タイトル: ダッシュボード改善バッチ 1
+    - [localhost-backend-unavailable-ui-batch.md](../exec-plans/active/localhost-backend-unavailable-ui-batch.md) — 実装計画: localhost backend unavailable UI 改善バッチ — - フェーズ: localhost 可視化改善 Phase 5
     - [qlib-phase1-release-and-frontend-visualization.md](../exec-plans/active/qlib-phase1-release-and-frontend-visualization.md) — 実装計画: qlib phase-1 リリース整理と localhost 可視化初回イテレーション — - タイトル: qlib phase-1 リリース整理と localhost 可視化初回イテレーション
     - [repository-rename-to-minervilism.md](../exec-plans/active/repository-rename-to-minervilism.md) — 実装計画: リポジトリ名を MinerviLism へ統一 — - フェーズ: リポジトリ識別子更新
   - `docs/exec-plans/completed/`
     - [index.md](../exec-plans/completed/index.md) — exec-plans/completed — 完了した実行計画の記録を置きます。
     - [backtest-dashboard-renewal.md](../exec-plans/completed/backtest-dashboard-renewal.md) — 実装計画: バックテスト・ダッシュボード改善 — - タイトル: バックテスト・ダッシュボード改善
+    - [backtest-dashboard-trader-summary-ui.md](../exec-plans/completed/backtest-dashboard-trader-summary-ui.md) — 実装計画: バックテストダッシュボード追加 UI 変更 — - フェーズ: バックテストダッシュボード改善 Phase 4
     - [backtest-dashboard-ui-improvement-batch-3.md](../exec-plans/completed/backtest-dashboard-ui-improvement-batch-3.md) — 実装計画: バックテストダッシュボード UI 改善バッチ 3 — - フェーズ: localhost 可視化改善 Phase 4
     - [backtest-retention.md](../exec-plans/completed/backtest-retention.md) — 変更・削除・作成するファイル — - backend/services/result_store.py
     - [ci-automation.md](../exec-plans/completed/ci-automation.md) — ci-automation — - タイトル: Docker / 契約生成の CI 自動検証

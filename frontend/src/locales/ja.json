@@ -90,6 +90,7 @@
     "tradesCount": "{{count}} 件のトレード",
     "runRoute": "実行・管理",
     "analysisRoute": "解析・結果",
+    "summarySectionTitle": "Summary",
     "routeNavigation": "バックテスト画面切り替え",
     "runRouteHint": "コマンド実行、実行結果一覧内の固定年次結果、実行ログを 1 画面で管理します。",
     "chartsDeferredHint": "スクロールするとチャートギャラリーを読み込みます。",
@@ -246,10 +247,13 @@
     "chartRendererUnavailable": "チャート描画を利用できません: {{error}}",
     "noPurchaseData": "購入データがありません",
     "expandChart": "チャートを拡大",
+    "expandChartFor": "{{ticker}} のチャートを拡大",
     "topPerformerDetail": "上位銘柄の詳細",
     "bottomPerformerDetail": "下位銘柄の詳細",
     "topShort": "上位",
-    "bottomShort": "下位"
+    "bottomShort": "下位",
+    "topRankBadge": "Top{{rank}}",
+    "bottomRankBadge": "Bottom{{rank}}"
   },
   "tickerList": {
     "noData": "データがありません"

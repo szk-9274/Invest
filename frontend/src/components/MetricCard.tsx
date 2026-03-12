@@ -12,6 +12,7 @@ export interface MetricCardProps {
   value: string;
   subText?: string;
   trend?: MetricTrend;
+  noWrapLabel?: boolean;
 }
 
 export const MetricCard: React.FC<MetricCardProps> = ({
@@ -19,10 +20,11 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   value,
   subText,
   trend = 'neutral',
+  noWrapLabel = false,
 }) => {
   return (
     <div className="metric-card">
-      <div className="metric-label">{label}</div>
+      <div className={`metric-label ${noWrapLabel ? 'metric-label--nowrap' : ''}`}>{label}</div>
       <div className={`metric-value metric-${trend}`}>{value}</div>
       {subText && <div className="metric-sub">{subText}</div>}
 
@@ -32,6 +34,11 @@ export const MetricCard: React.FC<MetricCardProps> = ({
           border: 1px solid var(--border, #e2e8f0);
           border-radius: var(--radius-md, 8px);
           padding: 20px;
+          min-height: 144px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
           text-align: center;
           box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.08));
           transition: transform 0.2s, box-shadow 0.2s;
@@ -49,6 +56,10 @@ export const MetricCard: React.FC<MetricCardProps> = ({
           text-transform: uppercase;
           letter-spacing: 0.8px;
           margin-bottom: 10px;
+        }
+
+        .metric-label--nowrap {
+          white-space: nowrap;
         }
 
         .metric-value {
@@ -76,6 +87,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
           color: var(--text-muted, #94a3b8);
           margin-top: 6px;
           font-weight: 500;
+          text-align: center;
         }
       `}</style>
     </div>

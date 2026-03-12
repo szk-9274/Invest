@@ -114,6 +114,23 @@ describe('TradeTable', () => {
     expect(within(row).getByText('0.00%')).toBeInTheDocument()
   })
 
+  it('centers table headers and cells', () => {
+    render(
+      <TradeTable
+        trades={[
+          buildTrade(1, {
+            ticker: 'ALIGN',
+          }),
+        ]}
+      />,
+    )
+
+    const table = screen.getByRole('table')
+    expect(within(table).getByText('Entry Price').closest('th')).toHaveClass('trade-table-cell--center')
+    expect(within(table).getByText('$101.00').closest('td')).toHaveClass('trade-table-cell--center')
+    expect(within(table).getByText('ALIGN').closest('td')).toHaveClass('trade-table-cell--center')
+  })
+
   it('translates exit reasons and renders compact mobile cards', async () => {
     await i18n.changeLanguage('ja')
 

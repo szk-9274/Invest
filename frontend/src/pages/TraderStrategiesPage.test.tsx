@@ -29,6 +29,19 @@ describe('TraderStrategiesPage', () => {
       setSelectedTimestamp: vi.fn(),
       strategyProfiles: [
         {
+          strategy_name: 'minervini-trend',
+          display_name: 'Mark Minervini',
+          short_name: 'Minervini',
+          title: 'Trend template leader',
+          description: 'Uses the current baseline backtest results.',
+          icon_key: 'target',
+          experiment_name: 'minervini-stage2-baseline',
+          rule_profile: 'trend-template',
+          tags: ['trader-inspired'],
+          is_trader_strategy: true,
+          sort_order: 5,
+        },
+        {
           strategy_name: 'buffett-quality',
           display_name: 'Warren Buffett',
           short_name: 'Buffett',
@@ -58,17 +71,17 @@ describe('TraderStrategiesPage', () => {
     })
     listAllBacktestsMock.mockResolvedValue([
       {
-        timestamp: 'buffett-run',
+        timestamp: 'baseline-run',
         start_date: '2020-01-01',
         end_date: '2020-12-31',
         period: '2020-01-01 to 2020-12-31',
         trade_count: 5,
-        dir_name: 'buffett-run',
-        strategy_name: 'buffett-quality',
+        dir_name: 'baseline-run',
+        strategy_name: 'rule-based-stage2',
       },
     ])
     fetchBacktestByRangeMock.mockResolvedValue({
-      timestamp: 'buffett-run',
+      timestamp: 'baseline-run',
       summary: { total_trades: 5 },
       trades: [],
       ticker_stats: [],
@@ -80,14 +93,17 @@ describe('TraderStrategiesPage', () => {
   it('renders strategy profiles and loads the selected trader result', async () => {
     render(<TraderStrategiesPage />)
 
+    expect(screen.getByRole('button', { name: /マーク・ミネルヴィニ/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /ウォーレン・バフェット/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /ジョージ・ソロス/i })).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: /マーク・ミネルヴィニ/i })).toBeInTheDocument()
 
-    await waitFor(() => expect(listAllBacktestsMock).toHaveBeenCalledWith('buffett-quality'))
-    expect(fetchBacktestByRangeMock).toHaveBeenCalledWith('ALL', 'buffett-quality')
+    await waitFor(() => expect(listAllBacktestsMock).toHaveBeenCalledWith())
+    expect(fetchBacktestByRangeMock).toHaveBeenCalledWith('ALL')
     expect(await screen.findByTestId('trader-summary')).toHaveTextContent('5')
-    expect(screen.getAllByText('優良企業の複利成長').length).toBeGreaterThan(0)
-    expect(screen.getByText('持続的な競争優位を持つ企業を探します。')).toBeInTheDocument()
-    expect(screen.queryByText('Warren Buffett')).not.toBeInTheDocument()
+    expect(screen.getAllByText('トレンドテンプレート主導').length).toBeGreaterThan(0)
+    expect(screen.getByText('52週高値圏の主導株を追い、相対力とブレイクアウトの質を重視します。')).toBeInTheDocument()
+    expect(screen.getByText('2020-01-01 to 2020-12-31')).toBeInTheDocument()
+    expect(screen.queryByText('Mark Minervini')).not.toBeInTheDocument()
   })
 })

@@ -100,12 +100,14 @@ describe('BacktestAnalysisPage', () => {
   it('renders summary and trades immediately but defers charts until visible', async () => {
     render(<BacktestAnalysisPage />)
 
+    expect(screen.getByText('Summary')).toBeInTheDocument()
     expect(screen.getByTestId('summary-view')).toHaveTextContent('summary:2')
     expect(screen.getByTestId('trades-view')).toHaveTextContent('trades:2')
     expect(screen.getByText('baseline-run')).toBeInTheDocument()
     expect(screen.getByText('qlib-inspired / rule-based-stage2 / strict-auto-fallback')).toBeInTheDocument()
     expect(screen.getByText('Benchmark disabled')).toBeInTheDocument()
     expect(screen.getByText('Detailed Time Series')).toBeInTheDocument()
+    expect(screen.queryByText('Analysis & Results')).not.toBeInTheDocument()
     expect(screen.getByTestId('visualization-panel')).toHaveTextContent('visualization:2:2')
     expect(screen.queryByTestId('charts-view')).not.toBeInTheDocument()
     expect(screen.getByTestId('analysis-charts-placeholder')).toBeInTheDocument()

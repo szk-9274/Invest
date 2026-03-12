@@ -13,7 +13,8 @@ export const TraderStrategiesPage: React.FC = () => {
   const traderProfiles = useMemo(
     () => strategyProfiles
       .filter((profile) => profile.is_trader_strategy)
-      .map(localizeStrategyProfile),
+      .map(localizeStrategyProfile)
+      .sort((left, right) => (left.sort_order ?? 0) - (right.sort_order ?? 0)),
     [strategyProfiles],
   )
   const [selectedTraderId, setSelectedTraderId] = useState('')
@@ -40,6 +41,13 @@ export const TraderStrategiesPage: React.FC = () => {
     [selectedTraderId, traderProfiles],
   )
 
+  const resolvedStrategyName = useMemo(() => {
+    if (!selectedTrader?.strategy_name) return undefined
+    return selectedTrader.strategy_name === 'minervini-trend'
+      ? undefined
+      : selectedTrader.strategy_name
+  }, [selectedTrader])
+
   useEffect(() => {
     if (!selectedTrader?.strategy_name) {
       setAvailableBacktests([])
@@ -56,8 +64,8 @@ export const TraderStrategiesPage: React.FC = () => {
 
       try {
         const [backtests, latest] = await Promise.all([
-          listAllBacktests(selectedTrader.strategy_name),
-          fetchBacktestByRange('ALL', selectedTrader.strategy_name),
+          resolvedStrategyName ? listAllBacktests(resolvedStrategyName) : listAllBacktests(),
+          resolvedStrategyName ? fetchBacktestByRange('ALL', resolvedStrategyName) : fetchBacktestByRange('ALL'),
         ])
 
         if (!active) return
@@ -82,7 +90,7 @@ export const TraderStrategiesPage: React.FC = () => {
     return () => {
       active = false
     }
-  }, [selectedTrader, setSelectedTimestamp])
+  }, [resolvedStrategyName, selectedTrader, setSelectedTimestamp])
 
   if (!selectedTrader) {
     return <div className="dashboard-empty-panel">{t('dashboard.noBacktests')}</div>
@@ -190,6 +198,23 @@ export const TraderStrategiesPage: React.FC = () => {
           display: inline-flex;
           width: 64px;
           height: 64px;
+          overflow: hidden;
+          border-radius: 999px;
+          border: 2px solid rgba(255, 255, 255, 0.92);
+          box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+          background: #ffffff;
+        }
+
+        .trader-avatar,
+        .trader-avatar__image,
+        .trader-avatar svg {
+          width: 100%;
+          height: 100%;
+          display: block;
+        }
+
+        .trader-avatar__image {
+          object-fit: cover;
         }
 
         .trader-profile-name {
