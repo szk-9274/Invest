@@ -4,7 +4,7 @@ import { getTraderProfileOverride, getTraderVisual, isKnownTraderStrategy } from
 describe('traderProfiles manifest', () => {
   it('provides localized copy and visual metadata from one source', () => {
     const profile = getTraderProfileOverride('minervini-trend')
-    const visual = getTraderVisual('minervini-trend')
+    const visual = getTraderVisual('minervini-trend', 'minervini')
 
     expect(profile?.display_name).toBe('マーク・ミネルヴィニ')
     expect(profile?.title).toBe('トレンドテンプレート主導')

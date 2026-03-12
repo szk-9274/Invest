@@ -79,10 +79,13 @@ class StrategyProfile(BaseModel):
     title: str
     description: str
     icon_key: Optional[str] = None
+    result_strategy_name: Optional[str] = None
+    portrait_asset_key: Optional[str] = None
     experiment_name: Optional[str] = None
     rule_profile: Optional[str] = None
     tags: list[str] = Field(default_factory=list)
     is_trader_strategy: bool = False
+    is_current_baseline: bool = False
     sort_order: int = 0
 
 

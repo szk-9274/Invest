@@ -99,6 +99,7 @@
     "traderStrategiesRoute": "Trader Strategies",
     "traderStrategiesHint": "Independent trader-inspired backtest profiles for mobile-friendly comparison.",
     "traderStrategyRunsHint": "Latest recorded runs for the selected trader-inspired profile.",
+    "currentBaselineBadge": "Current baseline",
     "pinnedAnnualResults": "Pinned Annual Results",
     "pinnedAnnualResultsHint": "Quick access to the fixed 2020 and 2021 benchmark periods.",
     "openRun": "Open run",

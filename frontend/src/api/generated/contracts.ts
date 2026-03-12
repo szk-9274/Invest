@@ -172,10 +172,13 @@ export type StrategyProfile = {
   title: string;
   description: string;
   icon_key?: string | null;
+  result_strategy_name?: string | null;
+  portrait_asset_key?: string | null;
   experiment_name?: string | null;
   rule_profile?: string | null;
   tags?: Array<string>;
   is_trader_strategy?: boolean;
+  is_current_baseline?: boolean;
   sort_order?: number;
 }
 

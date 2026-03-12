@@ -20,7 +20,6 @@ type TraderProfileOverride = {
 }
 
 type TraderVisual = {
-  portraitSrc?: string
   fallbackPalette: TraderPalette
 }
 
@@ -37,6 +36,14 @@ const DEFAULT_PALETTE: TraderPalette = {
   detail: '#475569',
 }
 
+const PORTRAIT_SRC_BY_ASSET_KEY: Record<string, string> = {
+  buffett: buffettPortrait,
+  dalio: dalioPortrait,
+  lynch: lynchPortrait,
+  minervini: minerviniPortrait,
+  soros: sorosPortrait,
+}
+
 const TRADER_METADATA_BY_STRATEGY: Record<string, TraderMetadata> = {
   'buffett-quality': {
     profile: {
@@ -46,7 +53,6 @@ const TRADER_METADATA_BY_STRATEGY: Record<string, TraderMetadata> = {
       description: '持続的な競争優位を持つ企業を探します。',
     },
     visual: {
-      portraitSrc: buffettPortrait,
       fallbackPalette: {
         background: '#fef3c7',
         accent: '#f59e0b',
@@ -64,7 +70,6 @@ const TRADER_METADATA_BY_STRATEGY: Record<string, TraderMetadata> = {
       description: '力強いブレイクアウトを重視し、勢いが鈍ったら素早く手仕舞います。',
     },
     visual: {
-      portraitSrc: sorosPortrait,
       fallbackPalette: {
         background: '#dbeafe',
         accent: '#2563eb',
@@ -82,7 +87,6 @@ const TRADER_METADATA_BY_STRATEGY: Record<string, TraderMetadata> = {
       description: '理解しやすい成長企業を中心に、上昇トレンドの継続性を見極めます。',
     },
     visual: {
-      portraitSrc: lynchPortrait,
       fallbackPalette: {
         background: '#dcfce7',
         accent: '#16a34a',
@@ -100,7 +104,6 @@ const TRADER_METADATA_BY_STRATEGY: Record<string, TraderMetadata> = {
       description: '52週高値圏の主導株を追い、相対力とブレイクアウトの質を重視します。',
     },
     visual: {
-      portraitSrc: minerviniPortrait,
       fallbackPalette: {
         background: '#fae8ff',
         accent: '#c026d3',
@@ -118,7 +121,6 @@ const TRADER_METADATA_BY_STRATEGY: Record<string, TraderMetadata> = {
       description: '変動を抑えつつトレンドに乗り、持ち過ぎを避けながら安定的な参加を狙います。',
     },
     visual: {
-      portraitSrc: dalioPortrait,
       fallbackPalette: {
         background: '#ede9fe',
         accent: '#7c3aed',
@@ -134,8 +136,16 @@ export function getTraderProfileOverride(strategyName: string) {
   return TRADER_METADATA_BY_STRATEGY[strategyName]?.profile
 }
 
-export function getTraderVisual(strategyName: string) {
-  return TRADER_METADATA_BY_STRATEGY[strategyName]?.visual ?? { fallbackPalette: DEFAULT_PALETTE }
+export function getPortraitSrc(assetKey?: string | null) {
+  if (!assetKey) return undefined
+  return PORTRAIT_SRC_BY_ASSET_KEY[assetKey]
+}
+
+export function getTraderVisual(strategyName: string, portraitAssetKey?: string | null) {
+  return {
+    portraitSrc: getPortraitSrc(portraitAssetKey ?? strategyName),
+    fallbackPalette: TRADER_METADATA_BY_STRATEGY[strategyName]?.visual.fallbackPalette ?? DEFAULT_PALETTE,
+  }
 }
 
 export function isKnownTraderStrategy(strategyName: string) {

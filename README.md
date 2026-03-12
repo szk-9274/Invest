@@ -281,6 +281,8 @@ npm run build
 
 `npm run test:e2e` は fixture を backend に読み込ませ、frontend ダッシュボードが実データを描画できることを確認します。
 
+`npm run screenshot:ci` は frontend dev server と backend が起動している前提で、Playwright から `analysis` と `strategies` の desktop/mobile 画像を `tests/screenshots/` に保存し、Summary・baseline badge・portrait まわりの見た目確認に使えます。
+
 ## Documentation system
 
 このリポジトリは大きな単一マニュアルではなく、索引と責務分離を前提にした知識ベースとしてドキュメントを管理します。

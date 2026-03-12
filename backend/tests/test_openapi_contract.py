@@ -51,3 +51,6 @@ def test_contract_export_generates_typescript_definitions(tmp_path):
     assert 'is_pinned?: boolean' in content
     assert 'available_runs?: number' in content
     assert 'run_metadata?: BacktestRunInfo | null' in content
+    assert 'result_strategy_name?: string | null' in content
+    assert 'portrait_asset_key?: string | null' in content
+    assert 'is_current_baseline?: boolean' in content

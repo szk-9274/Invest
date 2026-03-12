@@ -30,6 +30,7 @@
     - [index.md](../exec-plans/active/index.md) — exec-plans/active — ここには現在進行中の実行計画を置きます。
     - [dashboard-followup-batch-2.md](../exec-plans/active/dashboard-followup-batch-2.md) — 実装計画: ダッシュボード軽量化と保守性改善バッチ 2 — - フェーズ: localhost 可視化改善 Phase 3
     - [dashboard-followup-batch-3.md](../exec-plans/active/dashboard-followup-batch-3.md) — 実装計画: ダッシュボード改善バッチ 3 — - フェーズ: バックテストダッシュボード改善 Phase 5
+    - [dashboard-followup-batch-4.md](../exec-plans/active/dashboard-followup-batch-4.md) — 実装計画: ダッシュボード改善バッチ 4 — - フェーズ: バックテストダッシュボード改善 Phase 6
     - [dashboard-improvement-batch-1.md](../exec-plans/active/dashboard-improvement-batch-1.md) — 実装計画: ダッシュボード改善バッチ 1 — - タイトル: ダッシュボード改善バッチ 1
     - [localhost-backend-unavailable-ui-batch.md](../exec-plans/active/localhost-backend-unavailable-ui-batch.md) — 実装計画: localhost backend unavailable UI 改善バッチ — - フェーズ: localhost 可視化改善 Phase 5
     - [qlib-phase1-release-and-frontend-visualization.md](../exec-plans/active/qlib-phase1-release-and-frontend-visualization.md) — 実装計画: qlib phase-1 リリース整理と localhost 可視化初回イテレーション — - タイトル: qlib phase-1 リリース整理と localhost 可視化初回イテレーション

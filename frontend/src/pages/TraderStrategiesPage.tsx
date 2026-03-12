@@ -42,10 +42,8 @@ export const TraderStrategiesPage: React.FC = () => {
   )
 
   const resolvedStrategyName = useMemo(() => {
-    if (!selectedTrader?.strategy_name) return undefined
-    return selectedTrader.strategy_name === 'minervini-trend'
-      ? undefined
-      : selectedTrader.strategy_name
+    if (!selectedTrader) return undefined
+    return selectedTrader.result_strategy_name ?? selectedTrader.strategy_name ?? undefined
   }, [selectedTrader])
 
   useEffect(() => {
@@ -115,8 +113,15 @@ export const TraderStrategiesPage: React.FC = () => {
               onClick={() => setSelectedTraderId(profile.strategy_name)}
             >
               <span className="trader-profile-avatar">
-                <TraderAvatar traderKey={profile.strategy_name} label={profile.display_name} />
+                <TraderAvatar
+                  traderKey={profile.strategy_name}
+                  label={profile.display_name}
+                  portraitAssetKey={profile.portrait_asset_key}
+                />
               </span>
+              {profile.is_current_baseline ? (
+                <span className="trader-profile-badge">{t('dashboard.currentBaselineBadge', 'Current baseline')}</span>
+              ) : null}
               <span className="trader-profile-name">{profile.display_name}</span>
               <span className="trader-profile-short">{profile.title}</span>
             </button>
@@ -221,6 +226,20 @@ export const TraderStrategiesPage: React.FC = () => {
           font-weight: 700;
           color: #0f172a;
           text-align: center;
+        }
+
+        .trader-profile-badge {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 4px 10px;
+          border-radius: 999px;
+          background: #dbeafe;
+          color: #1d4ed8;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.02em;
+          white-space: nowrap;
         }
 
         .trader-profile-short {

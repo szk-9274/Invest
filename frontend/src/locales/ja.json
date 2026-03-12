@@ -99,6 +99,7 @@
     "traderStrategiesRoute": "著名トレーダー戦略",
     "traderStrategiesHint": "著名トレーダーに着想を得た独立バックテストを、モバイルでも比較しやすい形で表示します。",
     "traderStrategyRunsHint": "選択中のトレーダー戦略に対応する最新 run を表示します。",
+    "currentBaselineBadge": "現行ベースライン",
     "pinnedAnnualResults": "固定年次結果",
     "pinnedAnnualResultsHint": "2020年と2021年の固定比較期間へすぐにアクセスできます。",
     "openRun": "run を開く",

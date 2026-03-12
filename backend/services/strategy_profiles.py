@@ -35,10 +35,13 @@ def load_strategy_profiles(config_path: Path | None = None) -> list[dict[str, An
                 'title': str(profile.get('title') or profile.get('rule_profile') or strategy_name),
                 'description': str(profile.get('description') or ''),
                 'icon_key': profile.get('icon_key'),
+                'result_strategy_name': str(profile.get('result_strategy_name') or strategy_name),
+                'portrait_asset_key': profile.get('portrait_asset_key'),
                 'experiment_name': profile.get('experiment_name'),
                 'rule_profile': profile.get('rule_profile'),
                 'tags': tags,
                 'is_trader_strategy': 'trader-inspired' in tags,
+                'is_current_baseline': bool(profile.get('is_current_baseline', False)),
                 'sort_order': int(profile.get('sort_order', index)),
             }
         )

@@ -3,7 +3,7 @@ import fs from 'node:fs'
 import net from 'node:net'
 import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process'
 import { beforeAll, afterAll, describe, expect, it, vi } from 'vitest'
-import { act, render, screen } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Navigate, Route, Routes } from 'react-router-dom'
 
@@ -150,8 +150,10 @@ describe('BacktestDashboard E2E', () => {
 
       expect((await screen.findAllByText('AAA')).length).toBeGreaterThan(0)
       expect((await screen.findAllByText('CCC')).length).toBeGreaterThan(0)
-      expect(await screen.findByText('Top1')).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /expand chart for aaa/i })).toBeInTheDocument()
+      expect(await screen.findByRole('button', { name: /expand chart for aaa/i }, { timeout: 10000 })).toBeInTheDocument()
+      await waitFor(() => {
+        expect(screen.getByText(/^Top1$/)).toBeInTheDocument()
+      }, { timeout: 10000 })
     },
     60000,
   )
@@ -188,6 +190,7 @@ describe('BacktestDashboard E2E', () => {
       expect(await screen.findByRole('button', { name: /マーク・ミネルヴィニ/i })).toBeInTheDocument()
       expect(screen.getByRole('img', { name: /マーク・ミネルヴィニ portrait/i })).toBeInTheDocument()
       expect(await screen.findByText('トレンドテンプレート主導')).toBeInTheDocument()
+      expect(await screen.findByText('Current baseline')).toBeInTheDocument()
     },
     60000,
   )

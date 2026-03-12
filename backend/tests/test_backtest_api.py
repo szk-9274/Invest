@@ -180,6 +180,11 @@ class TestStrategyProfilesEndpoint:
         assert buffett["is_trader_strategy"] is True
         assert buffett["icon_key"] == "brain"
 
+        minervini = next(item for item in data["strategies"] if item["strategy_name"] == "minervini-trend")
+        assert minervini["is_current_baseline"] is True
+        assert minervini["result_strategy_name"] == "rule-based-stage2"
+        assert minervini["portrait_asset_key"] == "minervini"
+
 
 class TestBacktestRunMetadata:
     def test_get_results_by_timestamp_includes_run_metadata(self, tmp_path):

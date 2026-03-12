@@ -4,6 +4,7 @@ import { getTraderVisual, type TraderPalette } from '../domain/traderProfiles'
 type TraderAvatarProps = {
   traderKey: string
   label: string
+  portraitAssetKey?: string | null
 }
 
 function TraderAvatarFallback({ label, palette }: { label: string; palette: TraderPalette }) {
@@ -23,8 +24,8 @@ function TraderAvatarFallback({ label, palette }: { label: string; palette: Trad
   )
 }
 
-export const TraderAvatar: React.FC<TraderAvatarProps> = ({ traderKey, label }) => {
-  const visual = getTraderVisual(traderKey)
+export const TraderAvatar: React.FC<TraderAvatarProps> = ({ traderKey, label, portraitAssetKey }) => {
+  const visual = getTraderVisual(traderKey, portraitAssetKey)
   const [imageFailed, setImageFailed] = React.useState(false)
 
   React.useEffect(() => {
@@ -38,6 +39,8 @@ export const TraderAvatar: React.FC<TraderAvatarProps> = ({ traderKey, label }) 
           src={visual.portraitSrc}
           alt={`${label} portrait`}
           className="trader-avatar__image"
+          loading="lazy"
+          decoding="async"
           onError={() => setImageFailed(true)}
         />
       ) : (

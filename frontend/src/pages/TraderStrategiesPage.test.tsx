@@ -36,6 +36,9 @@ describe('TraderStrategiesPage', () => {
           description: 'Uses the current baseline backtest results.',
           icon_key: 'target',
           experiment_name: 'minervini-stage2-baseline',
+          result_strategy_name: 'rule-based-stage2',
+          portrait_asset_key: 'minervini',
+          is_current_baseline: true,
           rule_profile: 'trend-template',
           tags: ['trader-inspired'],
           is_trader_strategy: true,
@@ -49,6 +52,8 @@ describe('TraderStrategiesPage', () => {
           description: 'Looks for durable businesses.',
           icon_key: 'brain',
           experiment_name: 'buffett-quality-inspired',
+          result_strategy_name: 'buffett-quality',
+          portrait_asset_key: 'buffett',
           rule_profile: 'quality-compounder',
           tags: ['trader-inspired'],
           is_trader_strategy: true,
@@ -62,6 +67,8 @@ describe('TraderStrategiesPage', () => {
           description: 'Fast confirmation and quicker exits.',
           icon_key: 'bolt',
           experiment_name: 'soros-breakout-inspired',
+          result_strategy_name: 'soros-breakout',
+          portrait_asset_key: 'soros',
           rule_profile: 'macro-breakout',
           tags: ['trader-inspired'],
           is_trader_strategy: true,
@@ -97,9 +104,11 @@ describe('TraderStrategiesPage', () => {
     expect(screen.getByRole('button', { name: /ウォーレン・バフェット/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /ジョージ・ソロス/i })).toBeInTheDocument()
     expect(screen.getByRole('img', { name: /マーク・ミネルヴィニ/i })).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: /マーク・ミネルヴィニ/i })).toHaveAttribute('loading', 'lazy')
+    expect(screen.getByText('Current baseline')).toBeInTheDocument()
 
-    await waitFor(() => expect(listAllBacktestsMock).toHaveBeenCalledWith())
-    expect(fetchBacktestByRangeMock).toHaveBeenCalledWith('ALL')
+    await waitFor(() => expect(listAllBacktestsMock).toHaveBeenCalledWith('rule-based-stage2'))
+    expect(fetchBacktestByRangeMock).toHaveBeenCalledWith('ALL', 'rule-based-stage2')
     expect(await screen.findByTestId('trader-summary')).toHaveTextContent('5')
     expect(screen.getAllByText('トレンドテンプレート主導').length).toBeGreaterThan(0)
     expect(screen.getByText('52週高値圏の主導株を追い、相対力とブレイクアウトの質を重視します。')).toBeInTheDocument()

@@ -127,6 +127,7 @@ strategy_profiles:
     title: "Stage2 trend baseline"
     description: "Reference rule-based Stage2 profile with strict auto-fallback entry and exit rules."
     icon_key: "layers"
+    result_strategy_name: "rule-based-stage2"
     sort_order: 0
     experiment_name: "minervini-stage2-baseline"
     rule_profile: "strict-auto-fallback"
@@ -142,6 +143,8 @@ strategy_profiles:
     title: "Quality compounders"
     description: "Looks for durable businesses with stable volatility, rising long-term trends, and patient holding periods."
     icon_key: "brain"
+    result_strategy_name: "buffett-quality"
+    portrait_asset_key: "buffett"
     sort_order: 10
     experiment_name: "buffett-quality-inspired"
     rule_profile: "quality-compounder"
@@ -159,6 +162,8 @@ strategy_profiles:
     title: "Reflexive breakout momentum"
     description: "Emphasizes decisive breakouts, fast confirmation, and quicker exits when the breakout thesis loses momentum."
     icon_key: "bolt"
+    result_strategy_name: "soros-breakout"
+    portrait_asset_key: "soros"
     sort_order: 20
     experiment_name: "soros-breakout-inspired"
     rule_profile: "macro-breakout"
@@ -179,6 +184,8 @@ strategy_profiles:
     title: "Everyday growth leaders"
     description: "Favors liquid growth names trending near highs while still maintaining a broad, understandable trend structure."
     icon_key: "chart"
+    result_strategy_name: "lynch-growth"
+    portrait_asset_key: "lynch"
     sort_order: 30
     experiment_name: "lynch-growth-inspired"
     rule_profile: "growth-at-reasonable-trend"
@@ -196,6 +203,9 @@ strategy_profiles:
     title: "Trend template leadership"
     description: "Tracks leadership names near 52-week highs with relative-strength confirmation and tighter breakout risk control."
     icon_key: "target"
+    result_strategy_name: "rule-based-stage2"
+    portrait_asset_key: "minervini"
+    is_current_baseline: true
     sort_order: 40
     experiment_name: "minervini-trend-inspired"
     rule_profile: "volatility-contraction-trend"
@@ -217,6 +227,8 @@ strategy_profiles:
     title: "Balanced trend participation"
     description: "Targets steadier trend participation with volatility control, tighter holding windows, and mean-reversion aware exits."
     icon_key: "balance"
+    result_strategy_name: "dalio-balance"
+    portrait_asset_key: "dalio"
     sort_order: 50
     experiment_name: "dalio-balance-inspired"
     rule_profile: "balanced-trend"

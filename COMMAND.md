@@ -140,6 +140,15 @@ npm run test:e2e
 npm run build
 ```
 
+screenshot capture:
+
+```bash
+cd ~/code/MinerviLism
+./python/.venv/bin/python3 -m uvicorn backend.app:app --host 127.0.0.1 --port 8000
+npm --prefix frontend run dev -- --host 127.0.0.1 --port 5174 --strictPort
+npm run screenshot:ci
+```
+
 Docker / CI 相当確認:
 
 ```bash

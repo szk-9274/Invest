@@ -22,13 +22,13 @@ jobs:
           npm ci
           npx playwright install-deps || true
           npx playwright install || true
-      - name: Build and start frontend preview
+      - name: Build and start frontend dev server
         run: |
           # Install frontend deps and build
           npm --prefix frontend ci || npm --prefix frontend install --no-audit --no-fund
           npm --prefix frontend run build
-          # Start a preview server in background and log output (use port 5174 to avoid conflicts)
-          npm --prefix frontend run preview -- --port 5174 > frontend.log 2>&1 &
+          # Start the Vite dev server so /api proxy remains available during screenshot capture
+          npm --prefix frontend run dev -- --host 127.0.0.1 --port 5174 --strictPort > frontend.log 2>&1 &
           # Wait for frontend ready
           for i in $(seq 1 60); do
             if curl -sSf http://127.0.0.1:5174/ || curl -sSf http://127.0.0.1:5174/dashboard > /dev/null; then
