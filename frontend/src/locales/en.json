@@ -16,7 +16,7 @@
     "applicationError": "Application Error"
   },
   "home": {
-    "title": "Invest Backtest",
+    "title": "MinerviLism Backtest",
     "runBacktest": "Run Backtest",
     "topWinners": "Top 5 Winners",
     "bottomLosers": "Bottom 5 Losers",

@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-readonly SESSION_NAME="invest"
-readonly ROOT_DIR="${HOME}/code/Invest"
+readonly SESSION_NAME="minervilism"
+readonly ROOT_DIR="${HOME}/code/MinerviLism"
 
 if [ ! -d "${ROOT_DIR}" ]; then
-  echo "エラー: ~/code/Invest が存在しません" >&2
+  echo "エラー: ~/code/MinerviLism が存在しません" >&2
   exit 1
 fi
 
@@ -96,11 +96,11 @@ create_layout() {
 start_commands() {
   local backend_cmd frontend_cmd copilot_cmd logs_cmd git_cmd
 
-  backend_cmd="cd ${PYTHON_DIR} && source ${VENV_ACTIVATE} && cd ${BACKEND_DIR} && while true; do python -m uvicorn app:app --reload --host 0.0.0.0 --port 8000 2>&1 | tee -a ${LOG_FILE}; echo \"backend crashed. restarting...\"; sleep 2; done"
-  frontend_cmd="cd ${PYTHON_DIR} && source ${VENV_ACTIVATE} && cd ${FRONTEND_DIR} && while true; do npm run dev -- --host 0.0.0.0 --port 3000 --strictPort 2>&1 | tee -a ${FRONTEND_LOG_FILE}; echo \"frontend crashed. restarting...\"; sleep 2; done"
-  copilot_cmd="cd $(escape "${PYTHON_DIR}") && source $(escape "${VENV_ACTIVATE}") && cd $(escape "${ROOT_DIR}") && copilot --yolo --add-github-mcp-toolset all --add-dir ~/code/Invest"
+  backend_cmd="cd ${PYTHON_DIR} && source ${VENV_ACTIVATE} && cd ${BACKEND_DIR} && while true; do python -m uvicorn app:app --reload --host 0.0.0.0 --port 8000 2>&1 | tee -a $(escape "${LOG_FILE}"); echo \"backend crashed. restarting...\"; sleep 2; done"
+  frontend_cmd="cd ${PYTHON_DIR} && source ${VENV_ACTIVATE} && cd ${FRONTEND_DIR} && while true; do npm run dev -- --host 0.0.0.0 --port 3000 --strictPort 2>&1 | tee -a $(escape "${FRONTEND_LOG_FILE}"); echo \"frontend crashed. restarting...\"; sleep 2; done"
+  copilot_cmd="cd $(escape "${PYTHON_DIR}") && source $(escape "${VENV_ACTIVATE}") && cd $(escape "${ROOT_DIR}") && copilot --yolo --add-github-mcp-toolset all --add-dir ~/code/MinerviLism"
   gh auth status >/dev/null 2>&1 || gh auth login --hostname github.com --git-protocol ssh --web
-  logs_cmd="cd ${ROOT_DIR} && multitail ${LOG_FILE} ${FRONTEND_LOG_FILE}"
+  logs_cmd="cd ${ROOT_DIR} && tail -F $(escape "${LOG_FILE}") $(escape "${FRONTEND_LOG_FILE}")"
   git_cmd="cd ${ROOT_DIR} && echo 'Launching lazygit...' && lazygit"
 
   tmux send-keys -t "${SESSION_NAME}:0.0" "${backend_cmd}" C-m

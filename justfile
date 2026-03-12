@@ -4,7 +4,7 @@ dev:
   ./devinit.sh
 
 stop:
-  tmux kill-session -t invest
+  tmux kill-session -t minervilism
 
 logs:
   tail -F backend.log frontend.log

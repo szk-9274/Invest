@@ -4,7 +4,7 @@
 - Date: 2026-03-10
 
 ## Context
-Invest には既に yfinance ベースのデータ取得、ルール判定、バックテスト、FastAPI、React ダッシュボードが存在していた。一方で、run ごとの実行条件・評価指標・成果物一覧を一貫して残す仕組みが弱く、比較検証と後追い確認がしにくかった。
+MinerviLism には既に yfinance ベースのデータ取得、ルール判定、バックテスト、FastAPI、React ダッシュボードが存在していた。一方で、run ごとの実行条件・評価指標・成果物一覧を一貫して残す仕組みが弱く、比較検証と後追い確認がしにくかった。
 
 ## Decision
 Qlib の recorder / workflow 思想を最小限で取り込み、各バックテスト run に `run_manifest.json` を保存し、`python/output/backtest/registry.json` に run 一覧を集約する。外部サービスや MLflow は導入せず、ローカル JSON のみで完結させる。

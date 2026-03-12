@@ -1,5 +1,5 @@
 /**
- * API Client for Invest Backtest Backend
+ * API Client for MinerviLism Backtest Backend
  *
  * Provides typed functions for all backend API endpoints.
  */

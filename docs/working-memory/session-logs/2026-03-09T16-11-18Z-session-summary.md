@@ -48,7 +48,7 @@
 
 ## 参照
 - セッションプラン: /home/fpxszk/.copilot/session-state/b7553e90-294a-4306-a717-83c435a6b4e6/plan.md
-- 関連 PR: https://github.com/szk-9274/Invest/pull/56
+- 関連 PR: https://github.com/FPXszk/MinerviLism/pull/56
 - 実装詳細参照ファイル: docs/exec-plans/active/dashboard-improvement-batch-1.md
 
 ---

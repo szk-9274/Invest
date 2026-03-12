@@ -20,7 +20,7 @@
 ## 参照
 - docs/DOCUMENTATION_SYSTEM.md
 - session log: docs/working-memory/session-logs/2026-03-09T16-11-18Z-session-summary.md
-- PR: https://github.com/szk-9274/Invest/pull/56
+- PR: https://github.com/FPXszk/MinerviLism/pull/56
 
 ---
 

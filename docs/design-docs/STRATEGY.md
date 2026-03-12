@@ -1,5 +1,5 @@
 # STRATEGY.md
-Invest プロジェクト 戦略仕様書
+MinerviLism プロジェクト 戦略仕様書
 
 ---
 

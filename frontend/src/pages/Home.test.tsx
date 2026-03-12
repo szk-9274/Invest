@@ -103,7 +103,7 @@ describe('Home', () => {
 
     await waitFor(() => expect(getTopBottomTickersMock).toHaveBeenCalledTimes(1))
 
-    expect(screen.getByText('Invest Backtest')).toBeInTheDocument()
+    expect(screen.getByText('MinerviLism Backtest')).toBeInTheDocument()
     expect(screen.getByText('AAPL')).toBeInTheDocument()
     expect(screen.getByText('TSLA')).toBeInTheDocument()
   })
@@ -149,7 +149,7 @@ describe('Home', () => {
     await waitFor(() => expect(getTopBottomTickersMock).toHaveBeenCalledTimes(1))
 
     expect(screen.getByTestId('home-page')).toBeInTheDocument()
-    expect(screen.getByText('Invest Backtest')).toBeInTheDocument()
+    expect(screen.getByText('MinerviLism Backtest')).toBeInTheDocument()
   })
 
   it('navigates when a ticker is clicked and a callback is provided', async () => {

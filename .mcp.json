@@ -2,7 +2,7 @@
   "mcpServers": {
     "filesystem": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "~/code/Invest"],
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "~/code/MinerviLism"],
       "description": "Filesystem operations for project directory"
     },
     "github": {

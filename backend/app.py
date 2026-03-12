@@ -31,7 +31,7 @@ from api.charts import router as charts_router
 from api.jobs import router as jobs_router
 
 app = FastAPI(
-    title="Invest Backtest API",
+    title="MinerviLism Backtest API",
     version="0.1.0",
     description="API for stock screening and backtesting system",
 )
@@ -62,7 +62,7 @@ app.include_router(jobs_router)
 def root():
     """API root - returns basic info."""
     return {
-        "name": "Invest Backtest API",
+        "name": "MinerviLism Backtest API",
         "version": "0.1.0",
         "status": "running",
     }

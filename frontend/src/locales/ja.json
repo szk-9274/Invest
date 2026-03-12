@@ -16,7 +16,7 @@
     "applicationError": "アプリケーションエラー"
   },
   "home": {
-    "title": "Invest バックテスト",
+    "title": "MinerviLism バックテスト",
     "runBacktest": "バックテスト実行",
     "topWinners": "上位5銘柄",
     "bottomLosers": "下位5銘柄",

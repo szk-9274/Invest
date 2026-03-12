@@ -1,13 +1,13 @@
 # COMMAND.md
 
-Invest プロジェクトの主要コマンド集です。すべてリポジトリルート `~/code/Invest` を基準にしています。
+MinerviLism プロジェクトの主要コマンド集です。すべてリポジトリルート `~/code/MinerviLism` を基準にしています。
 
 ## 1. 開発環境をまとめて起動
 
 ```bash
-cd ~/code/Invest/python
+cd ~/code/MinerviLism/python
 source .venv/bin/activate
-cd ~/code/Invest
+cd ~/code/MinerviLism
 just dev
 ```
 
@@ -23,16 +23,16 @@ tmux を直接操作する場合:
 ```bash
 tmux ls
 tmux detach
-tmux kill-session -t invest
+tmux kill-session -t minervilism
 tmux kill-server
 ```
 
 ## 2. backend API を起動
 
 ```bash
-cd ~/code/Invest/python
+cd ~/code/MinerviLism/python
 source .venv/bin/activate
-cd ~/code/Invest
+cd ~/code/MinerviLism
 python -m uvicorn backend.app:app --reload --host 0.0.0.0 --port 8000
 ```
 
@@ -45,23 +45,23 @@ curl http://localhost:8000/health
 成果物ディレクトリを差し替える場合:
 
 ```bash
-cd ~/code/Invest/python
+cd ~/code/MinerviLism/python
 source .venv/bin/activate
-cd ~/code/Invest
+cd ~/code/MinerviLism
 INVEST_OUTPUT_DIR=/absolute/path/to/backtest python -m uvicorn backend.app:app --host 0.0.0.0 --port 8000
 ```
 
 ## 3. frontend を起動
 
 ```bash
-cd ~/code/Invest/frontend
+cd ~/code/MinerviLism/frontend
 npm run dev -- --host 0.0.0.0 --port 3000 --strictPort
 ```
 
 ## 4. Python CLI を実行
 
 ```bash
-cd ~/code/Invest/python
+cd ~/code/MinerviLism/python
 source .venv/bin/activate
 python main.py --mode backtest
 python main.py --mode backtest --start 2023-01-01 --end 2023-12-31
@@ -76,16 +76,16 @@ python scripts/update_tickers_extended.py --min-market-cap 5000000000
 ## 5. OpenAPI 契約から frontend 型を再生成
 
 ```bash
-cd ~/code/Invest/python
+cd ~/code/MinerviLism/python
 source .venv/bin/activate
-cd ~/code/Invest
+cd ~/code/MinerviLism
 python -m backend.scripts.export_frontend_contracts
 ```
 
 ## 6. Electron を使う
 
 ```bash
-cd ~/code/Invest
+cd ~/code/MinerviLism
 npm install
 npm run build
 npm run dev
@@ -95,7 +95,7 @@ npm run start:prod
 ## 7. Docker Compose で起動
 
 ```bash
-cd ~/code/Invest
+cd ~/code/MinerviLism
 docker compose up --build
 ```
 
@@ -110,9 +110,9 @@ docker compose up backend frontend
 backend:
 
 ```bash
-cd ~/code/Invest/python
+cd ~/code/MinerviLism/python
 source .venv/bin/activate
-cd ~/code/Invest
+cd ~/code/MinerviLism
 pytest backend/tests -q
 pytest backend/tests --cov=backend --cov-report=term --cov-fail-under=80
 pytest tests -q
@@ -121,7 +121,7 @@ pytest tests -q
 frontend:
 
 ```bash
-cd ~/code/Invest
+cd ~/code/MinerviLism
 npm --prefix frontend run build
 npm --prefix frontend run test -- --run
 npm --prefix frontend run test:coverage
@@ -130,9 +130,9 @@ npm --prefix frontend run test:coverage
 documentation:
 
 ```bash
-cd ~/code/Invest/python
+cd ~/code/MinerviLism/python
 source .venv/bin/activate
-cd ~/code/Invest
+cd ~/code/MinerviLism
 python scripts/doc_gardening.py
 python scripts/check_docs.py
 ```
@@ -140,9 +140,9 @@ python scripts/check_docs.py
 contract drift:
 
 ```bash
-cd ~/code/Invest/python
+cd ~/code/MinerviLism/python
 source .venv/bin/activate
-cd ~/code/Invest
+cd ~/code/MinerviLism
 python -m backend.scripts.export_frontend_contracts
 git diff -- frontend/src/api/generated/contracts.ts
 ```
@@ -150,7 +150,7 @@ git diff -- frontend/src/api/generated/contracts.ts
 full stack / Electron:
 
 ```bash
-cd ~/code/Invest
+cd ~/code/MinerviLism
 npm run test:e2e
 npm run build
 ```
@@ -158,7 +158,7 @@ npm run build
 Docker / CI 相当確認:
 
 ```bash
-cd ~/code/Invest
+cd ~/code/MinerviLism
 docker compose config
 docker compose build
 ```
@@ -166,7 +166,7 @@ docker compose build
 ## 9. よく使う just コマンド
 
 ```bash
-cd ~/code/Invest
+cd ~/code/MinerviLism
 just dev
 just stop
 just logs
