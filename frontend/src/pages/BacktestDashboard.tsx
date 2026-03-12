@@ -1,6 +1,7 @@
 import React from 'react'
 import { NavLink, Outlet, useOutletContext } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { BackendUnavailableState } from '../components/BackendUnavailableState'
 import { Notification } from '../components/Notification'
 import {
   useBacktestDashboardState,
@@ -46,6 +47,7 @@ export const BacktestDashboard: React.FC = () => {
     selectedBacktest?.rule_profile
     ?? dashboard.results?.run_metadata?.rule_profile
     ?? null
+  const showBackendUnavailableState = Boolean(dashboard.backendUnavailableDetail) && !dashboard.results && dashboard.backtests.length === 0
   const activeStrategyLabel = resolveStrategyDisplayName(activeStrategy, dashboard.strategyProfiles)
   const activeRuleProfileLabel = resolveRuleProfileDisplayName(activeRuleProfile, dashboard.strategyProfiles)
   const statusKey = dashboard.loading
@@ -110,7 +112,14 @@ export const BacktestDashboard: React.FC = () => {
       )}
 
       <main className="dashboard-shell">
-        <Outlet context={dashboard} />
+        {showBackendUnavailableState ? (
+          <BackendUnavailableState
+            detail={dashboard.backendUnavailableDetail ?? ''}
+            onRetry={dashboard.handleLoadLatest}
+          />
+        ) : (
+          <Outlet context={dashboard} />
+        )}
       </main>
 
       <style>{`

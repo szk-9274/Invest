@@ -362,4 +362,22 @@ describe('BacktestDashboard', () => {
     await clickAndFlush(user, screen.getByRole('button', { name: 'Dismiss notification' }))
     await waitFor(() => expect(screen.queryByTestId('notification')).not.toBeInTheDocument())
   })
+
+  it('shows a dedicated backend unavailable state on localhost', async () => {
+    listAllBacktestsMock.mockRejectedValueOnce(new TypeError('Failed to fetch'))
+
+    renderDashboard('/dashboard/run')
+
+    expect(await screen.findByTestId('backend-unavailable-state')).toHaveTextContent('Backend unavailable on localhost')
+    expect(screen.queryByTestId('notification')).not.toBeInTheDocument()
+  })
+
+  it('keeps legitimate service errors as generic notifications', async () => {
+    listAllBacktestsMock.mockRejectedValueOnce(new Error('Service Unavailable'))
+
+    renderDashboard('/dashboard/run')
+
+    expect(await screen.findByTestId('notification')).toHaveTextContent('Failed to load backtest list')
+    expect(screen.queryByTestId('backend-unavailable-state')).not.toBeInTheDocument()
+  })
 })
